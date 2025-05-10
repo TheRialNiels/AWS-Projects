@@ -15,6 +15,7 @@ export const DEFAULT_ALLOWED_HEADERS = [
  * @param event Lambda event
  */
 export const getOriginFromEvent = (event) => {
+    if (!event.headers) return null // Maneja el caso en que headers no exista
     return event.headers.Origin || event.headers.origin
 }
 
