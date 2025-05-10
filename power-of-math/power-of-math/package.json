@@ -7,6 +7,7 @@
   "author": "SAM CLI",
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.806.0",
     "axios": ">=1.6.0",
     "uuid": "^11.1.0"
   },
