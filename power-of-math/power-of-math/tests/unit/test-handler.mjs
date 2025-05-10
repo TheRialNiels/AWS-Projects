@@ -1,20 +1,31 @@
-'use strict';
+import { expect } from 'chai'
+import { handler } from '../../app.mjs'
 
-import { lambdaHandler } from '../../app.mjs';
-import { expect } from 'chai';
-var event, context;
+describe('Tests handler', () => {
+    let context
+    const testEvent = {
+        body: {
+            base: 5,
+            exponent: 5,
+        },
+        headers: {
+            Origin: 'https://www.example.com',
+        },
+    }
 
-describe('Tests index', function () {
+    before(() => {
+        process.env.TABLE_NAME = 'PowerOfMathDatabase'
+    })
+
     it('verifies successful response', async () => {
-        const result = await lambdaHandler(event, context)
+        const result = await handler(testEvent, context)
 
-        expect(result).to.be.an('object');
-        expect(result.statusCode).to.equal(200);
-        expect(result.body).to.be.an('string');
+        expect(result).to.be.an('object')
+        expect(result.statusCode).to.equal(200)
+        expect(result.body).to.be.a('string')
 
-        let response = JSON.parse(result.body);
-
-        expect(response).to.be.an('object');
-        expect(response.message).to.be.equal("hello world");
-    });
-});
+        const response = JSON.parse(result.body)
+        expect(response).to.be.a('string')
+        expect(response).to.equal('Your result is: 3125')
+    })
+})
