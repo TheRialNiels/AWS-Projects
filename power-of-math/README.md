@@ -1,15 +1,16 @@
-# power-of-math
+# Power of Math
 
 This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
 
-- hello-world - Code for the application's Lambda function.
+- power-of-math - Code for the application's Lambda function.
 - events - Invocation events that you can use to invoke the function.
-- hello-world/tests - Unit tests for the application code. 
+- power-of-math/lib - Utility files for the application.
+- power-of-math/tests - Unit tests for the application code.
 - template.yaml - A template that defines the application's AWS resources.
 
-The application uses several AWS resources, including Lambda functions and an API Gateway API. These resources are defined in the `template.yaml` file in this project. You can update the template to add AWS resources through the same deployment process that updates your application code.
+The application uses several AWS resources, including Lambda functions, DynamoDB and an API Gateway API. These resources are defined in the `template.yaml` file in this project. You can update the template to add AWS resources through the same deployment process that updates your application code.
 
-If you prefer to use an integrated development environment (IDE) to build and test your application, you can use the AWS Toolkit.  
+If you prefer to use an integrated development environment (IDE) to build and test your application, you can use the AWS Toolkit.
 The AWS Toolkit is an open source plug-in for popular IDEs that uses the SAM CLI to build and deploy serverless applications on AWS. The AWS Toolkit also adds a simplified step-through debugging experience for Lambda function code. See the following links to get started.
 
 * [CLion](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
@@ -59,7 +60,7 @@ Build your application with the `sam build` command.
 power-of-math$ sam build
 ```
 
-The SAM CLI installs dependencies defined in `hello-world/package.json`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
+The SAM CLI installs dependencies defined in `power-of-math/package.json`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
 
 Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
 
@@ -104,12 +105,12 @@ You can find more information and examples about filtering Lambda function logs 
 
 ## Unit tests
 
-Tests are defined in the `hello-world/tests` folder in this project. Use NPM to install the [Mocha test framework](https://mochajs.org/) and run unit tests.
+Tests are defined in the `power-of-math/tests` folder in this project. Use NPM to install the [Mocha test framework](https://mochajs.org/) and run unit tests.
 
 ```bash
-power-of-math$ cd hello-world
-hello-world$ npm install
-hello-world$ npm run test
+power-of-math$ cd power-of-math
+power-of-math$ npm install
+power-of-math$ npm run test
 ```
 
 ## Cleanup
