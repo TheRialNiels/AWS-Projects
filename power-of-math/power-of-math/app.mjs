@@ -31,7 +31,7 @@ export const handler = async (event, context) => {
             TableName: tableName,
             Item: {
                 id: { S: id },
-                result: { N: mathResult },
+                result: { N: `${mathResult}` },
             },
         }),
     )
