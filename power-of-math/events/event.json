@@ -4,6 +4,6 @@
         "exponent": 5
     },
     "headers": {
-        "Origin": "http://www.example.com"
+        "Origin": "https://www.example.com"
     }
 }
