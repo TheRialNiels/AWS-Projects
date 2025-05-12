@@ -6,6 +6,8 @@ This project contains source code and supporting files for a serverless applicat
 -   **Lambda Function**: Handles the logic to calculate the power of a number and save the result in DynamoDB.
 -   **DynamoDB Table**: Stores the results of the calculations.
 
+This is my first project working on AWS, I followed this [tutorial](https://www.youtube.com/watch?v=7m_q1ldzw0U&list=PLwyXYwu8kL0wMalR9iXJIPfiMYWNFWQzx&index=3&ab_channel=TinyTechnicalTutorials) to practice developing some apps using the AWS Cloud. In this video I learned how to create this app via UI but I decided to create this same application but using the SAM Templates.
+
 ## How It Works
 
 1. **API Gateway Endpoint**:
@@ -37,11 +39,7 @@ This project contains source code and supporting files for a serverless applicat
 
 Below is a high-level architecture diagram of the application:
 
-```
-[Client] --> [API Gateway] --> [Lambda Function] --> [DynamoDB Table]
-```
-
-> **Note**: Replace this placeholder with an actual diagram if needed. You can use tools like [draw.io](https://app.diagrams.net/) or [Lucidchart](https://www.lucidchart.com/) to create the diagram.
+![Power of Math Diagram Architecture](./docs/power-of-math_diagram.png)
 
 ## Project Structure
 
@@ -107,8 +105,6 @@ You can test the Lambda function locally using the SAM CLI.
 
     Test the API using `curl`:
 
-    // TODO - Fix this issue
-
     ```bash
     curl -X POST http://localhost:3000/ -d '{"base": 5, "exponent": 3}' -H "Content-Type: application/json"
     ```
@@ -143,3 +139,4 @@ Unit tests are located in the `power-of-math/tests` folder. To run the tests:
 -   [AWS SAM Developer Guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html)
 -   [AWS Lambda Documentation](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
 -   [Amazon DynamoDB Documentation](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html)
+-   [YouTube Tutorial](https://www.youtube.com/watch?v=7m_q1ldzw0U&list=PLwyXYwu8kL0wMalR9iXJIPfiMYWNFWQzx&index=3&ab_channel=TinyTechnicalTutorials)
