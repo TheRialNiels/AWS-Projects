@@ -1,8 +1,5 @@
 {
-    "body": {
-        "base": 5,
-        "exponent": 5
-    },
+    "body": "{ \"base\": 5, \"exponent\": 5 }",
     "headers": {
         "Origin": "https://www.example.com"
     }
