@@ -21,9 +21,10 @@ const client = new DynamoDBClient({ region: 'us-east-1' })
  */
 export const handler = async (event, context) => {
     const origin = cors.getOriginFromEvent(event)
+    const body = JSON.parse(event.body)
     const id = uuidv4()
-    const base = +event.body.base
-    const exponent = +event.body.exponent
+    const base = +body.base
+    const exponent = +body.exponent
     const mathResult = Math.pow(base, exponent)
     const tableName = process.env.TABLE_NAME
     await client.send(
@@ -37,7 +38,7 @@ export const handler = async (event, context) => {
     )
 
     return {
-        headers: cors.createOriginHeader(origin, corsConfig.allowedOrigins),
+        headers: cors.createCORSHeaders('POST', origin, corsConfig.allowedOrigins),
         statusCode: 200,
         body: JSON.stringify(`Your result is: ${mathResult}`),
     }
