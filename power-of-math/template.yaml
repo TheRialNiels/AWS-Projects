@@ -9,7 +9,22 @@ Globals:
     Function:
         Timeout: 3
 
+Parameters:
+    StageName:
+        Type: String
+        Default: staging
+
 Resources:
+    PowerOfMathApi:
+        Type: AWS::Serverless::Api
+        Properties:
+            StageName:
+                Ref: StageName
+            Cors:
+                AllowMethods: "'POST,OPTIONS'"
+                AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                AllowOrigin: "'*'"
+
     PowerOfMathDatabase:
         Type: AWS::Serverless::SimpleTable
         Properties:
@@ -46,16 +61,17 @@ Resources:
                 PowerOfMath:
                     Type: Api
                     Properties:
+                        RestApiId: !Ref PowerOfMathApi
                         Path: /
                         Method: post
 
 Outputs:
-    PowerOfMathApi:
-        Description: 'API Gateway endpoint URL for Staging stage for Power of Math function'
-        Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/staging/'
+    PowerOfMathApiEndpoint:
+        Description: 'API Gateway endpoint URL for Power of Math function'
+        Value: !Sub 'https://${PowerOfMathApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/'
     PowerOfMathFunction:
         Description: 'Power of Math Lambda Function ARN'
         Value: !GetAtt PowerOfMathFunction.Arn
     PowerOfMathFunctionIamRole:
-        Description: 'Implicit IAM Role created for Power of Math function'
+        Description: 'IAM Role created for Power of Math function'
         Value: !GetAtt PowerOfMathFunctionRole.Arn
