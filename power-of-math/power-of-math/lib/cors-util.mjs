@@ -27,13 +27,17 @@ export const getOriginFromEvent = (event) => {
  * @param {Array} allowedOrigins A list of strings or regexes representing allowed origin URLs
  * @return {Object} an object containing allowed header and its value
  */
-export const createOriginHeader = (origin, allowedOrigins) => {
+export const createCORSHeaders = (methods, origin, allowedOrigins) => {
     if (!origin) return {} // no CORS headers necessary; browser will load resource
 
     // look for origin in list of allowed origins
     const allowedPatterns = allowedOrigins.map(compileURLWildcards)
     const isAllowed = allowedPatterns.some((pattern) => origin.match(pattern))
-    if (isAllowed) return { 'Access-Control-Allow-Origin': origin }
+    if (isAllowed) return {
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Methods': methods
+    }
 
     // the origin does not match any allowed origins
     return {} // return no CORS headers; browser will not load resource
