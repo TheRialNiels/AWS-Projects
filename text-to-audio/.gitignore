@@ -18,6 +18,7 @@
 .nfs*
 
 ### Node ###
+package-lock.json
 # Logs
 logs
 *.log
@@ -150,7 +151,8 @@ temp/
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
