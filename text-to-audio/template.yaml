@@ -15,7 +15,7 @@ Parameters:
         Default: staging
 
 Resources:
-    RetrieveTextApi:
+    ConvertTextApi:
         Type: AWS::Serverless::Api
         Properties:
             StageName: !Ref StageName
@@ -24,20 +24,20 @@ Resources:
                 AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
                 AllowOrigin: "'*'"
 
-    RetrieveTextFunction:
+    ConvertTextFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: src/lambdas/
-            Handler: retrieve-text.handler
+            CodeUri: src/
+            Handler: convertText.handler
             Runtime: nodejs22.x
             Architectures:
                 - x86_64
             Events:
-                RetrieveText:
+                ConvertText:
                     Type: Api
                     Properties:
-                        RestApiId: !Ref RetrieveTextApi
-                        Path: /retrieve-text
+                        RestApiId: !Ref ConvertTextApi
+                        Path: /convert-text
                         Method: post
         Metadata:
             BuildMethod: esbuild
@@ -46,15 +46,15 @@ Resources:
                 Target: 'es2020'
                 Sourcemap: true
                 EntryPoints:
-                    - retrieve-text.ts
+                    - convertText.ts
 
 Outputs:
-    RetrieveTextApi:
+    ConvertTextApi:
         Description: 'API Gateway endpoint URL'
-        Value: !Sub 'https://${RetrieveTextApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/retrieve-text'
-    RetrieveTextFunction:
-        Description: 'Retrieve Text Lambda Function ARN'
-        Value: !GetAtt RetrieveTextFunction.Arn
-    RetrieveTextFunctionIamRole:
-        Description: 'Implicit IAM Role created for Retrieve Text function'
-        Value: !GetAtt RetrieveTextFunctionRole.Arn
+        Value: !Sub 'https://${ConvertTextApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/convert-text'
+    ConvertTextFunction:
+        Description: 'Convert Text Lambda Function ARN'
+        Value: !GetAtt ConvertTextFunction.Arn
+    ConvertTextFunctionIamRole:
+        Description: 'Implicit IAM Role created for Convert Text function'
+        Value: !GetAtt ConvertTextFunctionRole.Arn
