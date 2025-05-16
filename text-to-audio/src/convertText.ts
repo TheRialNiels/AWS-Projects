@@ -1,4 +1,9 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+
+interface ErrorResponse {
+  errorType: string
+  errorMessage: string
+}
 
 /**
  *
@@ -11,20 +16,21 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
  */
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  if (!event.body) throw Error('No text found in the request')
+  const body = JSON.parse(event.body)
+  console.log('🚀 ~ handler ~ body:', body)
+
   try {
     return {
       statusCode: 200,
       body: JSON.stringify({
         message: 'retrieve text',
       }),
-    };
+    }
   } catch (err) {
-    console.log(err);
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        message: 'some error happened',
-      }),
-    };
+      body: JSON.stringify({ err }),
+    }
   }
-};
+}
