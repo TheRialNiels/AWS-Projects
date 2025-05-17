@@ -1,4 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import {
   PollyClient,
   StartSpeechSynthesisTaskCommand,
@@ -14,7 +16,6 @@ import {
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  *
  */
-
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     const body = JSON.parse(event.body || '{}')
@@ -43,13 +44,21 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const pollyCommand = new StartSpeechSynthesisTaskCommand(params)
     const pollyResponse = await pollyClient.send(pollyCommand)
     console.log('🚀 ~ handler ~ pollyResponse:', pollyResponse)
-    const downloadUrl = pollyResponse.SynthesisTask?.OutputUri
+    const filename = pollyResponse.SynthesisTask?.OutputUri?.split('/').pop()
+
+    // * Create S3 Signed Url
+    const s3 = new S3Client({ region: 'us-east-1' })
+    const command = new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: filename,
+    })
+    const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 })
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         message: 'Audio file created successfully',
-        downloadUrl,
+        downloadUrl: signedUrl,
       }),
     }
   } catch (err: any) {
