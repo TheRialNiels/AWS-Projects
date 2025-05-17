@@ -19,6 +19,25 @@ Resources:
         Type: AWS::S3::Bucket
         Properties:
             BucketName: !Sub 'jdp-${AWS::StackName}-bucket'
+            PublicAccessBlockConfiguration:
+                BlockPublicPolicy: false
+
+    ConvertTextBucketPolicy:
+        Type: AWS::S3::BucketPolicy
+        Properties:
+            Bucket: !Ref ConvertTextBucket
+            PolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                    Action:
+                        - s3:PutObject
+                    Effect: Allow
+                    Resource: !Join
+                        - ''
+                        - - 'arn:aws:s3:::'
+                          - !Ref ConvertTextBucket
+                          - /*
+                    Principal: '*'
 
     ConvertTextApi:
         Type: AWS::Serverless::Api
@@ -42,6 +61,12 @@ Resources:
                     BUCKET_NAME: !Ref ConvertTextBucket
             Policies:
                 - AmazonPollyFullAccess
+                - Version: '2012-10-17'
+                  Statement:
+                      - Effect: Allow
+                        Action: s3:GetObject
+                        Resource: !Sub '${ConvertTextBucket.Arn}/*'
+
             Events:
                 ConvertText:
                     Type: Api
@@ -59,6 +84,9 @@ Resources:
                     - convertText.ts
 
 Outputs:
+    ConvertTextBucket:
+        Description: 'Convert Text Bucket ARN'
+        Value: !GetAtt ConvertTextBucket.Arn
     ConvertTextApi:
         Description: 'API Gateway endpoint URL'
         Value: !Sub 'https://${ConvertTextApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/convert-text'
