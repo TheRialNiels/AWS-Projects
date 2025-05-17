@@ -7,7 +7,7 @@ Description: >
 
 Globals:
     Function:
-        Timeout: 3
+        Timeout: 60
 
 Parameters:
     StageName:
@@ -15,6 +15,11 @@ Parameters:
         Default: staging
 
 Resources:
+    ConvertTextBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: !Sub 'jdp-${AWS::StackName}-bucket'
+
     ConvertTextApi:
         Type: AWS::Serverless::Api
         Properties:
@@ -32,6 +37,11 @@ Resources:
             Runtime: nodejs22.x
             Architectures:
                 - x86_64
+            Environment:
+                Variables:
+                    BUCKET_NAME: !Ref ConvertTextBucket
+            Policies:
+                - AmazonPollyFullAccess
             Events:
                 ConvertText:
                     Type: Api
