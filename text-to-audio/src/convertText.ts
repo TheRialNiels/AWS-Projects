@@ -18,9 +18,11 @@ import {
  */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
+    // * Extract text from request
     const body = JSON.parse(event.body || '{}')
     const text = body.text
 
+    // * Validate the text was found in the request
     if (!text) {
       return {
         statusCode: 400,
@@ -30,10 +32,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     const BUCKET_NAME = process.env.BUCKET_NAME
 
+    // * Create new Polly Client
     const pollyConfig = {
       region: 'us-east-1',
     }
     const pollyClient = new PollyClient(pollyConfig)
+
+    // * Specify the values to generate the audio from text
     const params = {
       OutputFormat: 'mp3',
       OutputS3BucketName: BUCKET_NAME,
@@ -43,16 +48,30 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     } as StartSpeechSynthesisTaskCommandInput
     const pollyCommand = new StartSpeechSynthesisTaskCommand(params)
     const pollyResponse = await pollyClient.send(pollyCommand)
-    console.log('🚀 ~ handler ~ pollyResponse:', pollyResponse)
-    const filename = pollyResponse.SynthesisTask?.OutputUri?.split('/').pop()
 
-    // * Create S3 Signed Url
-    const s3 = new S3Client({ region: 'us-east-1' })
-    const command = new GetObjectCommand({
+    // * Extract s3 Uri from polly response
+    const s3Uri = pollyResponse.SynthesisTask?.OutputUri
+
+    // * Validate audio file created successfully
+    if (!s3Uri) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ message: 'Failed to create audio file', error: 'Unexpected error' }),
+      }
+    }
+
+    // * Extract object key from s3 uri
+    const objectKey = s3Uri.split('/').pop()
+
+    // * Create S3 Client
+    const s3Client = new S3Client({ region: 'us-east-1' })
+
+    // * Generate a signed url
+    const getSignedUrlCommand = new GetObjectCommand({
       Bucket: BUCKET_NAME,
-      Key: filename,
+      Key: objectKey,
     })
-    const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 })
+    const signedUrl = await getSignedUrl(s3Client, getSignedUrlCommand, { expiresIn: 3600 })
 
     return {
       statusCode: 200,
