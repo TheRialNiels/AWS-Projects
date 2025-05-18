@@ -40,14 +40,15 @@ Resources:
             Environment:
                 Variables:
                     BUCKET_NAME: !Ref ConvertTextBucket
+                    REGION: us-east-1
             Policies:
                 - AmazonPollyFullAccess
                 - Version: 2012-10-17
                   Statement:
                       - Effect: Allow
                         Action:
-                          - s3:GetObject
-                          - s3:PutObject
+                            - s3:GetObject
+                            - s3:PutObject
                         Resource: !Sub '${ConvertTextBucket.Arn}/*'
             Events:
                 ConvertText:

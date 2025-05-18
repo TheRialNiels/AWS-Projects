@@ -1,11 +1,22 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
+import { v4 as uuidv4 } from 'uuid';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import {
   PollyClient,
   StartSpeechSynthesisTaskCommand,
   type StartSpeechSynthesisTaskCommandInput,
 } from '@aws-sdk/client-polly'
+
+// * Declare env variables
+const BUCKET_NAME = process.env.BUCKET_NAME
+const REGION = process.env.REGION
+
+// * Create new Polly Client
+const pollyClient = new PollyClient({ region: REGION })
+
+// * Create S3 Client
+const s3Client = new S3Client({ region: REGION })
 
 /**
  *
@@ -22,29 +33,31 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const body = JSON.parse(event.body || '{}')
     const text = body.text
 
-    // * Validate the text was found in the request
-    if (!text) {
+    // * Validate the text
+    const maxLength = 10000
+    if (typeof text !== 'string' || text.trim().length === 0) {
       return {
         statusCode: 400,
         body: JSON.stringify({ message: 'Missing "text" in request body' }),
       }
+    } else if (text.length > maxLength) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: `Text length has exceeded the max length allowed (${maxLength} characters)`,
+        }),
+      }
     }
-
-    const BUCKET_NAME = process.env.BUCKET_NAME
-
-    // * Create new Polly Client
-    const pollyConfig = {
-      region: 'us-east-1',
-    }
-    const pollyClient = new PollyClient(pollyConfig)
 
     // * Specify the values to generate the audio from text
+    const key = `audio-${uuidv4()}`
     const params = {
       OutputFormat: 'mp3',
       OutputS3BucketName: BUCKET_NAME,
       Text: body.text,
       VoiceId: 'Justin',
       LanguageCode: 'en-US',
+      OutputS3KeyPrefix: key
     } as StartSpeechSynthesisTaskCommandInput
     const pollyCommand = new StartSpeechSynthesisTaskCommand(params)
     const pollyResponse = await pollyClient.send(pollyCommand)
@@ -62,9 +75,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     // * Extract object key from s3 uri
     const objectKey = s3Uri.split('/').pop()
-
-    // * Create S3 Client
-    const s3Client = new S3Client({ region: 'us-east-1' })
 
     // * Generate a signed url
     const getSignedUrlCommand = new GetObjectCommand({
