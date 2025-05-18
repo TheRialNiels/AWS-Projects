@@ -5,6 +5,7 @@ import {
   StartSpeechSynthesisTaskCommand,
   type StartSpeechSynthesisTaskCommandInput,
 } from '@aws-sdk/client-polly'
+import { createCORSHeaders, createPreflightResponse, getOriginFromEvent } from './corsUtils'
 
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { v4 as uuidv4 } from 'uuid'
@@ -29,6 +30,13 @@ const s3Client = new S3Client({ region: REGION })
  *
  */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  const origin = getOriginFromEvent(event)
+
+  // * Handle preflight OPTIONS request
+  if (event.httpMethod === 'OPTIONS') {
+    return createPreflightResponse(origin)
+  }
+
   try {
     // * Extract text from request
     const body = JSON.parse(event.body || '{}')
@@ -39,11 +47,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (typeof text !== 'string' || text.trim().length === 0) {
       return {
         statusCode: 400,
+        headers: createCORSHeaders(origin),
         body: JSON.stringify({ message: 'Missing "text" in request body' }),
       }
     } else if (text.length > maxLength) {
       return {
         statusCode: 400,
+        headers: createCORSHeaders(origin),
         body: JSON.stringify({
           message: `Text length has exceeded the max length allowed (${maxLength} characters)`,
         }),
@@ -70,6 +80,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (!s3Uri) {
       return {
         statusCode: 500,
+        headers: createCORSHeaders(origin),
         body: JSON.stringify({ message: 'Failed to create audio file', error: 'Unexpected error' }),
       }
     }
@@ -86,6 +97,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     return {
       statusCode: 200,
+      headers: createCORSHeaders(origin),
       body: JSON.stringify({
         message: 'Audio file created successfully',
         downloadUrl: signedUrl,
@@ -94,6 +106,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   } catch (err: any) {
     return {
       statusCode: 500,
+      headers: createCORSHeaders(origin),
       body: JSON.stringify({ message: 'Internal Server Error', error: err.message }),
     }
   }
