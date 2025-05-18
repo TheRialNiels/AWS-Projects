@@ -1,12 +1,13 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
-import { v4 as uuidv4 } from 'uuid';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import {
   PollyClient,
   StartSpeechSynthesisTaskCommand,
   type StartSpeechSynthesisTaskCommandInput,
 } from '@aws-sdk/client-polly'
+
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { v4 as uuidv4 } from 'uuid'
 
 // * Declare env variables
 const BUCKET_NAME = process.env.BUCKET_NAME
@@ -57,7 +58,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       Text: body.text,
       VoiceId: 'Justin',
       LanguageCode: 'en-US',
-      OutputS3KeyPrefix: key
+      OutputS3KeyPrefix: key,
     } as StartSpeechSynthesisTaskCommandInput
     const pollyCommand = new StartSpeechSynthesisTaskCommand(params)
     const pollyResponse = await pollyClient.send(pollyCommand)
