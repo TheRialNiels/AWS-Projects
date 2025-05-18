@@ -7,6 +7,6 @@ export default {
   semi: false,
   trailingComma: 'all',
   singleQuote: true,
-  printWidth: 120,
+  printWidth: 80,
   tabWidth: 2,
 }
