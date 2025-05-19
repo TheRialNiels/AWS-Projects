@@ -1,6 +1,6 @@
 # AWS Projects
 
-This repository contains various projects created to practice building applications using AWS services and developing frontends with React. Each project focuses on different AWS services and frontend technologies to enhance cloud development and UI/UX skills.
+This repository contains various projects created to practice building applications using AWS services and developing frontend with React. Each project focuses on different AWS services and frontend technologies to enhance cloud development and UI/UX skills.
 
 ## Table of Contents
 
