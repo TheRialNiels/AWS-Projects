@@ -1,54 +1,75 @@
-# React + TypeScript + Vite
+# Text to Audio UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a simple React + TypeScript + Vite application that serves as the frontend for the ["Text to Audio"](../text-to-audio/README.md) project. It allows users to input text, convert it to audio using the backend API, and preview the generated audio file.
 
-Currently, two official plugins are available:
+The UI is styled using the Flowbite library, which leverages Tailwind CSS v4 for rapid design.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## How It Works
 
-## Expanding the ESLint configuration
+1. **Insert Text**:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+   - Users can input the text they want to convert into audio in the provided text field.
+   - ![Insert Text](./docs/home-page.png)
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+2. **Convert to Audio**:
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+   - When the "Convert to audio" button is clicked, the button text changes to "Loading" with a spinner while the request is being processed.
+   - ![Loading Spinner](./docs/converting-text.png)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+3. **Show Alert**:
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+   - Once the request is completed, an alert is displayed with the status of the operation (success or error).
+   - ![Show Alert](./docs/text-converted.png)
+
+4. **Preview Audio**:
+   - If the request is successful, a new button appears that redirects the user to the preview of the generated audio file.
+   - ![Preview Audio](./docs/preview-audio.png)
+
+## Setup and Installation
+
+To run the project locally, follow these steps:
+
+1. Clone the repository:
+
+   ```bash
+   https://github.com/TheRialNiels/AWS-Projects.git
+   cd text-to-audio-ui
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+4. Open your browser and navigate to `http://localhost:5173`.
+
+## Features
+
+- **React + TypeScript**: Built with modern React and TypeScript for type safety.
+- **Flowbite + Tailwind CSS**: Rapid UI design using Flowbite components and Tailwind CSS.
+- **API Integration**: Connects to the backend API to convert text to audio.
+- **User Feedback**: Provides real-time feedback with loading spinners and alerts.
+- **Audio Preview**: Allows users to preview the generated audio file.
+
+## Future Improvements
+
+This project is a simple design with room for improvement. Planned enhancements include:
+
+- Adding more customization options for the audio (e.g., voice selection, etc...).
+- Adding error handling for edge cases.
+- Implementing unit and integration tests.
+
+## Resources
+
+- [React Documentation](https://reactjs.org/docs/getting-started.html)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+- [Vite Documentation](https://vitejs.dev/guide/)
+- [Flowbite React Documentation](https://flowbite-react.com/docs/getting-started/introduction)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs/installation)
