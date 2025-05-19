@@ -113,6 +113,17 @@ To delete the application and its resources, run:
 sam delete --stack-name text-to-audio
 ```
 
+## Future Improvements
+
+This project currently implements basic functionality, but there are several potential enhancements that could be added in the future:
+
+-   Allow users to **choose the type of voice** (e.g., male, female, or specific voice IDs).
+-   Add an option to **select the engine** (e.g., standard or neural) for generating the audio.
+-   Enable users to **choose the language** of the audio output.
+-   Provide additional customization options, such as adjusting the speech rate, pitch, or volume.
+-   Implement support for batch processing of multiple text inputs.
+-   Add detailed logging and monitoring for better debugging and analytics.
+
 ## Resources
 
 -   [AWS SAM Developer Guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html)
