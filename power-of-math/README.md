@@ -55,7 +55,6 @@ To deploy the application, you need the following tools:
 
 -   **SAM CLI**: [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
 -   **Node.js**: [Install Node.js 22](https://nodejs.org/en/), including the NPM package management tool.
--   **Docker**: [Install Docker](https://www.docker.com/)
 
 ### Steps to Deploy
 
