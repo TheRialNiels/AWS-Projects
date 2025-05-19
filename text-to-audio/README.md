@@ -1,4 +1,4 @@
-# Text to Audi
+# Text to Audio
 
 This project contains source code and supporting files for a serverless application that converts text into audio using Amazon Polly and stores the audio files in an S3 bucket. The application is built using the AWS Serverless Application Model (SAM) and includes the following components:
 
@@ -112,17 +112,6 @@ To delete the application and its resources, run:
 ```bash
 sam delete --stack-name text-to-audio
 ```
-
-## Future Improvements
-
-This project currently implements basic functionality, but there are several potential enhancements that could be added in the future:
-
--   Allow users to **choose the type of voice** (e.g., male, female, or specific voice IDs).
--   Add an option to **select the engine** (e.g., standard or neural) for generating the audio.
--   Enable users to **choose the language** of the audio output.
--   Provide additional customization options, such as adjusting the speech rate, pitch, or volume.
--   Implement support for batch processing of multiple text inputs.
--   Add detailed logging and monitoring for better debugging and analytics.
 
 ## Resources
 
