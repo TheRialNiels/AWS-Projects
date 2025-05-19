@@ -1,120 +1,112 @@
-# text-to-audio
+# Text to Audio
 
-This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
+This project contains source code and supporting files for a serverless application that converts text into audio using Amazon Polly and stores the audio files in an S3 bucket. The application is built using the AWS Serverless Application Model (SAM) and includes the following components:
 
-- hello-world - Code for the application's Lambda function written in TypeScript.
-- events - Invocation events that you can use to invoke the function.
-- hello-world/tests - Unit tests for the application code. 
-- template.yaml - A template that defines the application's AWS resources.
+-   **API Gateway**: Exposes an HTTP endpoint to trigger the Lambda function.
+-   **Lambda Function**: Handles the logic to convert text to audio using Amazon Polly, save the audio file in S3, and generate a signed URL for accessing the file.
+-   **Amazon S3**: Stores the generated audio files in a protected bucket.
 
-The application uses several AWS resources, including Lambda functions and an API Gateway API. These resources are defined in the `template.yaml` file in this project. You can update the template to add AWS resources through the same deployment process that updates your application code.
+This project was inspired by this [tutorial](https://www.youtube.com/watch?v=hiE0El3zs1Y&list=PLYJ6Nch8PrM8HSO7xds8TNXLJa8oo6vqy&index=6&ab_channel=TechWithLucy), which demonstrated how to create a similar application using Lambda, Polly, and S3. I extended the idea by adding an API Gateway to connect everything, allowing me to practice creating projects with React. The UI for this project can be found in this same repository by clicking [here](../text-to-audio-ui/README.md). More details about the UI are available in that link.
 
-If you prefer to use an integrated development environment (IDE) to build and test your application, you can use the AWS Toolkit.  
-The AWS Toolkit is an open source plug-in for popular IDEs that uses the SAM CLI to build and deploy serverless applications on AWS. The AWS Toolkit also adds a simplified step-through debugging experience for Lambda function code. See the following links to get started.
+## How It Works
 
-* [CLion](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [GoLand](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [IntelliJ](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [WebStorm](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [Rider](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [PhpStorm](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [PyCharm](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [RubyMine](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [DataGrip](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [VS Code](https://docs.aws.amazon.com/toolkit-for-vscode/latest/userguide/welcome.html)
-* [Visual Studio](https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/welcome.html)
+1. **API Gateway Endpoint**:
 
-## Deploy the sample application
+    - A POST request is sent to the API Gateway endpoint with a JSON payload containing the `text` value.
+    - Example payload:
+        ```json
+        {
+            "text": "Send any text that you want to convert to audio"
+        }
+        ```
 
-The Serverless Application Model Command Line Interface (SAM CLI) is an extension of the AWS CLI that adds functionality for building and testing Lambda applications. It uses Docker to run your functions in an Amazon Linux environment that matches Lambda. It can also emulate your application's build environment and API.
+2. **Lambda Function**:
 
-To use the SAM CLI, you need the following tools.
+    - The Lambda function receives the request, uses Amazon Polly to synthesize the text into audio, and saves the audio file in an S3 bucket with a unique name.
+    - The S3 bucket is protected and not publicly accessible. To allow users to access the audio file, the Lambda function generates a signed URL, which is valid for a limited time.
 
-* SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
-* Node.js - [Install Node.js 22](https://nodejs.org/en/), including the NPM package management tool.
-* Docker - [Install Docker community edition](https://hub.docker.com/search/?type=edition&offering=community)
+3. **Amazon S3**:
 
-To build and deploy your application for the first time, run the following in your shell:
+    - The S3 bucket stores the audio files securely. Access to the files is only possible via the signed URL generated by the Lambda function.
 
-```bash
-sam build
-sam deploy --guided
-```
+4. **Response**:
+    - The Lambda function returns a response to the client with the signed URL of the generated audio file.
 
-The first command will build the source of your application. The second command will package and deploy your application to AWS, with a series of prompts:
+## Architecture Diagram
 
-* **Stack Name**: The name of the stack to deploy to CloudFormation. This should be unique to your account and region, and a good starting point would be something matching your project name.
-* **AWS Region**: The AWS region you want to deploy your app to.
-* **Confirm changes before deploy**: If set to yes, any change sets will be shown to you before execution for manual review. If set to no, the AWS SAM CLI will automatically deploy application changes.
-* **Allow SAM CLI IAM role creation**: Many AWS SAM templates, including this example, create AWS IAM roles required for the AWS Lambda function(s) included to access AWS services. By default, these are scoped down to minimum required permissions. To deploy an AWS CloudFormation stack which creates or modifies IAM roles, the `CAPABILITY_IAM` value for `capabilities` must be provided. If permission isn't provided through this prompt, to deploy this example you must explicitly pass `--capabilities CAPABILITY_IAM` to the `sam deploy` command.
-* **Save arguments to samconfig.toml**: If set to yes, your choices will be saved to a configuration file inside the project, so that in the future you can just re-run `sam deploy` without parameters to deploy changes to your application.
+Below is a high-level architecture diagram of the application:
 
-You can find your API Gateway Endpoint URL in the output values displayed after deployment.
+![Text to Audio Diagram Architecture](./docs/text-to-audio_diagram.png)
 
-## Use the SAM CLI to build and test locally
+## Project Structure
 
-Build your application with the `sam build` command.
+-   **`template.yaml`**: Defines the AWS resources for the application, including the API Gateway, Lambda function, and S3 bucket.
+-   **`events`**: Contains sample invocation events for testing the Lambda function locally.
+-   **`text-to-audio/src/convertText.ts`**: Contains the Lambda function code.
+-   **`text-to-audio/src/corsUtils.ts`**: Contains utility files for handling the CORS headers.
 
-```bash
-text-to-audio$ sam build
-```
+## Deploy the Application
 
-The SAM CLI installs dependencies defined in `hello-world/package.json`, compiles TypeScript with esbuild, creates a deployment package, and saves it in the `.aws-sam/build` folder.
+To deploy the application, you need the following tools:
 
-Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
+-   **SAM CLI**: [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+-   **Node.js**: [Install Node.js 22](https://nodejs.org/en/), including the NPM package management tool.
 
-Run functions locally and invoke them with the `sam local invoke` command.
+### Steps to Deploy
 
-```bash
-text-to-audio$ sam local invoke HelloWorldFunction --event events/event.json
-```
+1. Build the application:
 
-The SAM CLI can also emulate your application's API. Use the `sam local start-api` to run the API locally on port 3000.
+    ```bash
+    sam build
+    ```
 
-```bash
-text-to-audio$ sam local start-api
-text-to-audio$ curl http://localhost:3000/
-```
+2. Deploy the application:
 
-The SAM CLI reads the application template to determine the API's routes and the functions that they invoke. The `Events` property on each function's definition includes the route and method for each path.
+    ```bash
+    sam deploy --guided
+    ```
 
-```yaml
-      Events:
-        HelloWorld:
-          Type: Api
-          Properties:
-            Path: /hello
-            Method: get
-```
+    During deployment, you will be prompted to provide the following:
 
-## Add a resource to your application
-The application template uses AWS Serverless Application Model (AWS SAM) to define application resources. AWS SAM is an extension of AWS CloudFormation with a simpler syntax for configuring common serverless application resources such as functions, triggers, and APIs. For resources not included in [the SAM specification](https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md), you can use standard [AWS CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html) resource types.
+    - **Stack Name**: A unique name for your CloudFormation stack.
+    - **AWS Region**: The AWS region where you want to deploy the application.
+    - **IAM Role Permissions**: Allow SAM CLI to create necessary IAM roles.
 
-## Fetch, tail, and filter Lambda function logs
+3. After deployment, note the API Gateway endpoint URL from the output.
 
-To simplify troubleshooting, SAM CLI has a command called `sam logs`. `sam logs` lets you fetch logs generated by your deployed Lambda function from the command line. In addition to printing the logs on the terminal, this command has several nifty features to help you quickly find the bug.
+## Test the Application Locally
 
-`NOTE`: This command works for all AWS Lambda functions; not just the ones you deploy using SAM.
+You can test the Lambda function locally using the SAM CLI.
 
-```bash
-text-to-audio$ sam logs -n HelloWorldFunction --stack-name text-to-audio --tail
-```
+> [!NOTE] You must be located in the root path
 
-You can find more information and examples about filtering Lambda function logs in the [SAM CLI Documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-logging.html).
+1. Build the application:
 
-## Unit tests
+    ```bash
+    sam build
+    ```
 
-Tests are defined in the `hello-world/tests` folder in this project. Use NPM to install the [Jest test framework](https://jestjs.io/) and run unit tests.
+2. Invoke the function locally with a test event:
 
-```bash
-text-to-audio$ cd hello-world
-hello-world$ npm install
-hello-world$ npm run test
-```
+    ```bash
+    sam local invoke ConvertTextFunction -e ./events/event.json --env-vars ./events/env.json
+    ```
+
+3. Start the API locally:
+
+    ```bash
+    sam local start-api --env-vars ./events/env.json
+    ```
+
+    Test the API using `curl`:
+
+    ```bash
+    curl -X POST http://localhost:3000/ -d '{"text": "Quick test running the API locally"}' -H "Content-Type: application/json"
+    ```
 
 ## Cleanup
 
-To delete the sample application that you created, use the AWS CLI. Assuming you used your project name for the stack name, you can run the following:
+To delete the application and its resources, run:
 
 ```bash
 sam delete --stack-name text-to-audio
@@ -122,6 +114,8 @@ sam delete --stack-name text-to-audio
 
 ## Resources
 
-See the [AWS SAM developer guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) for an introduction to SAM specification, the SAM CLI, and serverless application concepts.
-
-Next, you can use AWS Serverless Application Repository to deploy ready to use Apps that go beyond hello world samples and learn how authors developed their applications: [AWS Serverless Application Repository main page](https://aws.amazon.com/serverless/serverlessrepo/)
+-   [AWS SAM Developer Guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html)
+-   [AWS Lambda Documentation](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
+-   [Amazon Polly Documentation](https://docs.aws.amazon.com/polly/latest/dg/what-is.html)
+-   [Amazon S3 Documentation](https://docs.aws.amazon.com/s3/index.html)
+-   [YouTube Tutorial](https://www.youtube.com/watch?v=hiE0El3zs1Y&list=PLYJ6Nch8PrM8HSO7xds8TNXLJa8oo6vqy&index=6&ab_channel=TechWithLucy)
