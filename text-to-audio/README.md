@@ -69,6 +69,7 @@ To deploy the application, you need the following tools:
     During deployment, you will be prompted to provide the following:
 
     - **Stack Name**: A unique name for your CloudFormation stack.
+    - **Stage Name**: Select the stage name, default value is `staging`.
     - **AWS Region**: The AWS region where you want to deploy the application.
     - **IAM Role Permissions**: Allow SAM CLI to create necessary IAM roles.
 
