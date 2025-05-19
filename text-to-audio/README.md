@@ -1,4 +1,4 @@
-# Text to Audio
+# Text to Audi
 
 This project contains source code and supporting files for a serverless application that converts text into audio using Amazon Polly and stores the audio files in an S3 bucket. The application is built using the AWS Serverless Application Model (SAM) and includes the following components:
 
