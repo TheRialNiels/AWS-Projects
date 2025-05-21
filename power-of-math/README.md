@@ -1,5 +1,6 @@
 # Power of Math
 
+Test
 This project contains source code and supporting files for a serverless application that calculates the power of a number and stores the result in a DynamoDB table. The application is built using the AWS Serverless Application Model (SAM) and includes the following components:
 
 -   **API Gateway**: Exposes an HTTP endpoint to trigger the Lambda function.
