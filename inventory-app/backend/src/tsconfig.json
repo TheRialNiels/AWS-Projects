@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+      "esModuleInterop": true,
+      "forceConsistentCasingInFileNames": true,
+      "module":"esnext",
+      "moduleResolution":"node",
+      "noEmit": true,
+      "preserveConstEnums": true,
+      "skipLibCheck": true,
+      "sourceMap": false,
+      "strict": true,
+      "target": "es2022",
+      "baseUrl": ".",
+      "paths": {}
+    },
+    "exclude": ["node_modules/**/*", ".esbuild/**/*"]
+  }
