@@ -18,17 +18,33 @@ Globals:
         Runtime: nodejs22.x
         CodeUri: .
         Timeout: 60
-        Environments:
+        Environment:
             Variables:
                 REGION: !Sub ${AWS::Region}
                 ENVIRONMENT: !Ref Environment
 
 Resources:
+    CategoriesTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+            TableName: !Sub ${Environment}-${AppName}-categories-table
+            BillingMode: PAY_PER_REQUEST
+            SSESpecification:
+                SSEEnabled: true
+            AttributeDefinitions:
+                - AttributeName: id
+                  AttributeType: S
+            KeySchema:
+                - AttributeName: id
+                  KeyType: HASH
+
     ProductsTable:
         Type: AWS::DynamoDB::Table
         Properties:
             TableName: !Sub ${Environment}-${AppName}-products-table
             BillingMode: PAY_PER_REQUEST
+            SSESpecification:
+                SSEEnabled: true
             AttributeDefinitions:
                 - AttributeName: sku
                   AttributeType: S
@@ -36,15 +52,9 @@ Resources:
                   AttributeType: S
                 - AttributeName: category
                   AttributeType: S
-                - AttributeName: quantity
-                  AttributeType: S
-                - AttributeName: price
-                  AttributeType: S
             KeySchema:
                 - AttributeName: sku
                   KeyType: HASH
-                - AttributeName: name
-                  KeyType: RANGE
             GlobalSecondaryIndexes:
                 - IndexName: CategoryIndex
                   KeySchema:
