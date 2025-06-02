@@ -24,6 +24,17 @@ Globals:
                 ENVIRONMENT: !Ref Environment
 
 Resources:
+    InventoryAppApiGw:
+        Type: AWS::Serverless::Api
+        Properties:
+            Name: !Sub ${Environment}-${AppName}-api
+            Description: API Gateway for InventoryApp Endpoints
+            StageName: !Ref Environment
+            Cors:
+                AllowMethods: "'POST,GET,PATCH,DELETE,HEAD,OPTIONS'"
+                AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                AllowOrigin: "'*'"
+
     CategoriesTable:
         Type: AWS::DynamoDB::Table
         Properties:
@@ -65,30 +76,45 @@ Resources:
                   Projection:
                       ProjectionType: ALL
 
-    # CreateProduct:
-    #     Type: AWS::Serverless::Function
-    #     Properties:
-    #         FunctionName: !Sub ${Environment}-${AppName}
-    #         Handler: src/handlers/addItem.handler
-    #         Events:
-    #             HelloWorld:
-    #                 Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-    #                 Properties:
-    #                     Path: /hello
-    #                     Method: get
-    #     Metadata: # Manage esbuild properties
-    #         BuildMethod: esbuild
-    #         BuildProperties:
-    #             Minify: true
-    #             Target: 'es2020'
-    #             Sourcemap: true
-    #             EntryPoints:
-    #                 - app.ts
+    CreateProductFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub ${Environment}-${AppName}-create-product
+            Description: Create product record in database
+            Handler: src/handlers/v1/products/createProduct.handler
+            AutoPublishAlias: live
+            # Environments:
+            #     TABLE_NAME: !GetAtt ProductsTable.TableName
+            Events:
+                ApiEvent:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref InventoryAppApiGw
+                        Path: /v1/products
+                        Method: POST
+                        TimeoutInMillis: 60000
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !Ref ProductsTable
+
+        Metadata:
+            BuildMethod: esbuild
+            BuildProperties:
+                Format: esm
+                OutExtension:
+                    - .js=.mjs
+                Minify: true
+                Target: es2022
+                Sourcemap: false
+                Banner:
+                    - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+                EntryPoints:
+                    - src/handlers/v1/products/createProduct.ts
 
 Outputs:
-    # HelloWorldApi:
-    #     Description: 'API Gateway endpoint URL for Prod stage for Hello World function'
-    #     Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/'
-    # HelloWorldFunction:
-    #     Description: 'Hello World Lambda Function ARN'
-    #     Value: !GetAtt HelloWorldFunction.Arn
+    InventoryAppApiGw:
+        Description: 'API Gateway endpoint URL'
+        Value: !Sub 'https://${InventoryAppApiGw}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/'
+    CreateProductFunctionArn:
+        Description: 'Create Product Lambda Function ARN'
+        Value: !GetAtt CreateProductFunction.Arn
