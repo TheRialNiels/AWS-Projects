@@ -49,10 +49,10 @@ Resources:
             SSESpecification:
                 SSEEnabled: true
             AttributeDefinitions:
-                - AttributeName: id
+                - AttributeName: name
                   AttributeType: S
             KeySchema:
-                - AttributeName: id
+                - AttributeName: name
                   KeyType: HASH
 
     ProductsTable:
@@ -81,6 +81,41 @@ Resources:
                         KeyType: RANGE
                   Projection:
                       ProjectionType: ALL
+
+    CreateCategoryFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub ${Environment}-${AppName}-create-category
+            Description: Create category record in database
+            Handler: src/handlers/v1/categories/createCategory.handler
+            AutoPublishAlias: live
+            Environment:
+                Variables:
+                    CATEGORIES_TABLE: !Ref CategoriesTable
+            Events:
+                ApiEvent:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref InventoryAppApiGw
+                        Path: /v1/categories
+                        Method: POST
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !Ref CategoriesTable
+
+        Metadata:
+            BuildMethod: esbuild
+            BuildProperties:
+                Format: esm
+                OutExtension:
+                    - .js=.mjs
+                Minify: true
+                Target: es2022
+                Sourcemap: false
+                Banner:
+                    - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+                EntryPoints:
+                    - src/handlers/v1/categories/createCategory.ts
 
     CreateProductFunction:
         Type: AWS::Serverless::Function
