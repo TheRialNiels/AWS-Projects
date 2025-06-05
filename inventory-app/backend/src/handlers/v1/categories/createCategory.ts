@@ -1,5 +1,9 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
+import {
+    ConditionalCheckFailedException,
+    DynamoDBClient,
+    PutItemCommand,
+} from '@aws-sdk/client-dynamodb'
 import {
     createCORSHeaders,
     createPreflightResponse,
@@ -74,7 +78,19 @@ export const handler = async (
             message: 'Category created successfully',
             responseData: body,
         })
-    } catch (err) {
+    } catch (err: ConditionalCheckFailedException | any) {
+        // * Check if the error is due to the item already existing
+        if (err.name === 'ValidationException') {
+            return errorResponse({
+                statusCode: BAD_REQUEST,
+                additionalHeaders: createCORSHeaders(origin, [], methods),
+                message: 'Category already exists',
+                responseData: {
+                    message: `A category with name "${body.name}" already exists`,
+                },
+            })
+        }
+
         const errorMsg = String(err) || 'Unexpected error'
         return errorResponse({
             statusCode: INTERNAL_SERVER_ERROR,
