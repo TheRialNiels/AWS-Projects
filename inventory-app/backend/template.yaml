@@ -117,6 +117,146 @@ Resources:
                 EntryPoints:
                     - src/handlers/v1/categories/createCategory.ts
 
+    GetCategoryFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub ${Environment}-${AppName}-get-category
+            Description: Get category record in database
+            Handler: src/handlers/v1/categories/getCategory.handler
+            AutoPublishAlias: live
+            Environment:
+                Variables:
+                    CATEGORIES_TABLE: !Ref CategoriesTable
+            Events:
+                ApiEvent:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref InventoryAppApiGw
+                        Path: /v1/categories/{id}
+                        Method: GET
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !Ref CategoriesTable
+
+        Metadata:
+            BuildMethod: esbuild
+            BuildProperties:
+                Format: esm
+                OutExtension:
+                    - .js=.mjs
+                Minify: true
+                Target: es2022
+                Sourcemap: false
+                Banner:
+                    - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+                EntryPoints:
+                    - src/handlers/v1/categories/getCategory.ts
+
+    GetCategoriesFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub ${Environment}-${AppName}-get-categories
+            Description: Get all categories records in database
+            Handler: src/handlers/v1/categories/getCategories.handler
+            AutoPublishAlias: live
+            Environment:
+                Variables:
+                    CATEGORIES_TABLE: !Ref CategoriesTable
+            Events:
+                ApiEvent:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref InventoryAppApiGw
+                        Path: /v1/categories
+                        Method: GET
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !Ref CategoriesTable
+
+        Metadata:
+            BuildMethod: esbuild
+            BuildProperties:
+                Format: esm
+                OutExtension:
+                    - .js=.mjs
+                Minify: true
+                Target: es2022
+                Sourcemap: false
+                Banner:
+                    - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+                EntryPoints:
+                    - src/handlers/v1/categories/getCategories.ts
+
+    UpdateCategoryFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub ${Environment}-${AppName}-update-category
+            Description: Update category record in database
+            Handler: src/handlers/v1/categories/updateCategory.handler
+            AutoPublishAlias: live
+            Environment:
+                Variables:
+                    CATEGORIES_TABLE: !Ref CategoriesTable
+            Events:
+                ApiEvent:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref InventoryAppApiGw
+                        Path: /v1/categories/{id}
+                        Method: PATCH
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !Ref CategoriesTable
+
+        Metadata:
+            BuildMethod: esbuild
+            BuildProperties:
+                Format: esm
+                OutExtension:
+                    - .js=.mjs
+                Minify: true
+                Target: es2022
+                Sourcemap: false
+                Banner:
+                    - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+                EntryPoints:
+                    - src/handlers/v1/categories/updateCategory.ts
+
+    DeleteCategoryFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub ${Environment}-${AppName}-delete-category
+            Description: Delete category record in database
+            Handler: src/handlers/v1/categories/deleteCategory.handler
+            AutoPublishAlias: live
+            Environment:
+                Variables:
+                    CATEGORIES_TABLE: !Ref CategoriesTable
+            Events:
+                ApiEvent:
+                    Type: Api
+                    Properties:
+                        RestApiId: !Ref InventoryAppApiGw
+                        Path: /v1/categories/{id}
+                        Method: DELETE
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !Ref CategoriesTable
+
+        Metadata:
+            BuildMethod: esbuild
+            BuildProperties:
+                Format: esm
+                OutExtension:
+                    - .js=.mjs
+                Minify: true
+                Target: es2022
+                Sourcemap: false
+                Banner:
+                    - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+                EntryPoints:
+                    - src/handlers/v1/categories/deleteCategory.ts
+
     CreateProductFunction:
         Type: AWS::Serverless::Function
         Properties:
