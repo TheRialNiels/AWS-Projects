@@ -11,10 +11,10 @@ import {
     successResponse,
 } from '@lib/httpResponse'
 
-import { envs } from '@lib/envs'
 import { productSchema } from '@interfaces/createProduct.types'
+import { productsEnvs } from '@handlers/v1/products/lib/envs'
 
-const dynamoDbClient = new DynamoDBClient({ region: envs.REGION })
+const dynamoDbClient = new DynamoDBClient({ region: productsEnvs.REGION })
 
 /**
  * @param {Object} event - API Gateway Lambda Proxy Input Format
@@ -59,7 +59,7 @@ export const handler = async (
 
         // * Insert the item into DynamoDB
         const command = new PutItemCommand({
-            TableName: envs.PRODUCTS_TABLE,
+            TableName: productsEnvs.PRODUCTS_TABLE,
             Item: item,
             ConditionExpression: 'attribute_not_exists(sku)',
         })
