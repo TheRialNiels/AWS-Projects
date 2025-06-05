@@ -3,7 +3,7 @@
 version = 0.1
 
 [default.global.parameters]
-stack_name = "backend"
+stack_name = "inventory-app"
 
 [default.build.parameters]
 cached = true
@@ -16,6 +16,10 @@ lint = true
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
 resolve_s3 = true
+s3_prefix = "inventory-app"
+region = "us-east-1"
+parameter_overrides = "AppName=\"inventory-app\" BaseUrl=\"'*'\" Environment=\"staging\""
+image_repositories = []
 
 [default.package.parameters]
 resolve_s3 = true
