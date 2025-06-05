@@ -1,5 +1,5 @@
-import { APIGatewayProxyEvent } from 'aws-lambda';
-import { envs } from './envs';
+import { APIGatewayProxyEvent } from 'aws-lambda'
+import { envs } from '@lib/envs'
 
 /**
  * Default headers allowed by AWS API Gateway
@@ -11,7 +11,7 @@ export const DEFAULT_ALLOWED_HEADERS = [
     'Authorization',
     'X-Api-Key',
     'X-Amz-Security-Token',
-];
+]
 
 /**
  * A constant array defining the default HTTP methods allowed for CORS (Cross-Origin Resource Sharing).
@@ -19,7 +19,15 @@ export const DEFAULT_ALLOWED_HEADERS = [
  * - `OPTIONS`: Used for preflight requests in CORS.
  * - `POST`: Used to send data to the server.
  */
-export const DEFAULT_ALLOWED_METHODS = ['OPTIONS', 'HEAD', 'POST', 'GET', 'PUT', 'PATCH', 'DELETE'];
+export const DEFAULT_ALLOWED_METHODS = [
+    'OPTIONS',
+    'HEAD',
+    'POST',
+    'GET',
+    'PUT',
+    'PATCH',
+    'DELETE',
+]
 
 /**
  * A list of allowed origins for Cross-Origin Resource Sharing (CORS).
@@ -28,17 +36,19 @@ export const DEFAULT_ALLOWED_METHODS = ['OPTIONS', 'HEAD', 'POST', 'GET', 'PUT',
  * - `https://*.yourdomain.com`: Allows requests from any subdomain of `yourdomain.com`.
  * - `http://localhost:*`: Permits requests from localhost on any port, typically used during development.
  */
-export const ALLOWED_ORIGINS = [envs.BASE_URL, 'http://localhost:*'];
+export const ALLOWED_ORIGINS = [envs.BASE_URL, 'http://localhost:*']
 
 /**
  * Extracts the origin from the Lambda event headers
  * @param event - AWS API Gateway proxy event
  * @returns the Origin string, or null if not present
  */
-export const getOriginFromEvent = (event: APIGatewayProxyEvent): string | null => {
-    if (!event.headers) return null;
-    return event.headers.Origin || event.headers.origin || null;
-};
+export const getOriginFromEvent = (
+    event: APIGatewayProxyEvent,
+): string | null => {
+    if (!event.headers) return null
+    return event.headers.Origin || event.headers.origin || null
+}
 
 /**
  * Compiles a wildcard-enabled URL pattern to RegExp
@@ -47,14 +57,15 @@ export const getOriginFromEvent = (event: APIGatewayProxyEvent): string | null =
  * @returns RegExp pattern to match origin
  */
 export const compileURLWildcards = (url: string): RegExp => {
-    const urlUnreservedPattern = '[A-Za-z0-9-._~]';
-    const wildcardPattern = `${urlUnreservedPattern}*`;
+    const urlUnreservedPattern = '[A-Za-z0-9-._~]'
+    const wildcardPattern = `${urlUnreservedPattern}*`
 
-    const escapeRegex = (str: string) => str.replace(/([.?+^$[\]\\(){}|-])/g, '\\$1');
+    const escapeRegex = (str: string) =>
+        str.replace(/([.?+^$[\]\\(){}|-])/g, '\\$1')
 
-    const parts = url.split('*').map(escapeRegex);
-    return new RegExp(`^${parts.join(wildcardPattern)}$`);
-};
+    const parts = url.split('*').map(escapeRegex)
+    return new RegExp(`^${parts.join(wildcardPattern)}$`)
+}
 
 /**
  * Checks if the provided origin is allowed based on a list of allowed patterns.
@@ -63,10 +74,10 @@ export const compileURLWildcards = (url: string): RegExp => {
  * @returns A boolean indicating whether the origin is allowed.
  */
 export const isOriginAllowed = (origin: string | null): boolean => {
-    if (!origin) return false;
-    const allowedPatterns = ALLOWED_ORIGINS.map(compileURLWildcards);
-    return allowedPatterns.some((pattern) => origin.match(pattern));
-};
+    if (!origin) return false
+    const allowedPatterns = ALLOWED_ORIGINS.map(compileURLWildcards)
+    return allowedPatterns.some((pattern) => origin.match(pattern))
+}
 
 /**
  * Creates a set of CORS headers based on the provided origin, headers, and methods.
@@ -85,18 +96,24 @@ export const createCORSHeaders = (
     headers?: string[],
     methods?: string[],
 ): Record<string, string> => {
-    if (!origin || !isOriginAllowed(origin)) return {};
+    if (!origin || !isOriginAllowed(origin)) return {}
 
-    const allowedHeaders = headers?.length ?? 0 ? headers!.join(',') : DEFAULT_ALLOWED_HEADERS.join(',');
-    const allowedMethods = methods?.length ?? 0 ? methods!.join(',') : DEFAULT_ALLOWED_METHODS.join(',');
+    const allowedHeaders =
+        headers?.length ?? 0
+            ? headers!.join(',')
+            : DEFAULT_ALLOWED_HEADERS.join(',')
+    const allowedMethods =
+        methods?.length ?? 0
+            ? methods!.join(',')
+            : DEFAULT_ALLOWED_METHODS.join(',')
 
     return {
         'Access-Control-Allow-Origin': origin,
         'Access-Control-Allow-Headers': allowedHeaders,
         'Access-Control-Allow-Methods': allowedMethods,
         // 'Access-Control-Allow-Credentials': 'true', // Optional: enable cookies if needed
-    };
-};
+    }
+}
 
 /**
  * Creates a preflight response for handling CORS (Cross-Origin Resource Sharing) requests.
@@ -107,16 +124,19 @@ export const createCORSHeaders = (
  *                 If provided, it will be included in the `Access-Control-Max-Age` header.
  * @returns An object representing the HTTP response, with a status code of 204, the generated headers, and an empty body.
  */
-export const createPreflightResponse = (origin: string | null, maxAge?: number) => {
-    const headers = createCORSHeaders(origin);
+export const createPreflightResponse = (
+    origin: string | null,
+    maxAge?: number,
+) => {
+    const headers = createCORSHeaders(origin)
 
     if (maxAge !== undefined) {
-        headers['Access-Control-Max-Age'] = maxAge.toString();
+        headers['Access-Control-Max-Age'] = maxAge.toString()
     }
 
     return {
         statusCode: 204,
         headers,
         body: '',
-    };
-};
+    }
+}
