@@ -7,21 +7,27 @@ Parameters:
         Type: String
         Default: inventory-app
         Description: Application name
+    BaseUrl:
+        Type: String
+        Default: "'*'"
     Environment:
         Type: String
+        Default: prod
         Description: Define the runtime environment for the application
+        MinLength: 3
 
 Globals:
     Function:
         Architectures:
-            - arm64
+            - x86_64
         Runtime: nodejs22.x
         CodeUri: .
         Timeout: 60
         Environment:
             Variables:
-                REGION: !Sub ${AWS::Region}
+                BASE_URL: !Ref BaseUrl
                 ENVIRONMENT: !Ref Environment
+                REGION: !Sub ${AWS::Region}
 
 Resources:
     InventoryAppApiGw:
@@ -33,7 +39,7 @@ Resources:
             Cors:
                 AllowMethods: "'POST,GET,PATCH,DELETE,HEAD,OPTIONS'"
                 AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-                AllowOrigin: "'*'"
+                AllowOrigin: !Ref BaseUrl
 
     CategoriesTable:
         Type: AWS::DynamoDB::Table
@@ -83,8 +89,9 @@ Resources:
             Description: Create product record in database
             Handler: src/handlers/v1/products/createProduct.handler
             AutoPublishAlias: live
-            # Environments:
-            #     TABLE_NAME: !GetAtt ProductsTable.TableName
+            Environment:
+                Variables:
+                    PRODUCTS_TABLE: !Ref ProductsTable
             Events:
                 ApiEvent:
                     Type: Api
@@ -92,7 +99,6 @@ Resources:
                         RestApiId: !Ref InventoryAppApiGw
                         Path: /v1/products
                         Method: POST
-                        TimeoutInMillis: 60000
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref ProductsTable
