@@ -15,3 +15,13 @@ export const getValue = <T>(valueToGet: () => T, defaultsTo: T): T => {
         return defaultsTo
     }
 }
+
+/**
+ * Checks if the given value is of type string.
+ *
+ * @param value - The value to be checked.
+ * @returns `true` if the value is a string, otherwise `false`.
+ */
+export const isString = (value: any): boolean => {
+    return typeof value === 'string'
+}
