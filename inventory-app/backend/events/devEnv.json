@@ -1,0 +1,12 @@
+{
+    "CreateProductFunction": {
+        "PRODUCTS_TABLE": "staging-inventory-app-products-table",
+        "ENVIRONMENT": "staging",
+        "REGION": "us-east-1"
+    },
+    "Parameters": {
+        "AppName": "inventory-app",
+        "BaseUrl": "'*'",
+        "Environment": "staging"
+    }
+}
