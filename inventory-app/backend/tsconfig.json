@@ -1,4 +1,5 @@
 {
+    "extends": "./tsconfig.paths.json",
     "compilerOptions": {
       "esModuleInterop": true,
       "forceConsistentCasingInFileNames": true,
@@ -10,8 +11,7 @@
       "sourceMap": false,
       "strict": true,
       "target": "es2022",
-      "baseUrl": ".",
-      "paths": {}
     },
+    "include": ["src/**/*.ts", "tests/**/*.ts"],
     "exclude": ["node_modules/**/*", ".esbuild/**/*"]
   }
