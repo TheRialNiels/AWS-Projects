@@ -1,0 +1,6 @@
+{
+    "body": "{ \"name\": \"example\", \"label\": \"Example\" }",
+    "headers": {
+        "Origin": "http://localhost:3000"
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "body": "{ \"name\": 123, \"label\": true }",
+    "headers": {
+        "Origin": "http://localhost:3000"
+    }
+}
