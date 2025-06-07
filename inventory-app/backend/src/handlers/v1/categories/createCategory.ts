@@ -1,9 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import {
-    ConditionalCheckFailedException,
-    DynamoDBClient,
-    PutItemCommand,
-} from '@aws-sdk/client-dynamodb'
+import { convertTextToCamelCase, isString } from '@lib/utils'
 import {
     createCORSHeaders,
     createPreflightResponse,
@@ -15,11 +11,17 @@ import {
     successResponse,
 } from '@lib/httpResponse'
 
+import { CategoriesDynamoDBClient } from './lib/dynamoDbClient'
 import { categoriesEnvs } from '@handlers/v1/categories/lib/envs'
 import { categorySchema } from '@interfaces/categories.types'
-import { isString } from '@lib/utils'
+import { generateUuid } from '@lib/packages/uuid'
 
-const dynamoDbClient = new DynamoDBClient({ region: categoriesEnvs.REGION })
+const dynamoDbConfig = {
+    region: categoriesEnvs.REGION,
+    tableName: categoriesEnvs.CATEGORIES_TABLE,
+    gsiName: categoriesEnvs.CATEGORIES_GSI_INDEX,
+}
+const dynamoDbClient = new CategoriesDynamoDBClient(dynamoDbConfig)
 
 /**
  * @param {Object} event - API Gateway Lambda Proxy Input Format
@@ -42,7 +44,6 @@ export const handler = async (
     const body = JSON.parse(event.body || '{}')
 
     // * Trim whitespace
-    isString(body.name) ? (body.name = body.name.trim()) : null
     isString(body.label) ? (body.label = body.label.trim()) : null
 
     // * Validate payload with schema
@@ -57,19 +58,40 @@ export const handler = async (
     }
 
     try {
+        // * Convert the label to camelCase
+        const camelCaseLabel = convertTextToCamelCase(body.label)
+
+        // * Verify if the category already exists
+        const query = {
+            keyConditionExpression: '#name = :name',
+            expressionAttributeNames: { '#name': 'name' },
+            expressionAttributeValues: { ':name': { S: camelCaseLabel } },
+        }
+        const result = await dynamoDbClient.query(query)
+
+        // * Return an error if the item already exists
+        if (result && result.length > 0) {
+            return errorResponse({
+                statusCode: BAD_REQUEST,
+                additionalHeaders: createCORSHeaders(origin, [], methods),
+                message: 'Category already exists',
+                responseData: {
+                    message: `A category with name "${body.label}" already exists`,
+                },
+            })
+        }
+
         // * Prepare the item to be inserted into DynamoDB
+        body.id = generateUuid()
+        body.name = camelCaseLabel
         const item = {
+            id: { S: body.id },
             name: { S: body.name },
             label: { S: body.label },
         }
 
         // * Insert the item into DynamoDB
-        const command = new PutItemCommand({
-            TableName: categoriesEnvs.CATEGORIES_TABLE,
-            Item: item,
-            ConditionExpression: 'attribute_not_exists(name)',
-        })
-        await dynamoDbClient.send(command)
+        await dynamoDbClient.createItem(item)
 
         // * Return success response
         return successResponse({
@@ -78,19 +100,7 @@ export const handler = async (
             message: 'Category created successfully',
             responseData: body,
         })
-    } catch (err: ConditionalCheckFailedException | any) {
-        // * Check if the error is due to the item already existing
-        if (err.name === 'ValidationException') {
-            return errorResponse({
-                statusCode: BAD_REQUEST,
-                additionalHeaders: createCORSHeaders(origin, [], methods),
-                message: 'Category already exists',
-                responseData: {
-                    message: `A category with name "${body.name}" already exists`,
-                },
-            })
-        }
-
+    } catch (err) {
         const errorMsg = String(err) || 'Unexpected error'
         return errorResponse({
             statusCode: INTERNAL_SERVER_ERROR,
