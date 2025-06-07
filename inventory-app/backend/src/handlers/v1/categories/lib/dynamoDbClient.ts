@@ -13,29 +13,61 @@ import {
     UpdateItemCommand,
     UpdateItemCommandInput,
 } from '@aws-sdk/client-dynamodb'
+import type {
+    CategoriesDynamoDBConfig,
+    createItemParams,
+    deleteItemParams,
+    queryParams,
+    updateItemParams,
+} from '@interfaces/categories.types'
 
-export interface CategoriesDynamoDBConfig {
-    region: string
-    tableName: string
-    gsiName?: string // * Optional GSI for queries by alternate keys
-}
-
+/**
+ * A client for interacting with a DynamoDB table to manage categories.
+ *
+ * This class provides methods to perform CRUD operations and query operations
+ * on a DynamoDB table. It is designed to work with a specific table and optionally
+ * a Global Secondary Index (GSI) for queries.
+ *
+ * @class
+ * @template CategoriesDynamoDBConfig - Configuration for the DynamoDB client.
+ * @template createItemParams - Parameters for creating an item.
+ * @template updateItemParams - Parameters for updating an item.
+ * @template deleteItemParams - Parameters for deleting an item.
+ * @template queryParams - Parameters for querying items.
+ */
 export class CategoriesDynamoDBClient {
     private client: DynamoDBClient
     private tableName: string
     private gsiName?: string
 
+    /**
+     * Constructs a new instance of the DynamoDB client for managing categories.
+     *
+     * @param config - Configuration object for the DynamoDB client.
+     * @param config.region - The AWS region where the DynamoDB table is hosted.
+     * @param config.tableName - The name of the DynamoDB table to interact with.
+     * @param config.gsiName - The name of the Global Secondary Index (GSI) used for queries.
+     */
     constructor(config: CategoriesDynamoDBConfig) {
         this.client = new DynamoDBClient({ region: config.region })
         this.tableName = config.tableName
         this.gsiName = config.gsiName
     }
 
-    async createItem(item: Record<string, any>, conditionExpression?: string) {
+    /**
+     * Creates a new item in the DynamoDB table.
+     *
+     * @param params - The parameters required to create the item.
+     * @param params.item - The item to be inserted into the table.
+     * @param params.conditionExpression - An optional condition expression to ensure the item is only created if the condition is met.
+     *
+     * @throws Will throw an error if the operation fails.
+     */
+    async createItem(params: createItemParams) {
         const input: PutItemCommandInput = {
             TableName: this.tableName,
-            Item: item,
-            ConditionExpression: conditionExpression,
+            Item: params.item,
+            ConditionExpression: params.conditionExpression,
         }
 
         try {
@@ -45,6 +77,16 @@ export class CategoriesDynamoDBClient {
         }
     }
 
+    /**
+     * Retrieves an item from the DynamoDB table based on the provided key.
+     *
+     * @param key - A record representing the primary key of the item to retrieve.
+     *              The key must match the schema of the table's primary key.
+     * @returns A promise that resolves to the retrieved item as a DynamoDB attribute map,
+     *          or `null` if the item does not exist.
+     *
+     * @throws An error if the DynamoDB client fails to execute the command.
+     */
     async getItem(key: Record<string, any>) {
         const input: GetItemCommandInput = {
             TableName: this.tableName,
@@ -55,14 +97,22 @@ export class CategoriesDynamoDBClient {
         return result.Item || null
     }
 
-    async updateItem(params: {
-        key: Record<string, any>
-        updateExpression: string
-        expressionAttributeNames?: Record<string, string>
-        expressionAttributeValues?: Record<string, any>
-        conditionExpression?: string
-        returnValues?: string
-    }) {
+    /**
+     * Updates an item in the DynamoDB table with the specified parameters.
+     *
+     * @param params - The parameters required to update the item in the table.
+     * @param params.key - The primary key of the item to be updated.
+     * @param params.updateExpression - An expression that defines the attributes to be updated.
+     * @param params.expressionAttributeNames - A map of attribute names to be used in the update expression.
+     * @param params.expressionAttributeValues - A map of attribute values to be used in the update expression.
+     * @param params.conditionExpression - A condition that must be satisfied for the update to proceed (optional).
+     * @param params.returnValues - Specifies what is returned in the response. Defaults to 'ALL_NEW'.
+     *
+     * @returns The updated attributes of the item, or `null` if no attributes are returned.
+     *
+     * @throws An error if the update operation fails.
+     */
+    async updateItem(params: updateItemParams) {
         const input: UpdateItemCommandInput = {
             TableName: this.tableName,
             Key: params.key,
@@ -70,28 +120,47 @@ export class CategoriesDynamoDBClient {
             ExpressionAttributeNames: params.expressionAttributeNames,
             ExpressionAttributeValues: params.expressionAttributeValues,
             ConditionExpression: params.conditionExpression,
-            ReturnValues: params.returnValues as ReturnValue || 'ALL_NEW',
+            ReturnValues: (params.returnValues as ReturnValue) || 'ALL_NEW',
         }
 
         const result = await this.client.send(new UpdateItemCommand(input))
         return result.Attributes || null
     }
 
-    async deleteItem(key: Record<string, any>, conditionExpression?: string) {
+    /**
+     * Deletes an item from the DynamoDB table.
+     *
+     * @param params - The parameters required to delete the item.
+     * @param params.key - The primary key of the item to delete.
+     * @param params.conditionExpression - A condition that must be satisfied for the delete operation to proceed.
+     *
+     * @throws An error if the delete operation fails.
+     */
+    async deleteItem(params: deleteItemParams) {
         const input: DeleteItemCommandInput = {
             TableName: this.tableName,
-            Key: key,
-            ConditionExpression: conditionExpression,
+            Key: params.key,
+            ConditionExpression: params.conditionExpression,
         }
 
         await this.client.send(new DeleteItemCommand(input))
     }
 
-    async query(params: {
-        keyConditionExpression: string
-        expressionAttributeNames?: Record<string, string>
-        expressionAttributeValues?: Record<string, any>
-    }): Promise<Record<string, AttributeValue>[]> {
+    /**
+     * Executes a query operation on the DynamoDB table using the provided parameters.
+     *
+     * @param params - The parameters for the query operation, including:
+     *   - `keyConditionExpression`: A string that specifies the condition for the query.
+     *   - `expressionAttributeNames`: An object mapping attribute names to placeholders.
+     *   - `expressionAttributeValues`: An object mapping attribute values to placeholders.
+     * @returns A promise that resolves to an array of records (items) retrieved from the table.
+     *          If no items are found, an empty array is returned.
+     *
+     * @throws An error if the query operation fails.
+     */
+    async query(
+        params: queryParams,
+    ): Promise<Record<string, AttributeValue>[]> {
         const input: QueryCommandInput = {
             TableName: this.tableName,
             KeyConditionExpression: params.keyConditionExpression,

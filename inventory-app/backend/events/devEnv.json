@@ -13,5 +13,10 @@
         "AppName": "inventory-app",
         "BaseUrl": "'*'",
         "Environment": "staging"
+    },
+    "UpdateCategoryFunction": {
+        "CATEGORIES_TABLE": "staging-inventory-app-categories-table",
+        "ENVIRONMENT": "staging",
+        "REGION": "us-east-1"
     }
 }

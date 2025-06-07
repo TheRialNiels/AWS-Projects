@@ -49,11 +49,20 @@ Resources:
             SSESpecification:
                 SSEEnabled: true
             AttributeDefinitions:
+                - AttributeName: id
+                  AttributeType: S
                 - AttributeName: name
                   AttributeType: S
             KeySchema:
-                - AttributeName: name
+                - AttributeName: id
                   KeyType: HASH
+            GlobalSecondaryIndexes:
+                - IndexName: NameIndex
+                  KeySchema:
+                      - AttributeName: name
+                        KeyType: HASH
+                  Projection:
+                      ProjectionType: ALL
 
     ProductsTable:
         Type: AWS::DynamoDB::Table
@@ -92,6 +101,7 @@ Resources:
             Environment:
                 Variables:
                     CATEGORIES_TABLE: !Ref CategoriesTable
+                    CATEGORIES_GSI_INDEX: NameIndex
             Events:
                 ApiEvent:
                     Type: Api
@@ -197,6 +207,7 @@ Resources:
             Environment:
                 Variables:
                     CATEGORIES_TABLE: !Ref CategoriesTable
+                    CATEGORIES_GSI_INDEX: NameIndex
             Events:
                 ApiEvent:
                     Type: Api
@@ -296,6 +307,3 @@ Outputs:
     InventoryAppApiGw:
         Description: 'API Gateway endpoint URL'
         Value: !Sub 'https://${InventoryAppApiGw}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/'
-    CreateProductFunctionArn:
-        Description: 'Create Product Lambda Function ARN'
-        Value: !GetAtt CreateProductFunction.Arn

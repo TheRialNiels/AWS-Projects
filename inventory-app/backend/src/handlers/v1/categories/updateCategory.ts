@@ -1,8 +1,4 @@
-import {
-    categorySchema,
-    type createItemParams,
-    type queryParams,
-} from '@interfaces/categories.types'
+import { categorySchema, type queryParams, type updateItemParams } from '@interfaces/categories.types'
 import {
     createCORSHeaders,
     createPreflightResponse,
@@ -17,7 +13,6 @@ import { convertTextToCamelCase, isString } from '@lib/utils'
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
 import { categoriesEnvs } from '@handlers/v1/categories/lib/envs'
-import { generateUuid } from '@lib/packages/uuid'
 import { CategoriesDynamoDBClient } from './lib/dynamoDbClient'
 
 const dynamoDbConfig = {
@@ -36,7 +31,7 @@ export const handler = async (
     event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
     const origin = getOriginFromEvent(event)
-    const methods = ['POST', 'OPTIONS']
+    const methods = ['PATCH', 'OPTIONS']
     const { OK, BAD_REQUEST, INTERNAL_SERVER_ERROR } = httpStatusCodes
 
     // * Handle preflight OPTIONS request
@@ -44,9 +39,9 @@ export const handler = async (
         return createPreflightResponse(origin)
     }
 
-    // * Get the body payload from request
+    // * Get the body payload and id from request
     const body = JSON.parse(event.body || '{}')
-    body.id = body.id || generateUuid()
+    body.id = event.pathParameters?.id
 
     // * Trim whitespace
     isString(body.label) ? (body.label = body.label.trim()) : null
@@ -64,13 +59,13 @@ export const handler = async (
 
     try {
         // * Convert the label to camelCase
-        const camelCaseLabel = convertTextToCamelCase(body.label)
+        body.name = convertTextToCamelCase(body.label)
 
         // * Verify if the category already exists
         const query: queryParams = {
             keyConditionExpression: '#name = :name',
             expressionAttributeNames: { '#name': 'name' },
-            expressionAttributeValues: { ':name': { S: camelCaseLabel } },
+            expressionAttributeValues: { ':name': { S: body.name } },
         }
         const result = await dynamoDbClient.query(query)
 
@@ -87,32 +82,36 @@ export const handler = async (
         }
 
         // * Prepare the item to be inserted into DynamoDB
-        body.name = camelCaseLabel
-        const params: createItemParams = {
-            item: {
-                id: { S: body.id },
-                name: { S: body.name },
-                label: { S: body.label },
+        const params: updateItemParams = {
+            key: { id: { S: body.id } },
+            updateExpression: 'SET #name = :name, #label = :label',
+            expressionAttributeNames: {
+                '#name': 'name',
+                '#label': 'label',
             },
-            conditionExpression: 'attribute_not_exists(id)',
+            expressionAttributeValues: {
+                ':name': { S: body.name },
+                ':label': { S: body.label },
+            },
+            conditionExpression: 'attribute_exists(id)',
         }
 
-        // * Insert the item into DynamoDB
-        await dynamoDbClient.createItem(params)
+        // * Update item into DynamoDB
+        await dynamoDbClient.updateItem(params)
 
         // * Return success response
         return successResponse({
             statusCode: OK,
             additionalHeaders: createCORSHeaders(origin, [], methods),
-            message: 'Category created successfully',
+            message: 'Category updated successfully',
             responseData: body,
         })
-    } catch (err) {
+    } catch (err: any) {
         const errorMsg = String(err) || 'Unexpected error'
         return errorResponse({
-            statusCode: INTERNAL_SERVER_ERROR,
+            statusCode: err.$metadata.httpStatusCode || INTERNAL_SERVER_ERROR,
             additionalHeaders: createCORSHeaders(origin, [], methods),
-            message: 'Error creating category',
+            message: 'Error updating category',
             responseData: { message: errorMsg },
         })
     }
