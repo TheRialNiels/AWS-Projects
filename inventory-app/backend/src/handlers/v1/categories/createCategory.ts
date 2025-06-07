@@ -1,24 +1,21 @@
-import {
-    categorySchema,
-    type createItemParams,
-    type queryParams,
-} from '@interfaces/categories.types'
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import { categoryObj, categorySchema } from '@interfaces/categories.types'
+import { convertTextToCamelCase, isString } from '@lib/utils'
 import {
     createCORSHeaders,
     createPreflightResponse,
     getOriginFromEvent,
 } from '@lib/cors'
+import type { createItemParams, queryParams } from '@interfaces/shared.types'
 import {
     errorResponse,
     httpStatusCodes,
     successResponse,
 } from '@lib/httpResponse'
-import { convertTextToCamelCase, isString } from '@lib/utils'
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
+import { CategoriesDynamoDBClient } from './lib/dynamoDbClient'
 import { categoriesEnvs } from '@handlers/v1/categories/lib/envs'
 import { generateUuid } from '@lib/packages/uuid'
-import { CategoriesDynamoDBClient } from './lib/dynamoDbClient'
 
 const dynamoDbConfig = {
     region: categoriesEnvs.REGION,
@@ -45,7 +42,7 @@ export const handler = async (
     }
 
     // * Get the body payload from request
-    const body = JSON.parse(event.body || '{}')
+    const body: categoryObj = JSON.parse(event.body || '{}')
     body.id = body.id || generateUuid()
 
     // * Trim whitespace
@@ -68,8 +65,6 @@ export const handler = async (
 
         // * Verify if the category already exists
         const query: queryParams = {
-            keyConditionExpression: '#name = :name',
-            expressionAttributeNames: { '#name': 'name' },
             expressionAttributeValues: { ':name': { S: camelCaseLabel } },
         }
         const result = await dynamoDbClient.query(query)

@@ -1,4 +1,3 @@
-import { AttributeValue } from '@aws-sdk/client-dynamodb'
 import { z } from 'zod'
 
 export const categoryIdSchema = z.string().uuid()
@@ -18,39 +17,4 @@ export interface CategoriesDynamoDBConfig {
     region: string
     tableName: string
     gsiName?: string // * Optional GSI for queries by alternate keys
-}
-
-export interface createItemParams {
-    item: Record<string, any>
-    conditionExpression?: string
-}
-
-export interface updateItemParams {
-    key: Record<string, any>
-    updateExpression: string
-    expressionAttributeNames?: Record<string, string>
-    expressionAttributeValues?: Record<string, any>
-    conditionExpression?: string
-    returnValues?: string
-}
-
-export interface deleteItemParams {
-    key: Record<string, any>
-    conditionExpression?: string
-}
-
-export interface queryParams {
-    keyConditionExpression: string
-    expressionAttributeNames?: Record<string, string>
-    expressionAttributeValues?: Record<string, any>
-}
-
-export interface scanPageParams {
-    limit: number
-    lastEvaluatedKey?: Record<string, AttributeValue>
-}
-
-export interface scanPageResponse {
-    items: Record<string, AttributeValue>[]
-    lastKey?: Record<string, AttributeValue>
 }

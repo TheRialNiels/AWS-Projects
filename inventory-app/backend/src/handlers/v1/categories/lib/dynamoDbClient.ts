@@ -16,14 +16,15 @@ import {
     UpdateItemCommandInput,
 } from '@aws-sdk/client-dynamodb'
 import type {
-    CategoriesDynamoDBConfig,
     createItemParams,
     deleteItemParams,
     queryParams,
     scanPageParams,
     scanPageResponse,
     updateItemParams,
-} from '@interfaces/categories.types'
+} from '@interfaces/shared.types'
+
+import type { CategoriesDynamoDBConfig } from '@interfaces/categories.types'
 
 /**
  * A client for interacting with a DynamoDB table to manage categories.
@@ -153,11 +154,14 @@ export class CategoriesDynamoDBClient {
     /**
      * Executes a query operation on the DynamoDB table using the provided parameters.
      *
-     * @param params - The parameters for the query operation, including:
-     *   - `keyConditionExpression`: A string that specifies the condition for the query.
-     *   - `expressionAttributeNames`: An object mapping attribute names to placeholders.
-     *   - `expressionAttributeValues`: An object mapping attribute values to placeholders.
-     * @returns A promise that resolves to an array of records (items) retrieved from the table.
+     * @param params - The parameters for the query operation.
+     *   - `keyConditionExpression` (optional): A string that specifies the condition for the query.
+     *     Defaults to `#name = :name` if not provided.
+     *   - `expressionAttributeNames` (optional): A map of attribute names to substitute in the query.
+     *     Defaults to `{ '#name': 'name' }` if not provided.
+     *   - `expressionAttributeValues` (optional): A map of attribute values to substitute in the query.
+     *
+     * @returns A promise that resolves to an array of records (items) retrieved from the query.
      *          If no items are found, an empty array is returned.
      *
      * @throws An error if the query operation fails.
@@ -167,9 +171,13 @@ export class CategoriesDynamoDBClient {
     ): Promise<Record<string, AttributeValue>[]> {
         const input: QueryCommandInput = {
             TableName: this.tableName,
-            KeyConditionExpression: params.keyConditionExpression,
-            ExpressionAttributeNames: params.expressionAttributeNames,
-            ExpressionAttributeValues: params.expressionAttributeValues,
+            KeyConditionExpression:
+                params.keyConditionExpression || '#name = :name',
+            ExpressionAttributeNames: params.expressionAttributeNames || {
+                '#name': 'name',
+            },
+            ExpressionAttributeValues: params.expressionAttributeValues
+            ,
             IndexName: this.gsiName,
         }
 
@@ -187,8 +195,7 @@ export class CategoriesDynamoDBClient {
      * @returns items - The list of items retrieved from the scan.
      * @returns lastKey - The key to continue scanning from (for pagination), or undefined if there are no more items.
      */
-    async scanPage(params: scanPageParams
-    ): Promise<scanPageResponse> {
+    async scanPage(params: scanPageParams): Promise<scanPageResponse> {
         const input: ScanCommandInput = {
             TableName: this.tableName,
             ExclusiveStartKey: params.lastEvaluatedKey,
