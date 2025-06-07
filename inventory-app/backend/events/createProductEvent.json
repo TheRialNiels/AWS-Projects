@@ -1,6 +1,0 @@
-{
-    "body": "{ \"sku\": \"ab-123456\", \"name\": \"Example product\", \"category\": \"example\", \"quantity\": 10, \"price\": 199.99 }",
-    "headers": {
-        "Origin": "http://localhost:3000"
-    }
-}

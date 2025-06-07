@@ -5,6 +5,7 @@
         "REGION": "us-east-1"
     },
     "CreateProductFunction": {
+        "CATEGORIES_TABLE": "staging-inventory-app-categories-table",
         "ENVIRONMENT": "staging",
         "PRODUCTS_TABLE": "staging-inventory-app-products-table",
         "REGION": "us-east-1"

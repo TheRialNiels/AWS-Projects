@@ -280,7 +280,10 @@ Resources:
             AutoPublishAlias: live
             Environment:
                 Variables:
+                    CATEGORIES_TABLE: !Ref CategoriesTable
+                    CATEGORIES_GSI_INDEX: NameIndex
                     PRODUCTS_TABLE: !Ref ProductsTable
+                    PRODUCTS_GSI_INDEX: CategoryIndex
             Events:
                 ApiEvent:
                     Type: Api

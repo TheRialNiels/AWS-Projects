@@ -12,3 +12,17 @@ export const productSchema = z.object({
     quantity: z.number().int().nonnegative(),
     price: z.number().nonnegative(),
 })
+
+export interface productObj {
+    sku: string
+    name: string
+    category: string,
+    quantity: number
+    price: number
+}
+
+export interface ProductsDynamoDBConfig {
+    region: string
+    tableName: string
+    gsiName?: string // * Optional GSI for queries by alternate keys
+}
