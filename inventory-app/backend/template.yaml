@@ -137,6 +137,7 @@ Resources:
             Environment:
                 Variables:
                     CATEGORIES_TABLE: !Ref CategoriesTable
+                    CATEGORIES_GSI_INDEX: NameIndex
             Events:
                 ApiEvent:
                     Type: Api
