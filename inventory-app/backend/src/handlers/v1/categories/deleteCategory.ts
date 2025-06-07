@@ -1,5 +1,8 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { categoryObj, scanPageParams } from '@interfaces/categories.types'
+import {
+    categoryIdSchema,
+    deleteItemParams,
+} from '@interfaces/categories.types'
 import {
     createCORSHeaders,
     createPreflightResponse,
@@ -30,7 +33,7 @@ export const handler = async (
     event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
     const origin = getOriginFromEvent(event)
-    const methods = ['GET', 'OPTIONS']
+    const methods = ['DELETE', 'OPTIONS']
     const { OK, BAD_REQUEST, INTERNAL_SERVER_ERROR } = httpStatusCodes
 
     // * Handle preflight OPTIONS request
@@ -44,55 +47,47 @@ export const handler = async (
             statusCode: BAD_REQUEST,
             additionalHeaders: createCORSHeaders(origin, [], methods),
             message: 'Invalid request method',
-            responseData: { message: 'Only GET method is allowed' },
+            responseData: { message: 'Only DELETE method is allowed' },
         })
     }
 
-    // * Get the limit and lastKey from params
-    const limit = event.queryStringParameters?.limit
-        ? parseInt(event.queryStringParameters.limit)
-        : 10 // * Default limit
+    // * Get the id from request
+    const id = event.pathParameters?.id
 
-    const lastKeyParam = event.queryStringParameters?.lastKey || null
-    const lastEvaluatedKey = lastKeyParam ? JSON.parse(lastKeyParam) : undefined
+    // * Validate payload with schema
+    const schemaValidation = categoryIdSchema.safeParse(id)
+    if (!schemaValidation.success) {
+        return errorResponse({
+            statusCode: BAD_REQUEST,
+            additionalHeaders: createCORSHeaders(origin, [], methods),
+            message: 'Invalid request payload/parameters',
+            responseData: { message: schemaValidation.error },
+        })
+    }
 
     try {
-        // * Prepare the params to get the items from DynamoDB
-        const params: scanPageParams = {
-            limit,
-            lastEvaluatedKey,
+        // * Prepare the item to be deleted from DynamoDB
+        const params: deleteItemParams = {
+            key: { id: { S: id } },
+            conditionExpression: 'attribute_exists(id)',
         }
 
-        // * Scan items from DynamoDB
-        const results = await dynamoDbClient.scanPage(params)
-
-        // * Validate if the item was returned
-        if (!results) {
-            return errorResponse({
-                statusCode: BAD_REQUEST,
-                additionalHeaders: createCORSHeaders(origin, [], methods),
-                message: 'No categories found',
-            })
-        }
+        // * Delete item from DynamoDB
+        await dynamoDbClient.deleteItem(params)
 
         // * Return success response
-        const categories: categoryObj[] = results.items.map((item) => ({
-            id: item.id.S!,
-            name: item.name.S!,
-            label: item.label.S!,
-        }))
         return successResponse({
             statusCode: OK,
             additionalHeaders: createCORSHeaders(origin, [], methods),
-            message: 'Success',
-            responseData: { categories },
+            message: 'Category deleted successfully',
+            responseData: { id },
         })
     } catch (err: any) {
         const errorMsg = String(err) || 'Unexpected error'
         return errorResponse({
             statusCode: err.$metadata.httpStatusCode || INTERNAL_SERVER_ERROR,
             additionalHeaders: createCORSHeaders(origin, [], methods),
-            message: 'Error getting the categories',
+            message: 'Error deleting the category',
             responseData: { message: errorMsg },
         })
     }
