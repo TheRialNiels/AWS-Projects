@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent } from 'aws-lambda'
-import { envs } from '@lib/envs'
+import { envs } from '@lib/packages/envs'
 
 /**
  * Default headers allowed by AWS API Gateway

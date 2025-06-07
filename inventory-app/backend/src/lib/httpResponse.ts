@@ -1,5 +1,5 @@
 import type { APIGatewayProxyResult } from 'aws-lambda'
-import { BodyOptions } from '@interfaces/shared.types'
+import type { BodyOptions } from '@interfaces/shared.types'
 import { getValue } from './utils'
 
 /**
