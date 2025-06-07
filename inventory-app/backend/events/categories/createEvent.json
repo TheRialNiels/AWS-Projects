@@ -1,5 +1,5 @@
 {
-    "body": "{ \"name\": \"example\", \"label\": \"Example\" }",
+    "body": "{ \"label\": \"Example\" }",
     "headers": {
         "Origin": "http://localhost:3000"
     }
