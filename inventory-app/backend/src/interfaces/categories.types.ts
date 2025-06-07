@@ -1,3 +1,4 @@
+import { AttributeValue } from '@aws-sdk/client-dynamodb'
 import { z } from 'zod'
 
 export const categoryIdSchema = z.string().uuid()
@@ -42,4 +43,14 @@ export interface queryParams {
     keyConditionExpression: string
     expressionAttributeNames?: Record<string, string>
     expressionAttributeValues?: Record<string, any>
+}
+
+export interface scanPageParams {
+    limit: number
+    lastEvaluatedKey?: Record<string, AttributeValue>
+}
+
+export interface scanPageResponse {
+    items: Record<string, AttributeValue>[]
+    lastKey?: Record<string, AttributeValue>
 }

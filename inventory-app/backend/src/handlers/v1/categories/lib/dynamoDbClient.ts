@@ -10,6 +10,8 @@ import {
     QueryCommand,
     QueryCommandInput,
     ReturnValue,
+    ScanCommand,
+    ScanCommandInput,
     UpdateItemCommand,
     UpdateItemCommandInput,
 } from '@aws-sdk/client-dynamodb'
@@ -18,6 +20,8 @@ import type {
     createItemParams,
     deleteItemParams,
     queryParams,
+    scanPageParams,
+    scanPageResponse,
     updateItemParams,
 } from '@interfaces/categories.types'
 
@@ -171,5 +175,30 @@ export class CategoriesDynamoDBClient {
 
         const result = await this.client.send(new QueryCommand(input))
         return result.Items || []
+    }
+
+    /**
+     * Scans a page of items from the DynamoDB table.
+     *
+     * @param params - The parameters for the scan operation.
+     * @param params.lastEvaluatedKey - The key to start scanning from (used for pagination).
+     * @param params.limit - The maximum number of items to retrieve in the scan.
+     * @returns A promise that resolves to the scan result.
+     * @returns items - The list of items retrieved from the scan.
+     * @returns lastKey - The key to continue scanning from (for pagination), or undefined if there are no more items.
+     */
+    async scanPage(params: scanPageParams
+    ): Promise<scanPageResponse> {
+        const input: ScanCommandInput = {
+            TableName: this.tableName,
+            ExclusiveStartKey: params.lastEvaluatedKey,
+            Limit: params.limit,
+        }
+
+        const result = await this.client.send(new ScanCommand(input))
+        return {
+            items: result.Items || [],
+            lastKey: result.LastEvaluatedKey,
+        }
     }
 }
