@@ -3,6 +3,7 @@
     "headers": {
         "Origin": "http://localhost:3000"
     },
+    "httpMethod": "POST",
     "pathParameters": {
         "id": "6a82db4a-d384-4728-b369-286ca3130ed2"
     }

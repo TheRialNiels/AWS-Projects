@@ -91,9 +91,9 @@ export const handler = async (
             return errorResponse({
                 statusCode: BAD_REQUEST,
                 additionalHeaders: createCORSHeaders(origin, [], methods),
-                message: 'Product not found',
+                message: 'Category not found',
                 responseData: {
-                    message: `Product "${body.name}" does not exist`,
+                    message: `Category "${body.category}" does not exist`,
                 },
             })
         }
