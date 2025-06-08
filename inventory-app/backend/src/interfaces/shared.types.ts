@@ -15,7 +15,7 @@ export interface createItemParams {
 
 export interface updateItemParams {
     key: Record<string, any>
-    updateExpression: string
+    updateExpression?: string
     expressionAttributeNames?: Record<string, string>
     expressionAttributeValues?: Record<string, any>
     conditionExpression?: string

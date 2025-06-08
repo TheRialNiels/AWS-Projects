@@ -1,5 +1,5 @@
 import { productSchema, type productObj } from '@interfaces/products.types'
-import type { createItemParams, queryParams } from '@interfaces/shared.types'
+import type { queryParams, updateItemParams } from '@interfaces/shared.types'
 import {
     createCORSHeaders,
     createPreflightResponse,
@@ -39,7 +39,7 @@ export const handler = async (
     event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
     const origin = getOriginFromEvent(event)
-    const methods = ['POST', 'OPTIONS']
+    const methods = ['PATCH', 'OPTIONS']
     const { OK, BAD_REQUEST, INTERNAL_SERVER_ERROR } = httpStatusCodes
 
     // * Handle preflight OPTIONS request
@@ -59,8 +59,10 @@ export const handler = async (
         })
     }
 
-    // * Get the body payload from request
+    // * Get the body payload and id from request
     const body: productObj = JSON.parse(event.body || '{}')
+    body.sku = event.pathParameters?.id || ''
+
     // * Trim whitespace
     isString(body.sku) ? (body.sku = body.sku.trim()) : null
     isString(body.name) ? (body.name = body.name.trim()) : null
@@ -77,62 +79,52 @@ export const handler = async (
         })
     }
 
-    // * Validate if the category exists in Categories table
-    const query: queryParams = {
-        expressionAttributeValues: { ':name': { S: body.category } },
-    }
-    const result = await categoryDynamoDbClient.query(query)
-
-    // * Return an error if the item does not exist
-    if (!result || result.length === 0) {
-        return errorResponse({
-            statusCode: BAD_REQUEST,
-            additionalHeaders: createCORSHeaders(origin, [], methods),
-            message: 'Category not found',
-            responseData: {
-                message: `Category "${body.category}" does not exist`,
-            },
-        })
-    }
-
     try {
-        // * Prepare the item to be inserted into DynamoDB
-        const params: createItemParams = {
-            item: {
-                sku: { S: body.sku },
-                name: { S: body.name },
-                category: { S: body.category },
-                quantity: { N: String(body.quantity) },
-                price: { N: String(body.price) },
-            },
-            conditionExpression: 'attribute_not_exists(sku)',
+        // * Validate if the category exists in Categories table
+        const query: queryParams = {
+            expressionAttributeValues: { ':name': { S: body.category } },
+        }
+        const result = await categoryDynamoDbClient.query(query)
+
+        // * Return an error if the item does not exist
+        if (!result || result.length === 0) {
+            return errorResponse({
+                statusCode: BAD_REQUEST,
+                additionalHeaders: createCORSHeaders(origin, [], methods),
+                message: 'Product not found',
+                responseData: {
+                    message: `Product "${body.name}" does not exist`,
+                },
+            })
         }
 
-        // * Insert the item into DynamoDB
-        await dynamoDbClient.createItem(params)
+        // * Prepare the item to be updated into DynamoDB
+        const params: updateItemParams = {
+            key: { sku: { S: body.sku } },
+            expressionAttributeValues: {
+                ':name': { S: body.name },
+                ':category': { S: body.category },
+                ':quantity': { N: String(body.quantity) },
+                ':price': { N: String(body.price) },
+            },
+        }
+
+        // * Update item into DynamoDB
+        await dynamoDbClient.updateItem(params)
 
         // * Return success response
         return successResponse({
             statusCode: OK,
             additionalHeaders: createCORSHeaders(origin, [], methods),
-            message: 'Product created successfully',
+            message: 'Product updated successfully',
             responseData: body,
         })
     } catch (err: any) {
-        if (err.name === 'ConditionalCheckFailedException') {
-            return errorResponse({
-                statusCode: BAD_REQUEST,
-                additionalHeaders: createCORSHeaders(origin, [], methods),
-                message: 'Product with this SKU already exists',
-                responseData: {},
-            })
-        }
-
         const errorMsg = String(err) || 'Unexpected error'
         return errorResponse({
-            statusCode: INTERNAL_SERVER_ERROR,
+            statusCode: err.$metadata.httpStatusCode || INTERNAL_SERVER_ERROR,
             additionalHeaders: createCORSHeaders(origin, [], methods),
-            message: 'Error creating product',
+            message: 'Error updating product',
             responseData: { message: errorMsg },
         })
     }

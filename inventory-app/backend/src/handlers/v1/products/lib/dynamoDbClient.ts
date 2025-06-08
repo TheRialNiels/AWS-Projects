@@ -121,10 +121,17 @@ export class ProductsDynamoDBClient {
         const input: UpdateItemCommandInput = {
             TableName: this.tableName,
             Key: params.key,
-            UpdateExpression: params.updateExpression,
-            ExpressionAttributeNames: params.expressionAttributeNames,
+            UpdateExpression:
+                params.updateExpression ||
+                'SET #name = :name, #category = :category, #quantity = :quantity, #price = :price',
+            ExpressionAttributeNames: params.expressionAttributeNames || {
+                '#name': 'name',
+                '#category': 'category',
+                '#quantity': 'quantity',
+                '#price': 'price',
+            },
             ExpressionAttributeValues: params.expressionAttributeValues,
-            ConditionExpression: params.conditionExpression,
+            ConditionExpression: params.conditionExpression || 'attribute_exists(sku)',
             ReturnValues: (params.returnValues as ReturnValue) || 'ALL_NEW',
         }
 

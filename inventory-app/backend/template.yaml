@@ -26,7 +26,11 @@ Globals:
         Environment:
             Variables:
                 BASE_URL: !Ref BaseUrl
+                CATEGORIES_TABLE: !Ref CategoriesTable
+                CATEGORIES_GSI_INDEX: NameIndex
                 ENVIRONMENT: !Ref Environment
+                PRODUCTS_TABLE: !Ref ProductsTable
+                PRODUCTS_GSI_INDEX: CategoryIndex
                 REGION: !Sub ${AWS::Region}
 
 Resources:
@@ -98,10 +102,6 @@ Resources:
             Description: Create category record in database
             Handler: src/handlers/v1/categories/createCategory.handler
             AutoPublishAlias: live
-            Environment:
-                Variables:
-                    CATEGORIES_TABLE: !Ref CategoriesTable
-                    CATEGORIES_GSI_INDEX: NameIndex
             Events:
                 ApiEvent:
                     Type: Api
@@ -112,7 +112,6 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref CategoriesTable
-
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -134,10 +133,6 @@ Resources:
             Description: Get category record in database
             Handler: src/handlers/v1/categories/getCategory.handler
             AutoPublishAlias: live
-            Environment:
-                Variables:
-                    CATEGORIES_TABLE: !Ref CategoriesTable
-                    CATEGORIES_GSI_INDEX: NameIndex
             Events:
                 ApiEvent:
                     Type: Api
@@ -148,7 +143,6 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref CategoriesTable
-
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -170,10 +164,6 @@ Resources:
             Description: Get all categories records in database
             Handler: src/handlers/v1/categories/getCategories.handler
             AutoPublishAlias: live
-            Environment:
-                Variables:
-                    CATEGORIES_TABLE: !Ref CategoriesTable
-                    CATEGORIES_GSI_INDEX: NameIndex
             Events:
                 ApiEvent:
                     Type: Api
@@ -184,7 +174,6 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref CategoriesTable
-
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -206,10 +195,6 @@ Resources:
             Description: Update category record in database
             Handler: src/handlers/v1/categories/updateCategory.handler
             AutoPublishAlias: live
-            Environment:
-                Variables:
-                    CATEGORIES_TABLE: !Ref CategoriesTable
-                    CATEGORIES_GSI_INDEX: NameIndex
             Events:
                 ApiEvent:
                     Type: Api
@@ -220,7 +205,6 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref CategoriesTable
-
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -242,10 +226,6 @@ Resources:
             Description: Delete category record in database
             Handler: src/handlers/v1/categories/deleteCategory.handler
             AutoPublishAlias: live
-            Environment:
-                Variables:
-                    CATEGORIES_TABLE: !Ref CategoriesTable
-                    CATEGORIES_GSI_INDEX: NameIndex
             Events:
                 ApiEvent:
                     Type: Api
@@ -256,7 +236,6 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref CategoriesTable
-
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -278,12 +257,6 @@ Resources:
             Description: Create product record in database
             Handler: src/handlers/v1/products/createProduct.handler
             AutoPublishAlias: live
-            Environment:
-                Variables:
-                    CATEGORIES_TABLE: !Ref CategoriesTable
-                    CATEGORIES_GSI_INDEX: NameIndex
-                    PRODUCTS_TABLE: !Ref ProductsTable
-                    PRODUCTS_GSI_INDEX: CategoryIndex
             Events:
                 ApiEvent:
                     Type: Api
@@ -294,7 +267,6 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref ProductsTable
-
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -316,10 +288,6 @@ Resources:
             Description: Get product record in database
             Handler: src/handlers/v1/products/getProduct.handler
             AutoPublishAlias: live
-            Environment:
-                Variables:
-                    PRODUCTS_TABLE: !Ref ProductsTable
-                    PRODUCTS_GSI_INDEX: CategoryIndex
             Events:
                 ApiEvent:
                     Type: Api
@@ -351,10 +319,6 @@ Resources:
             Description: Get all products records in database
             Handler: src/handlers/v1/products/getProducts.handler
             AutoPublishAlias: live
-            Environment:
-                Variables:
-                    PRODUCTS_TABLE: !Ref ProductsTable
-                    PRODUCTS_GSI_INDEX: CategoryIndex
             Events:
                 ApiEvent:
                     Type: Api
@@ -365,7 +329,6 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref ProductsTable
-
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -387,12 +350,6 @@ Resources:
             Description: Update product record in database
             Handler: src/handlers/v1/products/updateProduct.handler
             AutoPublishAlias: live
-            Environment:
-                Variables:
-                    CATEGORIES_TABLE: !Ref CategoriesTable
-                    CATEGORIES_GSI_INDEX: NameIndex
-                    PRODUCTS_TABLE: !Ref ProductsTable
-                    PRODUCTS_GSI_INDEX: CategoryIndex
             Events:
                 ApiEvent:
                     Type: Api
@@ -403,7 +360,6 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref ProductsTable
-
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -425,10 +381,6 @@ Resources:
             Description: Delete product record in database
             Handler: src/handlers/v1/products/deleteProduct.handler
             AutoPublishAlias: live
-            Environment:
-                Variables:
-                    PRODUCTS_TABLE: !Ref ProductsTable
-                    PRODUCTS_GSI_INDEX: CategoryIndex
             Events:
                 ApiEvent:
                     Type: Api
@@ -439,7 +391,6 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref ProductsTable
-
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
