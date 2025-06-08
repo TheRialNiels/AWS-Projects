@@ -1,26 +1,26 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { categoryObj, categorySchema } from '@interfaces/categories.types'
-import { convertTextToCamelCase, isString } from '@lib/utils'
+import { categorySchema, type categoryObj } from '@interfaces/categories.types'
+import type { createItemParams, queryParams } from '@interfaces/shared.types'
 import {
     createCORSHeaders,
     createPreflightResponse,
     getOriginFromEvent,
 } from '@lib/cors'
-import type { createItemParams, queryParams } from '@interfaces/shared.types'
 import {
     errorResponse,
     httpStatusCodes,
     successResponse,
 } from '@lib/httpResponse'
+import { convertTextToCamelCase, isString } from '@lib/utils'
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
-import { CategoriesDynamoDBClient } from './lib/dynamoDbClient'
-import { categoriesEnvs } from '@handlers/v1/categories/lib/envs'
+import { envs } from '@lib/packages/envs'
 import { generateUuid } from '@lib/packages/uuid'
+import { CategoriesDynamoDBClient } from './lib/dynamoDbClient'
 
 const dynamoDbConfig = {
-    region: categoriesEnvs.REGION,
-    tableName: categoriesEnvs.CATEGORIES_TABLE,
-    gsiName: categoriesEnvs.CATEGORIES_GSI_INDEX,
+    region: envs.REGION,
+    tableName: envs.CATEGORIES_TABLE,
+    gsiName: envs.CATEGORIES_GSI_INDEX,
 }
 const dynamoDbClient = new CategoriesDynamoDBClient(dynamoDbConfig)
 
@@ -39,6 +39,18 @@ export const handler = async (
     // * Handle preflight OPTIONS request
     if (event.httpMethod === 'OPTIONS') {
         return createPreflightResponse(origin)
+    }
+
+    // * Validate the HTTP method
+    if (methods.indexOf(event.httpMethod) === -1) {
+        return errorResponse({
+            statusCode: BAD_REQUEST,
+            additionalHeaders: createCORSHeaders(origin, [], methods),
+            message: 'Invalid request method',
+            responseData: {
+                message: `Only ${methods.join(', ')} methods are allowed`,
+            },
+        })
     }
 
     // * Get the body payload from request

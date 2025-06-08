@@ -1,5 +1,7 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { categoryIdSchema, categoryObj } from '@interfaces/categories.types'
+import {
+    categoryIdSchema,
+    type categoryObj,
+} from '@interfaces/categories.types'
 import {
     createCORSHeaders,
     createPreflightResponse,
@@ -10,14 +12,15 @@ import {
     httpStatusCodes,
     successResponse,
 } from '@lib/httpResponse'
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
+import { envs } from '@lib/packages/envs'
 import { CategoriesDynamoDBClient } from './lib/dynamoDbClient'
-import { categoriesEnvs } from '@handlers/v1/categories/lib/envs'
 
 const dynamoDbConfig = {
-    region: categoriesEnvs.REGION,
-    tableName: categoriesEnvs.CATEGORIES_TABLE,
-    gsiName: categoriesEnvs.CATEGORIES_GSI_INDEX,
+    region: envs.REGION,
+    tableName: envs.CATEGORIES_TABLE,
+    gsiName: envs.CATEGORIES_GSI_INDEX,
 }
 const dynamoDbClient = new CategoriesDynamoDBClient(dynamoDbConfig)
 
@@ -36,6 +39,18 @@ export const handler = async (
     // * Handle preflight OPTIONS request
     if (event.httpMethod === 'OPTIONS') {
         return createPreflightResponse(origin)
+    }
+
+    // * Validate the HTTP method
+    if (methods.indexOf(event.httpMethod) === -1) {
+        return errorResponse({
+            statusCode: BAD_REQUEST,
+            additionalHeaders: createCORSHeaders(origin, [], methods),
+            message: 'Invalid request method',
+            responseData: {
+                message: `Only ${methods.join(', ')} methods are allowed`,
+            },
+        })
     }
 
     // * Get the body payload and id from request

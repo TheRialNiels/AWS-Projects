@@ -1,9 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import {
-    categoryIdSchema,
-    deleteItemParams,
-} from '@interfaces/categories.types'
-import {
     createCORSHeaders,
     createPreflightResponse,
     getOriginFromEvent,
@@ -15,12 +11,14 @@ import {
 } from '@lib/httpResponse'
 
 import { CategoriesDynamoDBClient } from './lib/dynamoDbClient'
-import { categoriesEnvs } from '@handlers/v1/categories/lib/envs'
+import { categoryIdSchema } from '@interfaces/categories.types'
+import type { deleteItemParams } from '@interfaces/shared.types'
+import { envs } from '@lib/packages/envs'
 
 const dynamoDbConfig = {
-    region: categoriesEnvs.REGION,
-    tableName: categoriesEnvs.CATEGORIES_TABLE,
-    gsiName: categoriesEnvs.CATEGORIES_GSI_INDEX,
+    region: envs.REGION,
+    tableName: envs.CATEGORIES_TABLE,
+    gsiName: envs.CATEGORIES_GSI_INDEX,
 }
 const dynamoDbClient = new CategoriesDynamoDBClient(dynamoDbConfig)
 
@@ -47,7 +45,9 @@ export const handler = async (
             statusCode: BAD_REQUEST,
             additionalHeaders: createCORSHeaders(origin, [], methods),
             message: 'Invalid request method',
-            responseData: { message: 'Only DELETE method is allowed' },
+            responseData: {
+                message: `Only ${methods.join(', ')} methods are allowed`,
+            },
         })
     }
 
