@@ -80,9 +80,18 @@ export const handler = async (
             statusCode: OK,
             additionalHeaders: createCORSHeaders(origin, [], methods),
             message: 'Product deleted successfully',
-            responseData: { id: sku },
+            responseData: { sku },
         })
     } catch (err: any) {
+        if (err.name === 'ConditionalCheckFailedException') {
+            return errorResponse({
+                statusCode: BAD_REQUEST,
+                additionalHeaders: createCORSHeaders(origin, [], methods),
+                message: `Product with the SKU "${sku}" does not exist`,
+                responseData: { sku },
+            })
+        }
+
         const errorMsg = String(err) || 'Unexpected error'
         return errorResponse({
             statusCode: err.$metadata.httpStatusCode || INTERNAL_SERVER_ERROR,

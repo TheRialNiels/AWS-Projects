@@ -83,6 +83,15 @@ export const handler = async (
             responseData: { id },
         })
     } catch (err: any) {
+        if (err.name === 'ConditionalCheckFailedException') {
+            return errorResponse({
+                statusCode: BAD_REQUEST,
+                additionalHeaders: createCORSHeaders(origin, [], methods),
+                message: `Category with the id "${id}" does not exist`,
+                responseData: { id },
+            })
+        }
+
         const errorMsg = String(err) || 'Unexpected error'
         return errorResponse({
             statusCode: err.$metadata.httpStatusCode || INTERNAL_SERVER_ERROR,

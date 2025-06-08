@@ -124,7 +124,7 @@ export const handler = async (
                 statusCode: BAD_REQUEST,
                 additionalHeaders: createCORSHeaders(origin, [], methods),
                 message: 'Product with this SKU already exists',
-                responseData: {},
+                responseData: body,
             })
         }
 
