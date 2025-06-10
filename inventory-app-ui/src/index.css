@@ -8,9 +8,14 @@
   --color-primary: #f9fafb;
   --color-primary-100: #f3f4f6;
   --color-primary-200: #e5e7eb;
-  --color-primary-400: #9CA3AF;
+  --color-primary-400: #9ca3af;
   --color-primary-500: #6b7280;
+  --color-primary-dark-600: #4b5563;
   --color-primary-dark-700: #374151;
   --color-primary-dark-800: #1f2937;
   --color-primary-dark-900: #111827;
+}
+
+.header-h1 {
+  @apply text-2xl font-bold;
 }

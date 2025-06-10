@@ -41,7 +41,7 @@ export function MainSidebar() {
       aria-label="Sidebar"
     >
       <SidebarItems>
-        <SidebarItemGroup>
+        <SidebarItemGroup className="flex flex-col gap-2">
           {links.map((link) => (
             <MainLink key={link.to} to={link.to} icon={link.icon}>
               {link.label}
