@@ -8,16 +8,16 @@ import {
   TableRow,
 } from 'flowbite-react'
 
+import { Category } from '../../routes/categories'
 import { HiOutlinePencilAlt } from 'react-icons/hi'
 import { HiOutlineTrash } from 'react-icons/hi'
-import { Product } from '../../routes/products'
 
 interface Props {
   headCells: string[]
-  data: Product[]
+  data: Category[]
 }
 
-export function ProductsTable(props: Props) {
+export function CategoriesTable(props: Props) {
   const btnParams = {
     class:
       'text-primary-500! hover:bg-primary-100 focus:ring-primary-200 dark:text-primary-400! dark:hover:bg-primary-dark-700! dark:focus:ring-primary-dark-700 w-10 cursor-pointer rounded-lg border-none p-2.5 text-sm focus:ring-2 focus:outline-none',
@@ -40,16 +40,13 @@ export function ProductsTable(props: Props) {
         <TableBody className="divide-y">
           {props.data.map((item) => (
             <TableRow
-              key={item.sku}
+              key={item.id}
               className="bg-primary dark:border-primary-dark-700 dark:bg-primary-dark-800"
             >
               <TableCell className="text-primary-dark-900 dark:text-primary font-medium whitespace-nowrap">
-                {item.sku}
+                {item.label}
               </TableCell>
               <TableCell> {item.name}</TableCell>
-              <TableCell>{item.category}</TableCell>
-              <TableCell>{item.quantity}</TableCell>
-              <TableCell>${item.price}</TableCell>
 
               <TableCell className="justify-left flex items-center gap-2">
                 <Button

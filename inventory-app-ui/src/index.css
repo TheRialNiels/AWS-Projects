@@ -16,6 +16,10 @@
   --color-primary-dark-900: #111827;
 }
 
+aside > div {
+    @apply bg-transparent!
+}
+
 .header-h1 {
   @apply text-2xl font-bold;
 }

@@ -13,7 +13,7 @@ export function MainNavbar() {
   return (
     <Navbar
       fluid
-      className="bg-primary dark:bg-primary-dark-800 border-primary-200 dark:border-primary-dark-700 fixed top-0 z-50 w-full border-b px-3!"
+      className="bg-primary-200 dark:bg-primary-dark-800 border-primary-400 dark:border-primary-dark-700 fixed top-0 z-50 w-full border-b px-3!"
     >
       <NavbarBrand as="div">
         <Link to="/products" className="self-center px-2 py-1 text-xl font-semibold whitespace-nowrap dark:text-primary">
