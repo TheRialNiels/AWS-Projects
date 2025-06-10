@@ -15,7 +15,7 @@ function RootComponent() {
 
       <MainSidebar />
 
-      <main className="flex min-h-screen flex-col items-center justify-start bg-white py-15 sm:ml-64 dark:bg-primary-dark-900">
+      <main className="flex min-h-screen flex-col items-center justify-start bg-primary py-15 sm:ml-64 dark:bg-primary-dark-900">
         {/* Background pattern */}
         <div className="absolute inset-0 size-full">
           <div className="relative h-full w-full select-none">

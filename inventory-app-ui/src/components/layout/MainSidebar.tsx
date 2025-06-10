@@ -1,3 +1,4 @@
+import { ElementType, ReactNode } from 'react'
 import {
   Sidebar,
   SidebarItem,
@@ -7,8 +8,32 @@ import {
 
 import { BiSolidCategoryAlt } from 'react-icons/bi'
 import { HiShoppingBag } from 'react-icons/hi'
+import { Link } from '@tanstack/react-router'
+
+function MainLink({
+  to,
+  icon,
+  children,
+}: {
+  to: string
+  icon: any
+  children: ReactNode
+}) {
+  return (
+    <Link to={to}>
+      <SidebarItem as="span" icon={icon}>
+        {children}
+      </SidebarItem>
+    </Link>
+  )
+}
 
 export function MainSidebar() {
+  const links: { to: string; icon: ElementType; label: string }[] = [
+    { to: '/products', icon: HiShoppingBag, label: 'Products' },
+    { to: '/categories', icon: BiSolidCategoryAlt, label: 'Categories' },
+  ]
+
   return (
     <Sidebar
       as="aside"
@@ -17,12 +42,11 @@ export function MainSidebar() {
     >
       <SidebarItems>
         <SidebarItemGroup>
-          <SidebarItem href="#" icon={HiShoppingBag}>
-            Products
-          </SidebarItem>
-          <SidebarItem href="#" icon={BiSolidCategoryAlt}>
-            Categories
-          </SidebarItem>
+          {links.map((link) => (
+            <MainLink key={link.to} to={link.to} icon={link.icon}>
+              {link.label}
+            </MainLink>
+          ))}
         </SidebarItemGroup>
       </SidebarItems>
     </Sidebar>
