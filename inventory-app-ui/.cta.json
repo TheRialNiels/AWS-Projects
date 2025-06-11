@@ -6,8 +6,10 @@
   "packageManager": "npm",
   "git": true,
   "version": 1,
+  "addOns": true,
   "framework": "react-cra",
   "chosenAddOns": [
-    "eslint"
+    "eslint",
+    "shadcn"
   ]
 }
