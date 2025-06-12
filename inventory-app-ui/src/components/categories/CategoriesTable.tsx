@@ -2,7 +2,13 @@
 
 import * as React from 'react'
 
-import { ArrowUpDown, SquarePen, Trash2 } from 'lucide-react'
+import {
+  ArrowUpDown,
+  SquarePen,
+  SquarePlus,
+  SquarePlusIcon,
+  Trash2,
+} from 'lucide-react'
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -29,6 +35,56 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 
 const data: Categories[] = [
+  {
+    id: 'm5gr84i9',
+    name: 'categoryOne',
+    label: 'Category One',
+  },
+  {
+    id: 'm5gr84i0',
+    name: 'categoryTwo',
+    label: 'Category two',
+  },
+  {
+    id: 'm5gr84i9',
+    name: 'categoryOne',
+    label: 'Category One',
+  },
+  {
+    id: 'm5gr84i0',
+    name: 'categoryTwo',
+    label: 'Category two',
+  },
+  {
+    id: 'm5gr84i9',
+    name: 'categoryOne',
+    label: 'Category One',
+  },
+  {
+    id: 'm5gr84i0',
+    name: 'categoryTwo',
+    label: 'Category two',
+  },
+  {
+    id: 'm5gr84i9',
+    name: 'categoryOne',
+    label: 'Category One',
+  },
+  {
+    id: 'm5gr84i0',
+    name: 'categoryTwo',
+    label: 'Category two',
+  },
+  {
+    id: 'm5gr84i9',
+    name: 'categoryOne',
+    label: 'Category One',
+  },
+  {
+    id: 'm5gr84i0',
+    name: 'categoryTwo',
+    label: 'Category two',
+  },
   {
     id: 'm5gr84i9',
     name: 'categoryOne',
@@ -79,7 +135,7 @@ export const columns: ColumnDef<Categories>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          className='cursor-pointer'
+          className="cursor-pointer"
         >
           Name
           <ArrowUpDown />
@@ -95,7 +151,7 @@ export const columns: ColumnDef<Categories>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          className='cursor-pointer'
+          className="cursor-pointer"
         >
           Label
           <ArrowUpDown />
@@ -110,28 +166,31 @@ export const columns: ColumnDef<Categories>[] = [
     id: 'actions',
     header: () => <div className="text-left">Actions</div>,
     cell: ({ row }) => {
-      console.log('🚀 ~ row:', row)
-      //   const payment = row.original
+      const category = row.original
+      console.log('🚀 ~ category:', category)
 
       return (
         <div className="inline-flex gap-3">
           <Button
             variant="secondary"
             size="icon"
-            className="size-8 cursor-pointer"
+            className="table-icon-button"
+            title="Edit record"
           >
             <SquarePen />
           </Button>
           <Button
             variant="secondary"
             size="icon"
-            className="size-8 cursor-pointer"
+            className="table-icon-button"
+            title="Delete record"
           >
             <Trash2 />
           </Button>
         </div>
       )
     },
+    size: 125,
     enableSorting: false,
     enableHiding: false,
   },
@@ -168,7 +227,7 @@ export function MainTable() {
   return (
     <div className="w-full pt-4">
       <div className="bg-card text-card-foreground shadow-primary rounded-md border p-4 shadow-xs">
-        <div className="flex items-center">
+        <div className="flex items-center justify-between h-14 pb-4">
           <Input
             placeholder="Filter categories..."
             value={(table.getColumn('label')?.getFilterValue() as string) ?? ''}
@@ -177,6 +236,18 @@ export function MainTable() {
             }
             className="main-input max-w-sm"
           />
+
+          <div className='inline-flex gap-3 items-start h-full'>
+            <Button variant="secondary" className="cursor-pointer">
+              <SquarePlus />
+              Delete
+            </Button>
+
+            <Button className="cursor-pointer">
+              <SquarePlus />
+              Add
+            </Button>
+          </div>
         </div>
         <Table>
           <TableHeader>
@@ -184,7 +255,14 @@ export function MainTable() {
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      style={
+                        header.column.id === 'actions'
+                          ? { width: `${header.getSize()}px` }
+                          : undefined
+                      }
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
