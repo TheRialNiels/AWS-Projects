@@ -4,17 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-body {
-  font-family: Inter, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family:
-    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-}
-
 :root {
   --background: hsl(221.74 40.35% 11.18%);
   --foreground: hsl(225 9.52% 91.76%);
@@ -103,6 +92,17 @@ code {
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+body {
+  font-family: Inter, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -110,4 +110,12 @@ code {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.title {
+  @apply border-primary w-full border-b-2 pb-2 text-left text-2xl font-bold tracking-widest;
+}
+
+.main-button {
+  @apply ring-offset-background focus-visible:ring-ring inline-flex h-10 cursor-pointer items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50;
 }

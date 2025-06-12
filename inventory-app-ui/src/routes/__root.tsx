@@ -8,8 +8,8 @@ export const Route = createRootRoute({
     <>
       <Navbar />
 
-      <main className="min-h-screen bg-background px-4 py-24">
-        <div className="relative flex w-full max-w-5xl flex-col items-center justify-center gap-12">
+      <main className="bg-background min-h-screen px-4 py-10">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-start">
           <Outlet />
         </div>
       </main>

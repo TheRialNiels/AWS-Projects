@@ -23,7 +23,7 @@ function Links() {
         <Link
           key={link.label}
           to={link.to}
-          className="hover:text-sidebar-primary-foreground hover:bg-sidebar-primary rounded-md px-3 py-2"
+          className="main-button hover:bg-primary hover:text-primary-foreground"
         >
           {link.label}
         </Link>
@@ -45,7 +45,7 @@ function Logout({
       size={size}
       className={clsx(
         className,
-        'hover:bg-sidebar-primary-foreground hover:text-sidebar bg-sidebar-primary text-sidebar-primary-foreground cursor-pointer rounded-md px-3 py-2',
+        'main-button bg-primary text-primary-foreground hover:bg-primary/90',
       )}
     >
       Logout
@@ -56,7 +56,7 @@ function Logout({
 export function Navbar() {
   return (
     <header className="bg-sidebar text-sidebar-foreground sticky top-0 z-50 w-full border-b px-4 py-3">
-      <div className="mx-auto flex max-w-7xl items-center justify-between">
+      <div className="mx-auto flex max-w-6xl items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-lg font-bold">Inventory App</span>
         </div>

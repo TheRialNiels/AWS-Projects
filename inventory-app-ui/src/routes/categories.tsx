@@ -7,7 +7,9 @@ export const Route = createFileRoute('/categories')({
 function RouteComponent() {
   return (
     <>
-                categories
+      <h1 className="title">
+        Categories
+      </h1>
     </>
   )
 }
