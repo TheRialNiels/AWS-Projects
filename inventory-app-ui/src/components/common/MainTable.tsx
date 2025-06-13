@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@components/ui/table'
 import {
   flexRender,
   getCoreRowModel,
@@ -22,19 +22,24 @@ import {
   type SortingState,
   type VisibilityState,
 } from '@tanstack/react-table'
-
 import { useState } from 'react'
-import { DataTablePagination } from './DataTablePagination'
-import { DataTableToolbar } from './DataTableToolbar'
+import { MainTablePagination } from '@components/common/MainTablePagination'
+import { MainTableToolbar } from '@components/common/MainTableToolbar'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  filterColumn?: string
+  filterPlaceholder?: string
+  toolbarActions?: React.ReactNode
 }
 
-export function MainTable2<TData, TValue>({
+export function MainTable<TData, TValue>({
   columns,
   data,
+  filterColumn = 'label',
+  filterPlaceholder = 'Filter...',
+  toolbarActions,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -70,38 +75,41 @@ export function MainTable2<TData, TValue>({
 
   return (
     <div className="main-table">
-      <DataTableToolbar table={table} />
+      <MainTableToolbar
+        table={table}
+        filterColumn={filterColumn}
+        filterPlaceholder={filterPlaceholder}
+        actions={toolbarActions}
+      />
 
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    style={
-                      header.column.id === 'actions' ||
-                      header.column.id === 'select'
-                        ? { width: `${header.getSize()}px` }
-                        : undefined
-                    }
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                )
-              })}
+              {headerGroup.headers.map((header) => (
+                <TableHead
+                  key={header.id}
+                  colSpan={header.colSpan}
+                  style={
+                    header.column.id === 'actions' ||
+                    header.column.id === 'select'
+                      ? { width: `${header.getSize()}px` }
+                      : undefined
+                  }
+                >
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                </TableHead>
+              ))}
             </TableRow>
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
+          {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
@@ -124,7 +132,7 @@ export function MainTable2<TData, TValue>({
         </TableBody>
       </Table>
 
-      <DataTablePagination table={table} />
+      <MainTablePagination table={table} />
     </div>
   )
 }

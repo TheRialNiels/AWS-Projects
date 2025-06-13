@@ -2,13 +2,13 @@
 
 import { SquarePen, Trash2 } from 'lucide-react'
 
-import { Button } from '../ui/button'
-import type { Category } from '../../data/schema'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '@components/ui/button'
+import type { Category } from './schema'
+import { Checkbox } from '@components/ui/checkbox'
 import type { ColumnDef } from '@tanstack/react-table'
-import { DataTableColumnHeader } from './DataTableColumnHeader'
+import { MainTableColumnHeader } from '@components/common/MainTableColumnHeader'
 
-export const columns: ColumnDef<Category>[] = [
+export const categoriesColumns: ColumnDef<Category>[] = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -37,7 +37,7 @@ export const columns: ColumnDef<Category>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Name" />
+      <MainTableColumnHeader column={column} title="Name" />
     ),
     cell: ({ row }) => {
       return <div className="flex gap-2">{row.getValue('name')}</div>
@@ -46,7 +46,7 @@ export const columns: ColumnDef<Category>[] = [
   {
     accessorKey: 'label',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Label" />
+      <MainTableColumnHeader column={column} title="Label" />
     ),
     cell: ({ row }) => {
       return (

@@ -4,11 +4,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@components/ui/dropdown-menu'
 
-import { Button } from '@/components/ui/button'
+import { Button } from '@components/ui/button'
 import type { Column } from '@tanstack/react-table'
-import { cn } from '@/lib/utils'
+import { cn } from '@lib/utils'
 
 interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -16,7 +16,7 @@ interface DataTableColumnHeaderProps<TData, TValue>
   title: string
 }
 
-export function DataTableColumnHeader<TData, TValue>({
+export function MainTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
