@@ -112,12 +112,20 @@ code {
   }
 }
 
+button[data-slot='dialog-close'] {
+  @apply pointer-events-auto! cursor-pointer;
+}
+
 .title {
   @apply border-primary w-full border-b-2 pb-2 text-left text-2xl font-bold tracking-widest;
 }
 
 .main-button {
   @apply ring-offset-background focus-visible:ring-ring inline-flex h-10 cursor-pointer items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50;
+}
+
+.main-form-input {
+  @apply disabled:pointer-events-auto disabled:cursor-not-allowed;
 }
 
 .main-table {

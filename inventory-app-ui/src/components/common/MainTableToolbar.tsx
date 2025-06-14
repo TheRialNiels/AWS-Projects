@@ -7,7 +7,7 @@ import { X } from 'lucide-react'
 
 export interface MainTableToolbarProps<TData> {
   table: Table<TData>
-  filterColumn?: string
+  filterColumn: string
   filterPlaceholder?: string
   onFilterChange?: (value: string) => void
   actions?: React.ReactNode
@@ -15,12 +15,12 @@ export interface MainTableToolbarProps<TData> {
 
 export function MainTableToolbar<TData>({
   table,
-  filterColumn = 'label',
+  filterColumn,
   filterPlaceholder = 'Filter...',
   onFilterChange,
   actions,
 }: MainTableToolbarProps<TData>) {
-  const column = table.getColumn(filterColumn)
+  const column = table.getColumn(filterColumn ?? '')
   const filterValue = (column?.getFilterValue() as string) ?? ''
   const isFiltered = table.getState().columnFilters.length > 0
 

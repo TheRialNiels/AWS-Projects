@@ -10,8 +10,6 @@ export const Route = createFileRoute('/categories')({
 function RouteComponent() {
   const { data, isError, isLoading } = useGetCategories()
   const categories = data?.responseData.categories ?? []
-  console.log('🚀 ~ RouteComponent ~ isLoading:', isLoading)
-  console.log('🚀 ~ RouteComponent ~ isError:', isError)
 
   return (
     <>

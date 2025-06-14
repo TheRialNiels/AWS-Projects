@@ -1,6 +1,8 @@
+import { CategoryDialog } from './CategoryDialog'
 import type { ColumnDef } from '@tanstack/react-table'
 import { MainTable } from '@components/common/MainTable'
 import { TableHeaderActions } from './TableHeaderActions'
+import { useState } from 'react'
 
 interface CategoriesTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -13,17 +15,25 @@ export function CategoriesTable<TData, TValue>({
   columns,
   isLoading,
   data,
-  isError
+  isError,
 }: CategoriesTableProps<TData, TValue>) {
+  const [dialogOpen, setDialogOpen] = useState(false)
+
   return (
-    <MainTable
-      columns={columns}
-      isLoading={isLoading}
-      data={data}
-      isError={isError}
-      filterColumn="label"
-      filterPlaceholder="Filter categories..."
-      toolbarActions={TableHeaderActions()}
-    />
+    <>
+      <CategoryDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+
+      <MainTable
+        columns={columns}
+        isLoading={isLoading}
+        data={data}
+        isError={isError}
+        filterColumn="label"
+        filterPlaceholder="Filter categories..."
+        toolbarActions={
+          <TableHeaderActions onAddCategory={() => setDialogOpen(true)} />
+        }
+      />
+    </>
   )
 }

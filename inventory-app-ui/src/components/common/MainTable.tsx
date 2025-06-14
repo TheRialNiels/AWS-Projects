@@ -28,12 +28,12 @@ import { MainTableToolbar } from '@components/common/MainTableToolbar'
 import { Skeleton } from '@components/ui/skeleton'
 import { TriangleAlert } from 'lucide-react'
 
-interface DataTableProps<TData, TValue> {
+interface MainTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   isLoading: boolean
   data: TData[]
+  filterColumn: string
   isError?: boolean
-  filterColumn?: string
   filterPlaceholder?: string
   toolbarActions?: React.ReactNode
 }
@@ -42,11 +42,11 @@ export function MainTable<TData, TValue>({
   columns,
   isLoading,
   data = [],
+  filterColumn,
   isError = false,
-  filterColumn = 'label',
   filterPlaceholder = 'Filter...',
   toolbarActions,
-}: DataTableProps<TData, TValue>) {
+}: MainTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])

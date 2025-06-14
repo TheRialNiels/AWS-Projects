@@ -2,6 +2,7 @@ import './styles.css'
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { Slide, ToastContainer, type ToastContainerProps } from 'react-toastify'
 
 import ReactDOM from 'react-dom/client'
 import { StrictMode } from 'react'
@@ -33,10 +34,27 @@ declare module '@tanstack/react-router' {
 const rootElement = document.getElementById('app')
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
+  const toastConfig: ToastContainerProps = {
+    position: 'top-right',
+    autoClose: 3000,
+    hideProgressBar: false,
+    newestOnTop: true,
+    closeOnClick: true,
+    rtl: false,
+    pauseOnFocusLoss: true,
+    draggable: true,
+    pauseOnHover: true,
+    theme: 'dark',
+    transition: Slide,
+    toastClassName: 'bg-background! text-foreground!',
+  }
+
   root.render(
     <StrictMode>
       <QueryClientProvider client={client}>
         <RouterProvider router={router} />
+
+        <ToastContainer {...toastConfig} />
       </QueryClientProvider>
     </StrictMode>,
   )
