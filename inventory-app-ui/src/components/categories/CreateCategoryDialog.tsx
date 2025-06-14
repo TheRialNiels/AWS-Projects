@@ -6,15 +6,18 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-import { CategoryForm } from './CategoryForm'
+import { CreateCategoryForm } from './CreateCategoryForm'
 import { useSuccessToast } from '@lib/toastify'
 
-interface CategoryDialogProps {
+interface CreateCategoryDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function CategoryDialog({ open, onOpenChange }: CategoryDialogProps) {
+export function CreateCategoryDialog({
+  open,
+  onOpenChange,
+}: CreateCategoryDialogProps) {
   const onSuccess = () => {
     // * Close dialog
     onOpenChange(false)
@@ -33,7 +36,7 @@ export function CategoryDialog({ open, onOpenChange }: CategoryDialogProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <CategoryForm handleOnSuccess={onSuccess} />
+        <CreateCategoryForm handleOnSuccess={onSuccess} />
       </DialogContent>
     </Dialog>
   )

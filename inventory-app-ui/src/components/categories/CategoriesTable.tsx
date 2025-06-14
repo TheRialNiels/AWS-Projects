@@ -1,5 +1,5 @@
-import { CategoryDialog } from './CategoryDialog'
 import type { ColumnDef } from '@tanstack/react-table'
+import { CreateCategoryDialog } from './CreateCategoryDialog'
 import { MainTable } from '@components/common/MainTable'
 import { TableHeaderActions } from './TableHeaderActions'
 import { useState } from 'react'
@@ -21,7 +21,7 @@ export function CategoriesTable<TData, TValue>({
 
   return (
     <>
-      <CategoryDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <CreateCategoryDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 
       <MainTable
         columns={columns}

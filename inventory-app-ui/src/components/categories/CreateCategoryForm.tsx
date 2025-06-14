@@ -6,11 +6,13 @@ import { useAppForm } from '@/components/ui/tanstack-form'
 import { useCallback } from 'react'
 import { useCreateCategory } from '@services/mutations/categoriesMutations'
 
-interface CategoryFormProps {
+interface CreateCategoryFormProps {
   handleOnSuccess: () => void
 }
 
-export function CategoryForm({ handleOnSuccess }: CategoryFormProps) {
+export function CreateCategoryForm({
+  handleOnSuccess,
+}: CreateCategoryFormProps) {
   const createCategoryMutation = useCreateCategory()
   const form = useAppForm({
     validators: { onChange: categorySchema },
@@ -45,7 +47,7 @@ export function CategoryForm({ handleOnSuccess }: CategoryFormProps) {
               <field.FormControl>
                 <Input
                   placeholder="Enter category name"
-                  className='main-form-input'
+                  className="main-form-input"
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
