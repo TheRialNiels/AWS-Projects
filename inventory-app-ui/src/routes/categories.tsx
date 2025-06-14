@@ -22,7 +22,12 @@ function RouteComponent() {
         categories as needed.
       </p>
 
-      <CategoriesTable data={categories} columns={categoriesColumns} />
+      <CategoriesTable
+        columns={categoriesColumns}
+        isLoading={isLoading}
+        data={categories}
+        isError={isError}
+      />
     </>
   )
 }
