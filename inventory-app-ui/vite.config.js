@@ -22,6 +22,8 @@ export default defineConfig({
       '@data': resolve(__dirname, './src/data'),
       '@lib': resolve(__dirname, './src/lib'),
       '@routes': resolve(__dirname, './src/routes'),
+      '@services': resolve(__dirname, './src/services'),
+      '@interfaces': resolve(__dirname, './src/interfaces'),
     },
   },
 })
