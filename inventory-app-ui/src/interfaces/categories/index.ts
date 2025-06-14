@@ -6,4 +6,14 @@ export const categorySchema = z.object({
   label: z.string(),
 })
 
+export interface GetCategoriesResponse {
+  message: string
+  responseData: ResponseData
+  success: boolean
+}
+
+export interface ResponseData {
+  categories: Category[]
+}
+
 export type Category = z.infer<typeof categorySchema>

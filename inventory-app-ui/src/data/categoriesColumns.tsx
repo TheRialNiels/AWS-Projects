@@ -3,7 +3,7 @@
 import { SquarePen, Trash2 } from 'lucide-react'
 
 import { Button } from '@components/ui/button'
-import type { Category } from './schema'
+import type { Category } from '@interfaces/categories'
 import { Checkbox } from '@components/ui/checkbox'
 import type { ColumnDef } from '@tanstack/react-table'
 import { MainTableColumnHeader } from '@components/common/MainTableColumnHeader'
