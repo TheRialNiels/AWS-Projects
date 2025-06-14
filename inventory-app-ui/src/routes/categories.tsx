@@ -1,5 +1,4 @@
 import { CategoriesTable } from '@components/categories/CategoriesTable'
-import { categoriesColumns } from '@data/categoriesColumns'
 import { createFileRoute } from '@tanstack/react-router'
 import { useGetCategories } from '@services/queries/categoriesQueries'
 
@@ -21,7 +20,6 @@ function RouteComponent() {
       </p>
 
       <CategoriesTable
-        columns={categoriesColumns}
         isLoading={isLoading}
         data={categories}
         isError={isError}
