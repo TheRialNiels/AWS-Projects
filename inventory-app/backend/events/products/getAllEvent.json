@@ -1,0 +1,9 @@
+{
+    "httpMethod": "GET",
+    "headers": {
+        "Origin": "http://localhost:3000"
+    },
+    "queryStringParameters": {
+        "limit": "10"
+    }
+}

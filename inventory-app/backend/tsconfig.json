@@ -1,0 +1,17 @@
+{
+    "extends": "./tsconfig.paths.json",
+    "compilerOptions": {
+      "esModuleInterop": true,
+      "forceConsistentCasingInFileNames": true,
+      "module":"esnext",
+      "moduleResolution":"node",
+      "noEmit": true,
+      "preserveConstEnums": true,
+      "skipLibCheck": true,
+      "sourceMap": false,
+      "strict": true,
+      "target": "es2022",
+    },
+    "include": ["src/**/*.ts", "tests/**/*.ts"],
+    "exclude": ["node_modules/**/*", ".esbuild/**/*"]
+  }

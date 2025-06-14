@@ -1,0 +1,6 @@
+{
+    "body": "{ \"sku\": \"ab-12345\", \"name\": true, \"category\": 123, \"quantity\": \"10\", \"price\": \"199.99\" }",
+    "headers": {
+        "Origin": "http://localhost:3000"
+    }
+}

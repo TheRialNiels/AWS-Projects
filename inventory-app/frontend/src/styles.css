@@ -1,0 +1,149 @@
+@import 'tailwindcss';
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: hsl(221.74 40.35% 11.18%);
+  --foreground: hsl(225 9.52% 91.76%);
+
+  --primary: hsl(226.15 11.5% 44.31%);
+  --primary-foreground: hsl(240 7.14% 94.51%);
+
+  --card: hsl(240 3.45% 5.69%);
+  --card-foreground: hsl(225 9.52% 91.76%);
+
+  --popover: hsl(0 0% 0%);
+  --popover-foreground: hsl(225 9.52% 91.76%);
+
+  --secondary: hsl(226.67 11.39% 15.49%);
+  --secondary-foreground: hsl(0 0% 100%);
+
+  --muted: hsl(0 0% 9.8%);
+  --muted-foreground: hsl(0 0% 50.2%);
+
+  --accent: hsl(226.67 11.39% 15.49%);
+  --accent-foreground: hsl(225 9.52% 91.76%);
+
+  --destructive: hsl(0 84.24% 60.2%);
+  --destructive-foreground: hsl(210 40% 98.04%);
+
+  --border: hsl(228 11.11% 8.82%);
+
+  --input: hsl(220 3.03% 19.41%);
+
+  --ring: hsl(226.15 11.5% 44.31%);
+
+  --chart-1: hsl(226.15 11.5% 44.31%);
+  --chart-2: hsl(226.36 11.46% 37.65%);
+  --chart-3: hsl(225.88 11.56% 28.82%);
+  --chart-4: hsl(227.14 11.29% 24.31%);
+  --chart-5: hsl(225 11.76% 20%);
+
+  --sidebar: hsl(0 0% 6.67%);
+  --sidebar-foreground: hsl(225 9.52% 91.76%);
+  --sidebar-primary: hsl(226.15 11.5% 44.31%);
+  --sidebar-primary-foreground: hsl(240 7.14% 94.51%);
+  --sidebar-accent: hsl(226.15 11.5% 44.31%);
+  --sidebar-accent-foreground: hsl(240 7.14% 94.51%);
+  --sidebar-border: hsl(228 11.11% 8.82%);
+  --sidebar-ring: hsl(226.15 11.5% 44.31%);
+
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+body {
+  font-family: Inter, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+button[data-slot='dialog-close'] {
+  @apply pointer-events-auto! cursor-pointer;
+}
+
+.title {
+  @apply border-primary w-full border-b-2 pb-2 text-left text-2xl font-bold tracking-widest;
+}
+
+.main-button {
+  @apply ring-offset-background focus-visible:ring-ring inline-flex h-10 cursor-pointer items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50;
+}
+
+.main-form-input {
+  @apply disabled:pointer-events-auto disabled:cursor-not-allowed;
+}
+
+.main-table {
+  @apply bg-card text-card-foreground shadow-primary mt-8 flex w-full flex-col gap-4 rounded-md border p-8 shadow-xs;
+}
+
+.table-toolbar-button {
+  @apply h-10 w-full cursor-pointer sm:h-full sm:w-auto;
+}
+
+.table-header-button {
+  @apply cursor-pointer;
+}
+
+.table-icon-button {
+  @apply size-8 cursor-pointer;
+}
+
+.table-pagination-button {
+  @apply size-8 cursor-pointer disabled:pointer-events-auto disabled:cursor-not-allowed;
+}

@@ -1,0 +1,67 @@
+{
+    "CreateCategoryFunction": {
+        "CATEGORIES_TABLE": "staging-inventory-app-categories-table",
+        "ENVIRONMENT": "staging",
+        "PRODUCTS_TABLE": "staging-inventory-app-products-table",
+        "REGION": "us-east-1"
+    },
+    "CreateProductFunction": {
+        "CATEGORIES_TABLE": "staging-inventory-app-categories-table",
+        "ENVIRONMENT": "staging",
+        "PRODUCTS_TABLE": "staging-inventory-app-products-table",
+        "REGION": "us-east-1"
+    },
+    "DeleteCategoryFunction": {
+        "CATEGORIES_TABLE": "staging-inventory-app-categories-table",
+        "ENVIRONMENT": "staging",
+        "PRODUCTS_TABLE": "staging-inventory-app-products-table",
+        "REGION": "us-east-1"
+    },
+    "DeleteProductFunction": {
+        "CATEGORIES_TABLE": "staging-inventory-app-categories-table",
+        "ENVIRONMENT": "staging",
+        "PRODUCTS_TABLE": "staging-inventory-app-products-table",
+        "REGION": "us-east-1"
+    },
+    "GetCategoriesFunction": {
+        "CATEGORIES_TABLE": "staging-inventory-app-categories-table",
+        "ENVIRONMENT": "staging",
+        "PRODUCTS_TABLE": "staging-inventory-app-products-table",
+        "REGION": "us-east-1"
+    },
+    "GetCategoryFunction": {
+        "CATEGORIES_TABLE": "staging-inventory-app-categories-table",
+        "ENVIRONMENT": "staging",
+        "PRODUCTS_TABLE": "staging-inventory-app-products-table",
+        "REGION": "us-east-1"
+    },
+    "GetProductFunction": {
+        "CATEGORIES_TABLE": "staging-inventory-app-categories-table",
+        "ENVIRONMENT": "staging",
+        "PRODUCTS_TABLE": "staging-inventory-app-products-table",
+        "REGION": "us-east-1"
+    },
+    "GetProductsFunction": {
+        "CATEGORIES_TABLE": "staging-inventory-app-categories-table",
+        "ENVIRONMENT": "staging",
+        "PRODUCTS_TABLE": "staging-inventory-app-products-table",
+        "REGION": "us-east-1"
+    },
+    "Parameters": {
+        "AppName": "inventory-app",
+        "BaseUrl": "'*'",
+        "Environment": "staging"
+    },
+    "UpdateCategoryFunction": {
+        "CATEGORIES_TABLE": "staging-inventory-app-categories-table",
+        "ENVIRONMENT": "staging",
+        "PRODUCTS_TABLE": "staging-inventory-app-products-table",
+        "REGION": "us-east-1"
+    },
+    "UpdateProductFunction": {
+        "CATEGORIES_TABLE": "staging-inventory-app-categories-table",
+        "ENVIRONMENT": "staging",
+        "PRODUCTS_TABLE": "staging-inventory-app-products-table",
+        "REGION": "us-east-1"
+    }
+}
