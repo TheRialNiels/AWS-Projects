@@ -25,10 +25,14 @@ import {
 import { useState } from 'react'
 import { MainTablePagination } from '@components/common/MainTablePagination'
 import { MainTableToolbar } from '@components/common/MainTableToolbar'
+import { Skeleton } from '@components/ui/skeleton'
+import { TriangleAlert } from 'lucide-react'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
+  isLoading: boolean
   data: TData[]
+  isError?: boolean
   filterColumn?: string
   filterPlaceholder?: string
   toolbarActions?: React.ReactNode
@@ -36,7 +40,9 @@ interface DataTableProps<TData, TValue> {
 
 export function MainTable<TData, TValue>({
   columns,
+  isLoading,
   data = [],
+  isError = false,
   filterColumn = 'label',
   filterPlaceholder = 'Filter...',
   toolbarActions,
@@ -109,7 +115,27 @@ export function MainTable<TData, TValue>({
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows.length ? (
+          {isLoading ? (
+            // 🔁 Show placeholder skeleton rows
+            [...Array(5)].map((_, index) => (
+              <TableRow key={`skeleton-${index}`}>
+                {columns.map((_, colIdx) => (
+                  <TableCell key={colIdx}>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : isError ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                <span className="text-muted-foreground flex items-center justify-center gap-1">
+                  <TriangleAlert />
+                  There was an error fetching the data
+                </span>
+              </TableCell>
+            </TableRow>
+          ) : table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
@@ -124,8 +150,11 @@ export function MainTable<TData, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+              <TableCell
+                colSpan={columns.length}
+                className="text-muted-foreground h-24 text-center"
+              >
+                No results
               </TableCell>
             </TableRow>
           )}
