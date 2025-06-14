@@ -1,75 +1,17 @@
 import { CategoriesTable } from '@components/categories/CategoriesTable'
-import type { Category } from '@data/schema'
 import { categoriesColumns } from '@data/categoriesColumns'
 import { createFileRoute } from '@tanstack/react-router'
+import { useGetCategories } from '@services/queries/categoriesQueries'
 
 export const Route = createFileRoute('/categories')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const data: Category[] = [
-    {
-      id: 'm5gr84i9',
-      name: 'categoryOne',
-      label: 'Category One',
-    },
-    {
-      id: 'm5gr84i0',
-      name: 'categoryTwo',
-      label: 'Category two',
-    },
-    {
-      id: 'm5gr84i9',
-      name: 'categoryOne',
-      label: 'Category One',
-    },
-    {
-      id: 'm5gr84i0',
-      name: 'categoryTwo',
-      label: 'Category two',
-    },
-    {
-      id: 'm5gr84i9',
-      name: 'categoryOne',
-      label: 'Category One',
-    },
-    {
-      id: 'm5gr84i0',
-      name: 'categoryTwo',
-      label: 'Category two',
-    },
-    {
-      id: 'm5gr84i9',
-      name: 'categoryOne',
-      label: 'Category One',
-    },
-    {
-      id: 'm5gr84i0',
-      name: 'categoryTwo',
-      label: 'Category two',
-    },
-    {
-      id: 'm5gr84i9',
-      name: 'categoryOne',
-      label: 'Category One',
-    },
-    {
-      id: 'm5gr84i0',
-      name: 'categoryTwo',
-      label: 'Category two',
-    },
-    {
-      id: 'm5gr84i9',
-      name: 'categoryOne',
-      label: 'Category One',
-    },
-    {
-      id: 'm5gr84i0',
-      name: 'categoryTwo',
-      label: 'Category two',
-    },
-  ]
+  const { data, isError, isLoading } = useGetCategories()
+  const categories = data?.responseData.categories ?? []
+  console.log('🚀 ~ RouteComponent ~ isLoading:', isLoading)
+  console.log('🚀 ~ RouteComponent ~ isError:', isError)
 
   return (
     <>
@@ -80,7 +22,7 @@ function RouteComponent() {
         categories as needed.
       </p>
 
-      <CategoriesTable data={data} columns={categoriesColumns} />
+      <CategoriesTable data={categories} columns={categoriesColumns} />
     </>
   )
 }

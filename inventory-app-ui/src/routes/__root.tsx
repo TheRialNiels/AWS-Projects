@@ -1,6 +1,7 @@
 import { Outlet, createRootRoute } from '@tanstack/react-router'
 
 import { Navbar } from '@components/layout/Navbar'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 export const Route = createRootRoute({
@@ -15,6 +16,7 @@ export const Route = createRootRoute({
       </main>
 
       <TanStackRouterDevtools />
+      <ReactQueryDevtools initialIsOpen={false} />
     </>
   ),
 })

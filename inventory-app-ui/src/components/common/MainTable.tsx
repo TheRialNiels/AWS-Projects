@@ -36,7 +36,7 @@ interface DataTableProps<TData, TValue> {
 
 export function MainTable<TData, TValue>({
   columns,
-  data,
+  data = [],
   filterColumn = 'label',
   filterPlaceholder = 'Filter...',
   toolbarActions,
