@@ -6,5 +6,5 @@ import { v4 as uuidv4 } from 'uuid'
  * @returns {string} A string representation of a UUID.
  */
 export const generateUuid = (): string => {
-    return uuidv4()
+  return uuidv4()
 }

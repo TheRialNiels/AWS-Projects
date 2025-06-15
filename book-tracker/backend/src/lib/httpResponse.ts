@@ -20,18 +20,18 @@ import { getValue } from './utils'
  * @property {number} GATEWAY_TIMEOUT - The server is acting as a gateway and cannot get a response in time. (504)
  */
 export const httpStatusCodes = {
-    OK: 200,
-    CREATED: 201,
-    NO_CONTENT: 204,
-    BAD_REQUEST: 400,
-    UNAUTHORIZED: 401,
-    FORBIDDEN: 403,
-    NOT_FOUND: 404,
-    TOO_MANY_REQUESTS: 429,
-    INTERNAL_SERVER_ERROR: 500,
-    NOT_IMPLEMENTED: 501,
-    SERVICE_UNAVAILABLE: 503,
-    GATEWAY_TIMEOUT: 504,
+  OK: 200,
+  CREATED: 201,
+  NO_CONTENT: 204,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  TOO_MANY_REQUESTS: 429,
+  INTERNAL_SERVER_ERROR: 500,
+  NOT_IMPLEMENTED: 501,
+  SERVICE_UNAVAILABLE: 503,
+  GATEWAY_TIMEOUT: 504,
 }
 
 /**
@@ -43,12 +43,12 @@ export const httpStatusCodes = {
  * @returns A record containing the headers for a JSON response.
  */
 const getJsonHeaders = (
-    additionalHeaders?: BodyOptions['additionalHeaders'],
+  additionalHeaders?: BodyOptions['additionalHeaders'],
 ): Record<string, string> => {
-    return {
-        'Content-Type': 'application/json',
-        ...getValue(() => additionalHeaders, {}),
-    }
+  return {
+    'Content-Type': 'application/json',
+    ...getValue(() => additionalHeaders, {}),
+  }
 }
 
 /**
@@ -64,15 +64,15 @@ const getJsonHeaders = (
  * @returns An object conforming to the `APIGatewayProxyResult` interface, containing the error response body, headers, and status code.
  */
 export const errorResponse = (options: BodyOptions): APIGatewayProxyResult => {
-    return {
-        statusCode: getValue(() => options.statusCode, 500),
-        headers: getJsonHeaders(options.additionalHeaders),
-        body: JSON.stringify({
-            message: getValue(() => options.message, 'Unexpected error'),
-            responseData: getValue(() => options.responseData, {}),
-            success: getValue(() => options.success, false),
-        }),
-    }
+  return {
+    statusCode: getValue(() => options.statusCode, 500),
+    headers: getJsonHeaders(options.additionalHeaders),
+    body: JSON.stringify({
+      message: getValue(() => options.message, 'Unexpected error'),
+      responseData: getValue(() => options.responseData, {}),
+      success: getValue(() => options.success, false),
+    }),
+  }
 }
 
 /**
@@ -88,15 +88,15 @@ export const errorResponse = (options: BodyOptions): APIGatewayProxyResult => {
  * @returns An object conforming to the `APIGatewayProxyResult` interface, containing the response body, headers, and status code.
  */
 export const successResponse = (
-    options: BodyOptions,
+  options: BodyOptions,
 ): APIGatewayProxyResult => {
-    return {
-        statusCode: getValue(() => options.statusCode, 200),
-        headers: getJsonHeaders(options.additionalHeaders),
-        body: JSON.stringify({
-            message: getValue(() => options.message, 'Success'),
-            responseData: getValue(() => options.responseData, {}),
-            success: getValue(() => options.success, true),
-        }),
-    }
+  return {
+    statusCode: getValue(() => options.statusCode, 200),
+    headers: getJsonHeaders(options.additionalHeaders),
+    body: JSON.stringify({
+      message: getValue(() => options.message, 'Success'),
+      responseData: getValue(() => options.responseData, {}),
+      success: getValue(() => options.success, true),
+    }),
+  }
 }

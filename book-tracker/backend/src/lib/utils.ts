@@ -8,12 +8,12 @@
  * @returns The retrieved value if successful and non-null, otherwise the default value.
  */
 export const getValue = <T>(valueToGet: () => T, defaultsTo: T): T => {
-    try {
-        const value = valueToGet()
-        return value != null ? value : defaultsTo
-    } catch (error) {
-        return defaultsTo
-    }
+  try {
+    const value = valueToGet()
+    return value != null ? value : defaultsTo
+  } catch (error) {
+    return defaultsTo
+  }
 }
 
 /**
@@ -23,7 +23,7 @@ export const getValue = <T>(valueToGet: () => T, defaultsTo: T): T => {
  * @returns `true` if the value is a string, otherwise `false`.
  */
 export const isString = (value: any): boolean => {
-    return typeof value === 'string'
+  return typeof value === 'string'
 }
 
 /**
@@ -37,10 +37,10 @@ export const isString = (value: any): boolean => {
  * @returns The camelCase formatted string.
  */
 export const convertTextToCamelCase = (text: string): string => {
-    return text
-        .toLowerCase()
-        .replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, (match, index) => {
-            if (+match === 0) return '' // * Remove spaces and numbers
-            return index === 0 ? match.toLowerCase() : match.toUpperCase()
-        })
+  return text
+    .toLowerCase()
+    .replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, (match, index) => {
+      if (+match === 0) return '' // * Remove spaces and numbers
+      return index === 0 ? match.toLowerCase() : match.toUpperCase()
+    })
 }
