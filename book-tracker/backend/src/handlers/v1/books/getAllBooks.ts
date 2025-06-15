@@ -75,10 +75,12 @@ export const handler = async (
     }
 
     // * Prepare the params to get the items from DynamoDB
-    const params: BooksScanPageParams = queriesSchemaValidation.data
+    const params = queriesSchemaValidation.data
 
     // * Scan items from DynamoDB
-    const { items, lastEvaluatedKey } = await dynamoDBClient.scanPage(params)
+    const { items, lastEvaluatedKey } = await dynamoDBClient.scanPage(
+      params as BooksScanPageParams,
+    )
 
     // * Validate if the items were returned
     if (!items) {
