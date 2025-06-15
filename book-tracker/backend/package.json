@@ -13,7 +13,10 @@
     "test": "npm run compile && npm run unit"
   },
   "dependencies": {
-    "esbuild": "^0.25.5"
+    "env-var": "^7.5.0",
+    "esbuild": "^0.25.5",
+    "uuid": "^11.1.0",
+    "zod": "^3.25.64"
   },
   "devDependencies": {
     "@jest/globals": "^29.2.0",

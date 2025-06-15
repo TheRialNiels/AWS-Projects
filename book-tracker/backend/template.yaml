@@ -11,6 +11,10 @@ Parameters:
     Type: String
     Default: "'*'"
     Description: Define the allow origin for CORS
+  AllowCredentials:
+    Type: String
+    Default: 'true'
+    Description: Boolean variable to specify credentials for CORS headers
   Environment:
     Type: String
     Default: prod
@@ -30,8 +34,12 @@ Globals:
     Environment:
       Variables:
         ALLOW_ORIGIN: !Ref AllowOrigin
-        ENVIRONMENT: !Ref Environment
+        ALLOW_CREDENTIALS: !Ref AllowCredentials
         REGION: !Sub ${AWS::Region}
+        ENVIRONMENT: !Ref Environment
+        BOOKS_TABLE: !Ref BooksTable
+        BOOKS_TITLE_GSI: TitleIndex
+        BOOKS_AUTHOR_GSI: AuthorIndex
 
 Resources:
   BookTrackerAppApiGW:
