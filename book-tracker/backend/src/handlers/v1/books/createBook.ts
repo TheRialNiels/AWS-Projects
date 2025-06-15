@@ -102,10 +102,10 @@ export const handler = async (
         title: { S: body.title },
         author: { S: body.author },
         status: { S: body.status },
-        rating: { N: String(body.rating) },
-        notes: { S: body.notes },
       },
     }
+    body.rating ? (params.item.rating = { N: String(body.rating) }) : null
+    body.notes ? (params.item.notes = { S: body.notes }) : null
 
     // * Insert the item into DynamoDB
     await dynamoDBClient.createItem(params)
@@ -118,12 +118,13 @@ export const handler = async (
       responseData: body,
     })
   } catch (err: any) {
-    const errorMsg = String(err) || 'Unexpected error'
     return errorResponse({
-      statusCode: err.$metadata.httpStatusCode || INTERNAL_SERVER_ERROR,
+      statusCode: err.$metadata
+        ? err.$metadata.httpStatusCode
+        : INTERNAL_SERVER_ERROR,
       additionalHeaders: createCORSHeaders(origin, [], methods),
       message: 'Error adding the book',
-      responseData: { message: errorMsg },
+      responseData: { message: 'Unexpected error' },
     })
   }
 }
