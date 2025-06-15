@@ -1,0 +1,16 @@
+{
+  "body": "{\"title\":\"The Hobbit\",\"author\":\"Tolkien\", \"status\":\"WISHLIST\",\"rating\":3,\"notes\":\"The book is really good\"}",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "httpMethod": "POST",
+  "isBase64Encoded": false,
+  "path": "/v1/books",
+  "requestContext": {
+    "httpMethod": "POST",
+    "path": "/v1/books",
+    "requestId": "test-add-book-request",
+    "stage": "staging"
+  },
+  "resource": "/{proxy+}"
+}
