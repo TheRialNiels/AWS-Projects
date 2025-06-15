@@ -27,13 +27,6 @@ export const BookSchema = createSchema({
 })
 
 export type Book = InferSchema<typeof BookSchema>
-// export interface Book {
-//   title: InferSchema<typeof BookTitleSchema>
-//   author: InferSchema<typeof BookAuthorSchema>
-//   status: InferSchema<typeof BookStatusSchema>
-//   rating?: InferSchema<typeof BookRatingSchema>
-//   notes?: InferSchema<typeof BookNotesSchema>
-// }
 
 export type BooksCreateItemParams = {
   item: Record<string, any>
