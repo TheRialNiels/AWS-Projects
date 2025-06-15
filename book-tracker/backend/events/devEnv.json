@@ -1,5 +1,5 @@
 {
-  "CreateCategoryFunction": {
+  "CreateBookFunction": {
     "BOOKS_AUTHOR_GSI": "AuthorIndex",
     "BOOKS_TABLE": "staging-book-tracker-app-books-table",
     "BOOKS_TITLE_GSI": "TitleIndex",

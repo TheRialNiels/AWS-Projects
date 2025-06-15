@@ -1,5 +1,5 @@
 {
-  "body": "{\"title\":\"The Hobbit 2\",\"author\":\"Tolkien\", \"status\":\"WISHLIST\",\"rating\":3,\"notes\":\"The book is really good\"}",
+  "body": "{\"title\":true,\"author\":123, \"status\":false,\"rating\":\"3\",\"notes\":123}",
   "headers": {
     "Content-Type": "application/json"
   },

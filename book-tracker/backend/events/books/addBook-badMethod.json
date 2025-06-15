@@ -1,9 +1,9 @@
 {
-  "body": "{\"title\":\"The Hobbit 2\",\"author\":\"Tolkien\", \"status\":\"WISHLIST\",\"rating\":3,\"notes\":\"The book is really good\"}",
+  "body": "{\"title\":\"The Hobbit\",\"author\":\"Tolkien\", \"status\":\"WISHLIST\",\"rating\":3,\"notes\":\"The book is really good\"}",
   "headers": {
     "Content-Type": "application/json"
   },
-  "httpMethod": "POST",
+  "httpMethod": "GET",
   "isBase64Encoded": false,
   "path": "/v1/books",
   "requestContext": {
