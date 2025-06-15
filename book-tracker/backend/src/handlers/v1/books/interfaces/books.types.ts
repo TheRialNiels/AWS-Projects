@@ -3,6 +3,8 @@ import {
   createSchema,
   enumField,
   numberField,
+  preprocessNumber,
+  queryParamRecordField,
   stringField,
   uuidField,
 } from '@lib/packages/zod'
@@ -41,6 +43,18 @@ export type BooksQueryTitleGsiParams = {
 }
 
 export type BooksQueryTitleGsiResult = {
+  items: Record<string, AttributeValue>[]
+  lastEvaluatedKey?: Record<string, AttributeValue>
+}
+
+export const BooksScanPageParamsSchema = createSchema({
+  limit: () => preprocessNumber().optional(),
+  lastEvaluatedKey: () => queryParamRecordField().optional(),
+})
+
+export type BooksScanPageParams = InferSchema<typeof BooksScanPageParamsSchema>
+
+export interface BooksScanPageResult {
   items: Record<string, AttributeValue>[]
   lastEvaluatedKey?: Record<string, AttributeValue>
 }

@@ -123,6 +123,42 @@ Resources:
         Banner:
           - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
 
+  GetAllBooksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-get-all-books
+      Description: Get all books records in database
+      Handler: !Sub ${BookHandlersPath}/getAllBooks.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BookTrackerAppApiGW
+            Path: /v1/books
+            Method: GET
+      Policies:
+        Statement:
+          - Sid: DynamoDBRead
+            Effect: Allow
+            Action:
+              - dynamodb:GetItem
+              - dynamodb:Query
+              - dynamodb:Scan
+            Resource: !GetAtt BooksTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${BookHandlersPath}/getAllBooks.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
 Outputs:
   BookTrackerAppApiGW:
     Description: 'API Gateway endpoint URL'
@@ -130,3 +166,6 @@ Outputs:
   CreateBookFunction:
     Description: 'Create Book Lambda Function ARN'
     Value: !GetAtt CreateBookFunction.Arn
+  GetAllBooksFunction:
+    Description: 'Get All Books Lambda Function ARN'
+    Value: !GetAtt GetAllBooksFunction.Arn

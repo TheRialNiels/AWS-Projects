@@ -118,6 +118,7 @@ export const handler = async (
       responseData: body,
     })
   } catch (err: any) {
+    console.log(err) // TODO - Implement CW to log the error
     return errorResponse({
       statusCode: err.$metadata
         ? err.$metadata.httpStatusCode

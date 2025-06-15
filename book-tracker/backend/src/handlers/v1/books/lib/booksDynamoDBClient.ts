@@ -2,6 +2,8 @@ import type {
   BooksCreateItemParams,
   BooksQueryTitleGsiParams,
   BooksQueryTitleGsiResult,
+  BooksScanPageParams,
+  BooksScanPageResult,
 } from '@handlers/v1/books/interfaces/books.types'
 import {
   DynamoDBClient,
@@ -9,6 +11,8 @@ import {
   PutItemCommandInput,
   QueryCommand,
   QueryCommandInput,
+  ScanCommand,
+  ScanCommandInput,
 } from '@aws-sdk/client-dynamodb'
 
 export class BooksDynamoDBClient {
@@ -103,17 +107,18 @@ export class BooksDynamoDBClient {
     }
   }
 
-  //   async scanPage(params: any): Promise<any> {
-  //     const input: ScanCommandInput = {
-  //       TableName: this.tableName,
-  //       ExclusiveStartKey: params.lastEvaluatedKey,
-  //       Limit: params.limit,
-  //     }
+  async scanPage(params: BooksScanPageParams): Promise<BooksScanPageResult> {
+    const input: ScanCommandInput = {
+      TableName: this.tableName,
+      Limit: params.limit,
+      ExclusiveStartKey: params.lastEvaluatedKey,
+    }
 
-  //     const result = await this.client.send(new ScanCommand(input))
-  //     return {
-  //       items: result.Items || [],
-  //       lastKey: result.LastEvaluatedKey,
-  //     }
-  //   }
+    const result = await this.client.send(new ScanCommand(input))
+
+    return {
+      items: result.Items ?? [],
+      lastEvaluatedKey: result.LastEvaluatedKey,
+    }
+  }
 }

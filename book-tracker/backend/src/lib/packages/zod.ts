@@ -61,3 +61,27 @@ export const numberField = (
 
   return schema
 }
+
+export const DynamoAttributeValueSchema = z
+  .object({
+    S: z.string('Must be a string!').optional(),
+    N: z.string('Must be a number!').optional(),
+    BOOL: z.boolean('Must be a boolean!').optional(),
+    NULL: z.literal(true).optional(),
+  })
+  .strict()
+
+export const queryParamRecordField = () => {
+  return z.preprocess(
+    (val) =>
+      typeof val === 'string' ? JSON.parse(decodeURIComponent(val)) : val,
+    z.record(z.string(), DynamoAttributeValueSchema),
+  )
+}
+
+export const preprocessNumber = () => {
+  return z.preprocess(
+    (value) => (typeof value === 'string' ? parseFloat(value) : value),
+    z.number('Must be a number!'),
+  )
+}
