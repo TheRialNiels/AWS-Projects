@@ -1,0 +1,122 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS SAM Template for Book Tracker App
+
+Parameters:
+  AppName:
+    Type: String
+    Default: book-tracker
+    Description: Application name
+  AllowOrigin:
+    Type: String
+    Default: "'*'"
+    Description: Define the allow origin for CORS
+  Environment:
+    Type: String
+    Default: prod
+    Description: Define the runtime environment for the application
+    MinLength: 3
+  BookHandlersPath:
+    Type: String
+    Default: src/handlers/v1/books
+
+Globals:
+  Function:
+    Architectures:
+      - x86_64
+    Runtime: nodejs22.x
+    CodeUri: .
+    Timeout: 60
+    Environment:
+      Variables:
+        ALLOW_ORIGIN: !Ref AllowOrigin
+        ENVIRONMENT: !Ref Environment
+        REGION: !Sub ${AWS::Region}
+
+Resources:
+  BookTrackerAppApiGW:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub ${Environment}-${AppName}-api
+      Description: API Gateway for Book Tracker App Endpoints
+      StageName: !Ref Environment
+      Cors:
+        AllowMethods: "'*'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: !Ref AllowOrigin
+
+  BooksTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${Environment}-${AppName}-books-table
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: title
+          AttributeType: S
+        - AttributeName: author
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: TitleIndex
+          KeySchema:
+            - AttributeName: title
+              KeyType: HASH
+            - AttributeName: author
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: AuthorIndex
+          KeySchema:
+            - AttributeName: author
+              KeyType: HASH
+            - AttributeName: title
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  CreateBookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-create-book
+      Description: Create book record in database
+      Handler: !Sub ${BookHandlersPath}/createBook.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BookTrackerAppApiGW
+            Path: /v1/books
+            Method: POST
+      Policies:
+        Statement:
+          - Sid: DynamoDBWrite
+            Effect: Allow
+            Action:
+              - dynamodb:PutItem
+              - dynamodb:UpdateItem
+            Resource: !GetAtt BooksTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${BookHandlersPath}/createBook.ts
+
+Outputs:
+  BookTrackerAppApiGW:
+    Description: 'API Gateway endpoint URL'
+    Value: !Sub 'https://${BookTrackerAppApiGW}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/'
+  CreateBookFunction:
+    Description: 'Create Book Lambda Function ARN'
+    Value: !GetAtt CreateBookFunction.Arn
