@@ -30,19 +30,19 @@ export const BookSchema = createSchema({
 
 export type Book = InferSchema<typeof BookSchema>
 
-export type BooksCreateItemParams = {
+export interface BooksCreateItemParams {
   item: Record<string, any>
   conditionExpression?: string
 }
 
-export type BooksQueryTitleGsiParams = {
+export interface BooksQueryTitleGsiParams {
   title: string
   author?: string
   limit?: number
   lastEvaluatedKey?: Record<string, AttributeValue>
 }
 
-export type BooksQueryTitleGsiResult = {
+export interface BooksQueryTitleGsiResult {
   items: Record<string, AttributeValue>[]
   lastEvaluatedKey?: Record<string, AttributeValue>
 }
@@ -52,7 +52,7 @@ export const BooksScanPageParamsSchema = createSchema({
   lastEvaluatedKey: () => queryParamRecordField().optional(),
 })
 
-export type BooksScanPageParams = {
+export interface BooksScanPageParams {
   limit?: number
   lastEvaluatedKey?: Record<string, AttributeValue>
 }
