@@ -52,7 +52,10 @@ export const BooksScanPageParamsSchema = createSchema({
   lastEvaluatedKey: () => queryParamRecordField().optional(),
 })
 
-export type BooksScanPageParams = InferSchema<typeof BooksScanPageParamsSchema>
+export type BooksScanPageParams = {
+  limit?: number
+  lastEvaluatedKey?: Record<string, AttributeValue>
+}
 
 export interface BooksScanPageResult {
   items: Record<string, AttributeValue>[]
