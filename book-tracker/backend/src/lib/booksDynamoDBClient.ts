@@ -5,7 +5,7 @@ import type {
   BooksScanPageParams,
   BooksScanPageResult,
   Item,
-} from '@handlers/v1/books/interfaces/books.types'
+} from '@interfaces/books.types'
 import {
   DynamoDBClient,
   GetItemCommand,

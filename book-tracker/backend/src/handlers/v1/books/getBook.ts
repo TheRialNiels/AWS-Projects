@@ -1,5 +1,4 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { BookIdSchema, Item, type Book } from './interfaces/books.types'
+import { BookIdSchema, Item, type Book } from '@interfaces/books.types'
 import {
   createCORSHeaders,
   createPreflightResponse,
@@ -10,8 +9,9 @@ import {
   httpStatusCodes,
   successResponse,
 } from '@lib/httpResponse'
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
-import { BooksDynamoDBClient } from './lib/booksDynamoDBClient'
+import { BooksDynamoDBClient } from '@lib/booksDynamoDBClient'
 import { env } from '@lib/packages/env'
 import { returnFlattenError } from '@lib/packages/zod'
 

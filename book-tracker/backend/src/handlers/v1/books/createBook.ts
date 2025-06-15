@@ -1,4 +1,10 @@
 import {
+  BookSchema,
+  type Book,
+  type BooksCreateItemParams,
+  type BooksQueryTitleGsiParams,
+} from '@interfaces/books.types'
+import {
   createCORSHeaders,
   createPreflightResponse,
   getOriginFromEvent,
@@ -9,18 +15,12 @@ import {
   successResponse,
 } from '@lib/httpResponse'
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import {
-  BookSchema,
-  type Book,
-  type BooksCreateItemParams,
-  type BooksQueryTitleGsiParams,
-} from './interfaces/books.types'
 
+import { BooksDynamoDBClient } from '@lib/booksDynamoDBClient'
 import { env } from '@lib/packages/env'
 import { generateUuid } from '@lib/packages/uuid'
 import { returnFlattenError } from '@lib/packages/zod'
 import { isString } from '@lib/utils'
-import { BooksDynamoDBClient } from './lib/booksDynamoDBClient'
 
 const dynamoDbConfig = {
   region: env.REGION,
