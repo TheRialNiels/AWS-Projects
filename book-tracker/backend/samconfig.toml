@@ -3,7 +3,7 @@
 version = 0.1
 
 [default.global.parameters]
-stack_name = "book-tracker"
+stack_name = "book-tracker-app"
 
 [default.build.parameters]
 cached = true
@@ -16,9 +16,9 @@ lint = true
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
 resolve_s3 = true
-s3_prefix = "book-tracker"
+s3_prefix = "book-tracker-app"
 region = "us-east-1"
-parameter_overrides = "AppName=\"book-tracker\" AllowOrigin=\"'*'\" Environment=\"staging\" BookHandlersPath=\"src/handlers/v1/books\""
+parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"'*'\" AllowCredentials=\"false\" Environment=\"staging\" BookHandlersPath=\"src/handlers/v1/books\""
 image_repositories = []
 
 [default.package.parameters]

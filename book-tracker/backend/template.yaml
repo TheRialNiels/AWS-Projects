@@ -5,7 +5,7 @@ Description: AWS SAM Template for Book Tracker App
 Parameters:
   AppName:
     Type: String
-    Default: book-tracker
+    Default: book-tracker-app
     Description: Application name
   AllowOrigin:
     Type: String
@@ -120,6 +120,8 @@ Resources:
         Sourcemap: false
         EntryPoints:
           - !Sub ${BookHandlersPath}/createBook.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
 
 Outputs:
   BookTrackerAppApiGW:
