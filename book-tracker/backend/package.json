@@ -13,6 +13,7 @@
     "test": "npm run compile && npm run unit"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.828.0",
     "env-var": "^7.5.0",
     "esbuild": "^0.25.5",
     "uuid": "^11.1.0",
