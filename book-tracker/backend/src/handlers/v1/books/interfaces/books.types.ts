@@ -10,8 +10,8 @@ import {
 import { AttributeValue } from '@aws-sdk/client-dynamodb'
 
 export const BookIdSchema = uuidField('Book ID').optional()
-export const BookTitleSchema = stringField('Title', 3)
-export const BookAuthorSchema = stringField('Author', 3)
+export const BookTitleSchema = stringField('Title', 3, 60)
+export const BookAuthorSchema = stringField('Author', 3, 60)
 const bookStatus = ['READING', 'COMPLETED', 'WISHLIST', 'ABANDONED']
 export const BookStatusSchema = enumField('Status', bookStatus)
 export const BookRatingSchema = numberField('Rating', 1, 5).optional()
