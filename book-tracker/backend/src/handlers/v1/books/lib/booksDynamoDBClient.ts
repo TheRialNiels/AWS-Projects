@@ -4,9 +4,12 @@ import type {
   BooksQueryTitleGsiResult,
   BooksScanPageParams,
   BooksScanPageResult,
+  Item,
 } from '@handlers/v1/books/interfaces/books.types'
 import {
   DynamoDBClient,
+  GetItemCommand,
+  GetItemCommandInput,
   PutItemCommand,
   PutItemCommandInput,
   QueryCommand,
@@ -43,15 +46,15 @@ export class BooksDynamoDBClient {
     }
   }
 
-  //   async getItem(key: Record<string, any>) {
-  //     const input: GetItemCommandInput = {
-  //       TableName: this.tableName,
-  //       Key: key,
-  //     }
+  async getItem(key: Item): Promise<Item | null> {
+    const input: GetItemCommandInput = {
+      TableName: this.tableName,
+      Key: key,
+    }
 
-  //     const result = await this.client.send(new GetItemCommand(input))
-  //     return result.Item || null
-  //   }
+    const result = await this.client.send(new GetItemCommand(input))
+    return result.Item || null
+  }
 
   //   async updateItem(params: any) {
   //     const input: UpdateItemCommandInput = {

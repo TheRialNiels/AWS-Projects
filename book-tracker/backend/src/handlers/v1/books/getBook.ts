@@ -1,9 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import {
-  BooksScanPageParamsSchema,
-  type Book,
-  type BooksScanPageParams,
-} from './interfaces/books.types'
+import { BookIdSchema, Item, type Book } from './interfaces/books.types'
 import {
   createCORSHeaders,
   createPreflightResponse,
@@ -52,59 +48,52 @@ export const handler = async (
       })
     }
 
-    // * Get the limit and lastKey from params
-    const limit = event.queryStringParameters?.limit
-      ? parseInt(event.queryStringParameters.limit)
-      : 10 // * Default limit
-    const lastEvaluatedKeyParam =
-      event.queryStringParameters?.lastEvaluatedKey || null
+    // * Get the body payload and id from request
+    const id = event.pathParameters?.id
 
-    // * Validate query parameters with schema
-    const queriesSchemaValidation = BooksScanPageParamsSchema.safeParse({
-      limit,
-      lastEvaluatedKey: lastEvaluatedKeyParam ?? undefined,
-    })
-    if (queriesSchemaValidation.error) {
-      const error = returnFlattenError(queriesSchemaValidation.error)
+    // * Validate payload with schema
+    const schemaValidation = BookIdSchema.safeParse(id)
+    if (schemaValidation.error) {
+      const error = returnFlattenError(schemaValidation.error)
       return errorResponse({
         statusCode: BAD_REQUEST,
         additionalHeaders: createCORSHeaders(origin, [], methods),
-        message: 'Invalid query parameters',
+        message: 'Invalid request',
         responseData: { message: error },
       })
     }
 
-    // * Prepare the params to get the items from DynamoDB
-    const params = queriesSchemaValidation.data
+    // * Prepare the key to get the item from DynamoDB
+    const key = {
+      id: { S: id },
+    }
 
-    // * Scan items from DynamoDB
-    const { items, lastEvaluatedKey } = await dynamoDBClient.scanPage(
-      params as BooksScanPageParams,
-    )
+    // * Get item from DynamoDB
+    const item = await dynamoDBClient.getItem(key as Item)
 
-    // * Validate if the items were returned
-    if (!items) {
+    // * Validate if the item was returned
+    if (!item) {
       return errorResponse({
         statusCode: BAD_REQUEST,
         additionalHeaders: createCORSHeaders(origin, [], methods),
-        message: 'Books not found',
+        message: 'Book not found',
       })
     }
 
     // * Return success response
-    const books: Book[] = items.map((item) => ({
+    const book: Book = {
       id: item.id.S!,
       title: item.title.S!,
       author: item.author.S!,
       status: item.status.S!,
       rating: item.rating?.N !== undefined ? +item.rating.N : undefined,
       notes: item.notes?.S ?? undefined,
-    }))
+    }
     return successResponse({
       statusCode: OK,
       additionalHeaders: createCORSHeaders(origin, [], methods),
       message: 'Success',
-      responseData: { books, lastEvaluatedKey },
+      responseData: { book },
     })
   } catch (err: any) {
     console.log(err) // TODO - Implement CW to log the error
@@ -113,7 +102,7 @@ export const handler = async (
         ? err.$metadata.httpStatusCode
         : INTERNAL_SERVER_ERROR,
       additionalHeaders: createCORSHeaders(origin, [], methods),
-      message: 'Error retrieving books',
+      message: 'Error retrieving book',
       responseData: { message: 'Unexpected error' },
     })
   }

@@ -11,24 +11,25 @@ import {
 
 import { AttributeValue } from '@aws-sdk/client-dynamodb'
 
-export const BookIdSchema = uuidField('Book ID').optional()
+export const BookIdSchema = uuidField('Book ID')
 export const BookTitleSchema = stringField('Title', 3, 60)
 export const BookAuthorSchema = stringField('Author', 3, 60)
 const bookStatus = ['READING', 'COMPLETED', 'WISHLIST', 'ABANDONED']
 export const BookStatusSchema = enumField('Status', bookStatus)
-export const BookRatingSchema = numberField('Rating', 1, 5).optional()
-export const BookNotesSchema = stringField('Notes', 3, 500).optional()
+export const BookRatingSchema = numberField('Rating', 1, 5)
+export const BookNotesSchema = stringField('Notes', 3, 500)
 
 export const BookSchema = createSchema({
-  id: () => BookIdSchema,
+  id: () => BookIdSchema.optional(),
   title: () => BookTitleSchema,
   author: () => BookAuthorSchema,
   status: () => BookStatusSchema,
-  rating: () => BookRatingSchema,
-  notes: () => BookNotesSchema,
+  rating: () => BookRatingSchema.optional(),
+  notes: () => BookNotesSchema.optional(),
 })
 
 export type Book = InferSchema<typeof BookSchema>
+export type Item = Record<string, AttributeValue>
 
 export interface BooksCreateItemParams {
   item: Record<string, any>
@@ -39,11 +40,11 @@ export interface BooksQueryTitleGsiParams {
   title: string
   author?: string
   limit?: number
-  lastEvaluatedKey?: Record<string, AttributeValue>
+  lastEvaluatedKey?: Item
 }
 
 export interface BooksQueryTitleGsiResult {
-  items: Record<string, AttributeValue>[]
+  items: Item[]
   lastEvaluatedKey?: Record<string, AttributeValue>
 }
 
@@ -54,10 +55,10 @@ export const BooksScanPageParamsSchema = createSchema({
 
 export interface BooksScanPageParams {
   limit?: number
-  lastEvaluatedKey?: Record<string, AttributeValue>
+  lastEvaluatedKey?: Item
 }
 
 export interface BooksScanPageResult {
-  items: Record<string, AttributeValue>[]
-  lastEvaluatedKey?: Record<string, AttributeValue>
+  items: Item[]
+  lastEvaluatedKey?: Item
 }
