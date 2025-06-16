@@ -4,10 +4,13 @@ import type {
   BooksQueryTitleGsiResult,
   BooksScanPageParams,
   BooksScanPageResult,
+  DeleteItemParams,
   Item,
   UpdateItemParams,
 } from '@interfaces/books.types'
 import {
+  DeleteItemCommand,
+  DeleteItemCommandInput,
   DynamoDBClient,
   GetItemCommand,
   GetItemCommandInput,
@@ -126,15 +129,20 @@ export class BooksDynamoDBClient {
     }
   }
 
-  //   async deleteItem(params: any) {
-  //     const input: DeleteItemCommandInput = {
-  //       TableName: this.tableName,
-  //       Key: params.key,
-  //       ConditionExpression: params.conditionExpression,
-  //     }
+  async deleteItem(params: DeleteItemParams): Promise<Item | null> {
+    const input: DeleteItemCommandInput = {
+      TableName: this.tableName,
+      Key: params.key,
+      ConditionExpression: params.conditionExpression ?? 'attribute_exists(id)',
+    }
 
-  //     await this.client.send(new DeleteItemCommand(input))
-  //   }
+    try {
+      const result = await this.client.send(new DeleteItemCommand(input))
+      return result.Attributes || null
+    } catch (err) {
+      throw err
+    }
+  }
 
   async queryTitleGsi(
     params: BooksQueryTitleGsiParams,

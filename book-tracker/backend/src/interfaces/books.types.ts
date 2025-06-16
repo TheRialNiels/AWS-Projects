@@ -70,3 +70,8 @@ export interface BooksScanPageResult {
   items: Item[]
   lastEvaluatedKey?: Item
 }
+
+export interface DeleteItemParams {
+  key: Record<string, any>
+  conditionExpression?: string
+}
