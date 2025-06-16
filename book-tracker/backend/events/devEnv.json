@@ -6,14 +6,14 @@
     "ENVIRONMENT": "staging",
     "REGION": "us-east-1"
   },
-  "GetBookFunction": {
+  "GetAllBooksFunction": {
     "BOOKS_AUTHOR_GSI": "AuthorIndex",
     "BOOKS_TABLE": "staging-book-tracker-app-books-table",
     "BOOKS_TITLE_GSI": "TitleIndex",
     "ENVIRONMENT": "staging",
     "REGION": "us-east-1"
   },
-  "GetAllBooksFunction": {
+  "GetBookFunction": {
     "BOOKS_AUTHOR_GSI": "AuthorIndex",
     "BOOKS_TABLE": "staging-book-tracker-app-books-table",
     "BOOKS_TITLE_GSI": "TitleIndex",
@@ -25,5 +25,12 @@
     "AllowOrigin": "'*'",
     "AppName": "book-tracker-app",
     "Environment": "staging"
+  },
+  "UpdateBookFunction": {
+    "BOOKS_AUTHOR_GSI": "AuthorIndex",
+    "BOOKS_TABLE": "staging-book-tracker-app-books-table",
+    "BOOKS_TITLE_GSI": "TitleIndex",
+    "ENVIRONMENT": "staging",
+    "REGION": "us-east-1"
   }
 }

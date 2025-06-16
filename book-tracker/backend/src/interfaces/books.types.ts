@@ -1,3 +1,4 @@
+import { AttributeValue, ReturnValue } from '@aws-sdk/client-dynamodb'
 import {
   InferSchema,
   createSchema,
@@ -8,8 +9,6 @@ import {
   stringField,
   uuidField,
 } from '@lib/packages/zod'
-
-import { AttributeValue } from '@aws-sdk/client-dynamodb'
 
 export const BookIdSchema = uuidField('Book ID')
 export const BookTitleSchema = stringField('Title', 3, 60)
@@ -34,6 +33,15 @@ export type Item = Record<string, AttributeValue>
 export interface BooksCreateItemParams {
   item: Record<string, any>
   conditionExpression?: string
+}
+
+export interface UpdateItemParams {
+  key: Item
+  updateExpression: string
+  expressionAttributeNames: Record<string, string>
+  expressionAttributeValues: Item
+  conditionExpression?: string
+  returnValues?: ReturnValue
 }
 
 export interface BooksQueryTitleGsiParams {

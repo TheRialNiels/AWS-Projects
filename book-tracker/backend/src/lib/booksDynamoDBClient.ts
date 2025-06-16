@@ -5,6 +5,7 @@ import type {
   BooksScanPageParams,
   BooksScanPageResult,
   Item,
+  UpdateItemParams,
 } from '@interfaces/books.types'
 import {
   DynamoDBClient,
@@ -14,8 +15,11 @@ import {
   PutItemCommandInput,
   QueryCommand,
   QueryCommandInput,
+  ReturnValue,
   ScanCommand,
   ScanCommandInput,
+  UpdateItemCommand,
+  UpdateItemCommandInput,
 } from '@aws-sdk/client-dynamodb'
 
 export class BooksDynamoDBClient {
@@ -31,7 +35,49 @@ export class BooksDynamoDBClient {
     this.authorGsi = config.authorGsi
   }
 
-  async createItem(params: BooksCreateItemParams) {
+  static buildUpdateExpression(data: Record<string, any>) {
+    const expressionAttributeNames: Record<string, string> = {}
+    const expressionAttributeValues: Item = {}
+    const setExpressions: string[] = []
+    const removeExpressions: string[] = []
+
+    for (const [key, value] of Object.entries(data)) {
+      const attributeName = `#${key}`
+      expressionAttributeNames[attributeName] = key
+
+      if (value === undefined) {
+        removeExpressions.push(attributeName)
+        continue
+      }
+
+      const attributeValue = `:${key}`
+      if (typeof value === 'string') {
+        expressionAttributeValues[attributeValue] = { S: value }
+      } else if (typeof value === 'number') {
+        expressionAttributeValues[attributeValue] = { N: value.toString() }
+      } else if (typeof value === 'boolean') {
+        expressionAttributeValues[attributeValue] = { BOOL: value }
+      }
+
+      setExpressions.push(`${attributeName} = ${attributeValue}`)
+    }
+
+    const parts = []
+    if (setExpressions.length > 0) {
+      parts.push(`SET ${setExpressions.join(', ')}`)
+    }
+    if (removeExpressions.length > 0) {
+      parts.push(`REMOVE ${removeExpressions.join(', ')}`)
+    }
+
+    return {
+      updateExpression: parts.join(' '),
+      expressionAttributeNames,
+      expressionAttributeValues,
+    }
+  }
+
+  async createItem(params: BooksCreateItemParams): Promise<Item | null> {
     const input: PutItemCommandInput = {
       TableName: this.tableName,
       Item: params.item,
@@ -40,9 +86,10 @@ export class BooksDynamoDBClient {
     }
 
     try {
-      await this.client.send(new PutItemCommand(input))
+      const result = await this.client.send(new PutItemCommand(input))
+      return result.Attributes || null
     } catch (err) {
-      throw new Error(String(err) || 'Error creating item in DynamoDB')
+      throw err
     }
   }
 
@@ -52,24 +99,32 @@ export class BooksDynamoDBClient {
       Key: key,
     }
 
-    const result = await this.client.send(new GetItemCommand(input))
-    return result.Item || null
+    try {
+      const result = await this.client.send(new GetItemCommand(input))
+      return result.Item || null
+    } catch (err) {
+      throw err
+    }
   }
 
-  //   async updateItem(params: any) {
-  //     const input: UpdateItemCommandInput = {
-  //       TableName: this.tableName,
-  //       Key: params.key,
-  //       UpdateExpression: params.updateExpression,
-  //       ExpressionAttributeNames: params.expressionAttributeNames,
-  //       ExpressionAttributeValues: params.expressionAttributeValues,
-  //       ConditionExpression: params.conditionExpression,
-  //       ReturnValues: (params.returnValues as ReturnValue) || 'ALL_NEW',
-  //     }
+  async updateItem(params: UpdateItemParams): Promise<Item | null> {
+    const input: UpdateItemCommandInput = {
+      TableName: this.tableName,
+      Key: params.key,
+      UpdateExpression: params.updateExpression,
+      ExpressionAttributeNames: params.expressionAttributeNames,
+      ExpressionAttributeValues: params.expressionAttributeValues,
+      ConditionExpression: params.conditionExpression ?? 'attribute_exists(id)',
+      ReturnValues: (params.returnValues as ReturnValue) || 'ALL_NEW',
+    }
 
-  //     const result = await this.client.send(new UpdateItemCommand(input))
-  //     return result.Attributes || null
-  //   }
+    try {
+      const result = await this.client.send(new UpdateItemCommand(input))
+      return result.Attributes || null
+    } catch (err) {
+      throw err
+    }
+  }
 
   //   async deleteItem(params: any) {
   //     const input: DeleteItemCommandInput = {
@@ -102,11 +157,14 @@ export class BooksDynamoDBClient {
       ExclusiveStartKey: params.lastEvaluatedKey,
     }
 
-    const result = await this.client.send(new QueryCommand(input))
-
-    return {
-      items: result.Items || [],
-      lastEvaluatedKey: result.LastEvaluatedKey,
+    try {
+      const result = await this.client.send(new QueryCommand(input))
+      return {
+        items: result.Items || [],
+        lastEvaluatedKey: result.LastEvaluatedKey,
+      }
+    } catch (err) {
+      throw err
     }
   }
 
@@ -117,11 +175,14 @@ export class BooksDynamoDBClient {
       ExclusiveStartKey: params.lastEvaluatedKey,
     }
 
-    const result = await this.client.send(new ScanCommand(input))
-
-    return {
-      items: result.Items ?? [],
-      lastEvaluatedKey: result.LastEvaluatedKey,
+    try {
+      const result = await this.client.send(new ScanCommand(input))
+      return {
+        items: result.Items ?? [],
+        lastEvaluatedKey: result.LastEvaluatedKey,
+      }
+    } catch (err) {
+      throw err
     }
   }
 }

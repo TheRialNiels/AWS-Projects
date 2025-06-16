@@ -1,0 +1,19 @@
+{
+  "body": "{\"title\":\"T\",\"author\":\"T\", \"status\":\"WRONG\",\"rating\":0,\"notes\":\"T\"}",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "httpMethod": "PATCH",
+  "isBase64Encoded": false,
+  "path": "/v1/books",
+  "pathParameters": {
+    "id": "9ab51f52-4995-4ff9-b245-a68bb248cec3"
+  },
+  "requestContext": {
+    "httpMethod": "PATCH",
+    "path": "/v1/books",
+    "requestId": "test-update-book-request",
+    "stage": "staging"
+  },
+  "resource": "/{proxy+}"
+}
