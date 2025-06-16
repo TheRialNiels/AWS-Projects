@@ -52,14 +52,14 @@ export const handler = async (
       })
     }
 
-    // * Get the limit and lastKey from params
+    // * Get the limit and lastEvaluatedKey from query string params
     const limit = event.queryStringParameters?.limit
       ? parseInt(event.queryStringParameters.limit)
       : 10 // * Default limit
     const lastEvaluatedKeyParam =
       event.queryStringParameters?.lastEvaluatedKey || null
 
-    // * Validate query parameters with schema
+    // * Validate query string params with schema
     const queriesSchemaValidation = BooksScanPageParamsSchema.safeParse({
       limit,
       lastEvaluatedKey: lastEvaluatedKeyParam ?? undefined,
@@ -77,7 +77,7 @@ export const handler = async (
     // * Prepare the params to get the items from DynamoDB
     const params = queriesSchemaValidation.data
 
-    // * Scan items from DynamoDB
+    // * Scan items in DynamoDB
     const { items, lastEvaluatedKey } = await dynamoDBClient.scanPage(
       params as BooksScanPageParams,
     )

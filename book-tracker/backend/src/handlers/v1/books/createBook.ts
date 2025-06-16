@@ -95,7 +95,7 @@ export const handler = async (
       })
     }
 
-    // * Prepare the item to be inserted into DynamoDB
+    // * Prepare the params to insert the item in DynamoDB
     const params: BooksCreateItemParams = {
       item: {
         id: { S: body.id },
@@ -107,7 +107,7 @@ export const handler = async (
     body.rating ? (params.item.rating = { N: String(body.rating) }) : null
     body.notes ? (params.item.notes = { S: body.notes }) : null
 
-    // * Insert the item into DynamoDB
+    // * Insert item in DynamoDB
     await dynamoDBClient.createItem(params)
 
     // * Return success response

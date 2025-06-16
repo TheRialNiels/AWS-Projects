@@ -1,4 +1,4 @@
-import { BookIdSchema, Item, type Book } from '@interfaces/books.types'
+import { BookIdSchema, type Book, type Item } from '@interfaces/books.types'
 import {
   createCORSHeaders,
   createPreflightResponse,
@@ -48,10 +48,10 @@ export const handler = async (
       })
     }
 
-    // * Get the body payload and id from request
+    // * Get id param from request
     const id = event.pathParameters?.id
 
-    // * Validate payload with schema
+    // * Validate id with schema
     const schemaValidation = BookIdSchema.safeParse(id)
     if (schemaValidation.error) {
       const error = returnFlattenError(schemaValidation.error)

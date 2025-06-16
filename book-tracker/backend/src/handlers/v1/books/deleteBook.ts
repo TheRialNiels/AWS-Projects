@@ -63,12 +63,12 @@ export const handler = async (
       })
     }
 
-    // * Prepare the params to delete the item from DynamoDB
+    // * Prepare the params to delete the item in DynamoDB
     const params: DeleteItemParams = {
       key: { id: { S: id } },
     }
 
-    // * Delete item from DynamoDB
+    // * Delete item in DynamoDB
     await dynamoDBClient.deleteItem(params)
 
     // * Return success response

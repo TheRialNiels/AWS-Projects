@@ -53,7 +53,7 @@ export const handler = async (
       })
     }
 
-    // * Get the body payload id param from request
+    // * Get the body payload and id param from request
     const body: Book = JSON.parse(event.body || '{}')
     body.id = event.pathParameters?.id || ''
 
