@@ -21,6 +21,7 @@ export function BooksTable<TData, TValue>({
       pageSize={10}
       isLoading={isLoading}
       isError={isError}
+      rowsPerPage={[10, 20, 25]}
     />
   )
 }

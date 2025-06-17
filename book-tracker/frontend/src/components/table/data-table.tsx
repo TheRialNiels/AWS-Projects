@@ -35,6 +35,7 @@ export interface DataTableProps<TData, TValue> {
   pageSize: number
   isLoading: boolean
   isError: boolean
+  rowsPerPage?: number[]
   noResultsMsg?: string
   errorMsg?: string
 }
@@ -45,6 +46,7 @@ export function DataTable<TData, TValue>({
   pageSize,
   isLoading,
   isError,
+  rowsPerPage,
   noResultsMsg = 'No results',
   errorMsg = 'There was an error fetching the data',
 }: DataTableProps<TData, TValue>) {
@@ -159,7 +161,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      <DataTablePagination table={table} rowsPerPage={rowsPerPage} />
     </div>
   )
 }
