@@ -21,6 +21,9 @@ export function BooksTable<TData, TValue>({
       pageSize={10}
       isLoading={isLoading}
       isError={isError}
+      filterColumn="title"
+      filterPlaceholder="Search by title..."
+      addBtnLabel='Add book'
       rowsPerPage={[10, 20, 25]}
     />
   )

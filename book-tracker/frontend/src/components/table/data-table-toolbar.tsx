@@ -11,22 +11,40 @@ import { X } from 'lucide-react'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
+  filterColumn: string
+  filterPlaceholder?: string
+  showViewBtn?: boolean
+  showAddBtn?: boolean
+  addBtnLabel?: string
+  onFilterChange?: (value: string) => void
 }
 
 export function DataTableToolbar<TData>({
   table,
+  filterColumn,
+  filterPlaceholder = 'Search...',
+  showViewBtn = true,
+  showAddBtn = true,
+  addBtnLabel = 'Add',
+  onFilterChange,
 }: DataTableToolbarProps<TData>) {
+  const column = table.getColumn(filterColumn ?? '')
+  const filterValue = (column?.getFilterValue() as string) ?? ''
   const isFiltered = table.getState().columnFilters.length > 0
+
+  const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value
+    column?.setFilterValue(value)
+    onFilterChange?.(value)
+  }
 
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center gap-2">
         <Input
-          placeholder="Filter tasks..."
-          value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn('title')?.setFilterValue(event.target.value)
-          }
+          placeholder={filterPlaceholder}
+          value={filterValue}
+          onChange={handleFilterChange}
           className="h-8 w-[150px] lg:w-[250px]"
         />
         {table.getColumn('status') && (
@@ -55,8 +73,12 @@ export function DataTableToolbar<TData>({
         )}
       </div>
       <div className="flex items-center gap-2">
-        <DataTableViewOptions table={table} />
-        <Button size="sm">Add Task</Button>
+        {showViewBtn && <DataTableViewOptions table={table} />}
+        {showAddBtn && (
+          <Button size="sm" className="h-8">
+            {addBtnLabel}
+          </Button>
+        )}
       </div>
     </div>
   )

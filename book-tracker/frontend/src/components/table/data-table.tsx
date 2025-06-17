@@ -35,6 +35,11 @@ export interface DataTableProps<TData, TValue> {
   pageSize: number
   isLoading: boolean
   isError: boolean
+  filterColumn: string
+  filterPlaceholder?: string
+  showViewBtn?: boolean
+  showAddBtn?: boolean
+  addBtnLabel?: string
   rowsPerPage?: number[]
   noResultsMsg?: string
   errorMsg?: string
@@ -46,6 +51,11 @@ export function DataTable<TData, TValue>({
   pageSize,
   isLoading,
   isError,
+  filterColumn,
+  filterPlaceholder,
+  showViewBtn,
+  showAddBtn,
+  addBtnLabel,
   rowsPerPage,
   noResultsMsg = 'No results',
   errorMsg = 'There was an error fetching the data',
@@ -84,7 +94,15 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="flex flex-col gap-4">
-      <DataTableToolbar table={table} />
+      <DataTableToolbar
+        table={table}
+        filterColumn={filterColumn}
+        filterPlaceholder={filterPlaceholder}
+        showViewBtn={showViewBtn}
+        showAddBtn={showAddBtn}
+        addBtnLabel={addBtnLabel}
+      />
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
