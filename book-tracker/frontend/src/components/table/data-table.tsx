@@ -25,9 +25,9 @@ import {
 
 import { useState } from 'react'
 import { DataTablePagination } from './data-table-pagination'
-import { DataTableToolbar } from './data-table-toolbar'
+import { DataTableToolbar, type FacetedFilter } from './data-table-toolbar'
 import { SearchXIcon, TriangleAlertIcon } from 'lucide-react'
-import { Skeleton } from '../ui/skeleton'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -37,6 +37,7 @@ export interface DataTableProps<TData, TValue> {
   isError: boolean
   filterColumn: string
   filterPlaceholder?: string
+  facetedFilters?: FacetedFilter[]
   showViewBtn?: boolean
   showAddBtn?: boolean
   addBtnLabel?: string
@@ -53,6 +54,7 @@ export function DataTable<TData, TValue>({
   isError,
   filterColumn,
   filterPlaceholder,
+  facetedFilters,
   showViewBtn,
   showAddBtn,
   addBtnLabel,
@@ -98,6 +100,7 @@ export function DataTable<TData, TValue>({
         table={table}
         filterColumn={filterColumn}
         filterPlaceholder={filterPlaceholder}
+        facetedFilters={facetedFilters}
         showViewBtn={showViewBtn}
         showAddBtn={showAddBtn}
         addBtnLabel={addBtnLabel}

@@ -1,28 +1,41 @@
 'use client'
 
-import { priorities, statuses } from '@/data/data'
-
 import { Button } from '@/components/ui/button'
 import { DataTableFacetedFilter } from './data-table-faceted-filter'
 import { DataTableViewOptions } from './data-table-view-options'
 import { Input } from '@/components/ui/input'
 import type { Table } from '@tanstack/react-table'
 import { X } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
   filterColumn: string
   filterPlaceholder?: string
+  facetedFilters?: FacetedFilter[]
   showViewBtn?: boolean
   showAddBtn?: boolean
   addBtnLabel?: string
   onFilterChange?: (value: string) => void
 }
 
+export interface FacetedFilter {
+  key: string
+  title: string
+  options: FilterOptions[]
+}
+
+interface FilterOptions {
+  label: string
+  value: string
+  icon?: React.ComponentType<{ className?: string }>
+}
+
 export function DataTableToolbar<TData>({
   table,
   filterColumn,
   filterPlaceholder = 'Search...',
+  facetedFilters,
   showViewBtn = true,
   showAddBtn = true,
   addBtnLabel = 'Add',
@@ -39,27 +52,24 @@ export function DataTableToolbar<TData>({
   }
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex flex-1 items-center gap-2">
+    <div className="flex gap-4 items-start justify-between">
+      <div className="flex flex-wrap flex-1 items-center gap-2">
         <Input
           placeholder={filterPlaceholder}
           value={filterValue}
           onChange={handleFilterChange}
-          className="h-8 w-[150px] lg:w-[250px]"
+          className="h-8 w-full max-w-xs sm:max-w-[15rem]"
         />
-        {table.getColumn('status') && (
-          <DataTableFacetedFilter
-            column={table.getColumn('status')}
-            title="Status"
-            options={statuses}
-          />
-        )}
-        {table.getColumn('priority') && (
-          <DataTableFacetedFilter
-            column={table.getColumn('priority')}
-            title="Priority"
-            options={priorities}
-          />
+        {facetedFilters?.map(
+          ({ key, title, options }) =>
+            table.getColumn(key) && (
+              <DataTableFacetedFilter
+                key={key}
+                column={table.getColumn(key)!}
+                title={title}
+                options={options}
+              />
+            ),
         )}
         {isFiltered && (
           <Button
@@ -72,14 +82,21 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <div className="flex items-center gap-2">
-        {showViewBtn && <DataTableViewOptions table={table} />}
-        {showAddBtn && (
-          <Button size="sm" className="h-8">
-            {addBtnLabel}
-          </Button>
-        )}
-      </div>
+      {(showViewBtn || showAddBtn) && (
+        <div
+          className={cn(
+            'flex items-center gap-2',
+            showViewBtn && !showAddBtn && 'hidden md:flex',
+          )}
+        >
+          {showViewBtn && <DataTableViewOptions table={table} />}
+          {showAddBtn && (
+            <Button size="sm" className="h-8">
+              {addBtnLabel}
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   )
 }

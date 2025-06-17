@@ -1,5 +1,8 @@
+import { priorities, statuses } from '@/data/data'
+
 import type { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/table/data-table'
+import type { FacetedFilter } from '@/components/table/data-table-toolbar'
 
 interface BooksTableProps<TData, TValue> {
   data: TData[]
@@ -14,6 +17,19 @@ export function BooksTable<TData, TValue>({
   isLoading,
   isError,
 }: BooksTableProps<TData, TValue>) {
+  const facetedFilters: FacetedFilter[] = [
+    {
+      key: 'status',
+      title: 'Status',
+      options: statuses,
+    },
+    {
+      key: 'priority',
+      title: 'Priority',
+      options: priorities,
+    },
+  ]
+
   return (
     <DataTable
       columns={columns}
@@ -23,7 +39,8 @@ export function BooksTable<TData, TValue>({
       isError={isError}
       filterColumn="title"
       filterPlaceholder="Search by title..."
-      addBtnLabel='Add book'
+      facetedFilters={facetedFilters}
+      addBtnLabel="Add book"
       rowsPerPage={[10, 20, 25]}
     />
   )
