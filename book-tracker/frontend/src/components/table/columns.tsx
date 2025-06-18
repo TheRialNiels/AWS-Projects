@@ -5,9 +5,24 @@ import { Checkbox } from '@/components/ui/checkbox'
 import type { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from './data-table-column-header'
 import { DataTableRowActions } from './data-table-row-actions'
+import { DataTableRowDropdownActions } from './data-table-row-dropdown-actions'
 import type { Task } from '@/data/schema'
 
-export function getTaskColumns(showViewBtn: boolean): ColumnDef<Task>[] {
+export interface GetTaskColumnsProps {
+  showViewBtn: boolean
+  rowActionsStyle: RowActionsStyles
+  onEdit: (task: Task) => void
+  onDelete: (id: string) => void
+}
+
+type RowActionsStyles = 'row' | 'dropdown'
+
+export function getTaskColumns({
+  showViewBtn = true,
+  rowActionsStyle = 'row',
+  onEdit,
+  onDelete,
+}: GetTaskColumnsProps): ColumnDef<Task>[] {
   return [
     {
       id: 'select',
@@ -120,7 +135,16 @@ export function getTaskColumns(showViewBtn: boolean): ColumnDef<Task>[] {
     },
     {
       id: 'actions',
-      cell: ({ row }) => <DataTableRowActions row={row} />,
+      cell: ({ row }) =>
+        rowActionsStyle === 'row' ? (
+          <DataTableRowActions
+            row={row}
+            onEdit={() => onEdit(row.original)}
+            onDelete={() => onDelete(row.id)}
+          />
+        ) : (
+          <DataTableRowDropdownActions row={row} />
+        ),
     },
   ]
 }
