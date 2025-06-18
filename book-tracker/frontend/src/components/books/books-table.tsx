@@ -1,22 +1,23 @@
 import { priorities, statuses } from '@/data/data'
 
-import type { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/table/data-table'
 import type { FacetedFilter } from '@/components/table/data-table-toolbar'
+import type { Task } from '@/data/schema'
+import { getTaskColumns } from '@/components/table/columns'
 
-interface BooksTableProps<TData, TValue> {
+interface BooksTableProps<TData extends Task> {
   data: TData[]
-  columns: ColumnDef<TData, TValue>[]
   isLoading: boolean
   isError: boolean
 }
 
-export function BooksTable<TData, TValue>({
+export function BooksTable<TData extends Task>({
   data,
-  columns,
   isLoading,
   isError,
-}: BooksTableProps<TData, TValue>) {
+}: BooksTableProps<TData>) {
+  const showViewBtn = false
+  const columns = getTaskColumns(showViewBtn)
   const facetedFilters: FacetedFilter[] = [
     {
       key: 'status',
@@ -40,6 +41,7 @@ export function BooksTable<TData, TValue>({
       filterColumn="title"
       filterPlaceholder="Search by title..."
       facetedFilters={facetedFilters}
+      showViewBtn={showViewBtn}
       addBtnLabel="Add book"
       rowsPerPage={[10, 20, 25]}
     />

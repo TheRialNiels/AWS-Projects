@@ -1,4 +1,3 @@
-import { columns } from '@/components/table/columns'
 import { createFileRoute } from '@tanstack/react-router'
 import { taskSchema, type Task } from '@/data/schema'
 import tasksJson from '@/data/tasks.json' with { type: 'json' }
@@ -42,7 +41,6 @@ function App() {
 
       <BooksTable
         data={tasks}
-        columns={columns}
         isLoading={loading}
         isError={false}
       />
