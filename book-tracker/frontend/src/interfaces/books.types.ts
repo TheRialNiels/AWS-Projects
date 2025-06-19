@@ -47,3 +47,9 @@ export interface GetBooksResponse {
 interface GetBooksResponseData {
   books: Book[]
 }
+
+export interface PatchBookResponse {
+  message: string
+  responseData: Book
+  success: boolean
+}

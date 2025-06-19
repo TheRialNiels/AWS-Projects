@@ -19,14 +19,21 @@ import {
   type BookStatus,
   type BookTitle,
 } from '@/interfaces/books.types'
+import { Loader2 } from 'lucide-react'
 import { useCallback } from 'react'
 
 interface BookFormProps {
   onSubmit: (data: Book) => void
   book?: Book
+  isPending?: boolean
 }
 
-export function BookForm({ onSubmit, book, ...props }: BookFormProps) {
+export function BookForm({
+  onSubmit,
+  book,
+  isPending,
+  ...props
+}: BookFormProps) {
   const form = useAppForm({
     validators: {
       onChange: BookSchema,
@@ -67,6 +74,7 @@ export function BookForm({ onSubmit, book, ...props }: BookFormProps) {
                   value={field.state.value as BookTitle}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
+                  disabled={isPending}
                 />
               </field.FormControl>
               <field.FormDescription>
@@ -87,6 +95,7 @@ export function BookForm({ onSubmit, book, ...props }: BookFormProps) {
                   value={field.state.value as BookAuthor}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
+                  disabled={isPending}
                 />
               </field.FormControl>
               <field.FormDescription>
@@ -109,6 +118,7 @@ export function BookForm({ onSubmit, book, ...props }: BookFormProps) {
                     <Select
                       value={field.state.value as BookStatus}
                       onValueChange={(value) => field.handleChange(value)}
+                      disabled={isPending}
                     >
                       <SelectTrigger id={id} className="w-full">
                         <SelectValue placeholder="Select status" />
@@ -145,6 +155,7 @@ export function BookForm({ onSubmit, book, ...props }: BookFormProps) {
                     value={field.state.value as BookRating}
                     onChange={(e) => field.handleChange(Number(e.target.value))}
                     onBlur={field.handleBlur}
+                    disabled={isPending}
                   />
                 </field.FormControl>
                 <field.FormDescription className="text-xs">
@@ -166,7 +177,7 @@ export function BookForm({ onSubmit, book, ...props }: BookFormProps) {
                   placeholder="Enter any notes about the book"
                   value={field.state.value as BookNotes}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
+                  disabled={isPending}
                 />
               </field.FormControl>
               <field.FormDescription>
@@ -177,7 +188,16 @@ export function BookForm({ onSubmit, book, ...props }: BookFormProps) {
           )}
         />
 
-        <Button type="submit">Submit</Button>
+        {isPending ? (
+          <Button size="sm" disabled>
+            <Loader2 className="animate-spin" />
+            Loading...
+          </Button>
+        ) : (
+          <Button type="submit" className="cursor-pointer">
+            {book ? 'Update' : 'Submit'}
+          </Button>
+        )}
       </form>
     </form.AppForm>
   )

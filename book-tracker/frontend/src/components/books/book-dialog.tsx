@@ -8,8 +8,7 @@ import {
 
 import type { Book } from '@/interfaces/books.types'
 import { BookForm } from './book-form'
-
-// import { useErrorToast, useSuccessToast } from '@/lib/toastify'
+import { useUpdateBook } from '@/services/mutations/books.mutations'
 
 interface BookDialogProps {
   open: boolean
@@ -22,15 +21,23 @@ export function BookDialog({
   setOpen: setOpen,
   book: book,
 }: BookDialogProps) {
+  const successMsg = book
+    ? 'Book updated successfully'
+    : 'Book created successfully'
+  const errorMsg = book
+    ? 'There was an error updating the category'
+    : 'There was an error creating the category'
+  const { mutate, isPending } = useUpdateBook(setOpen, successMsg, errorMsg)
+
   const handleOnSubmit = (data: Book) => {
-    
-    // * Close dialog
-    setOpen(false)
-    // * Show success alert
-    // useSuccessToast(
-    //   book ? 'Book updated successfully' : 'Book created successfully',
-    // )
-    console.log('Book data submitted:', data)
+    // * Update existing book
+    if (book) {
+      mutate(data)
+      return
+    }
+
+    // * Handle create logic
+    console.log('Book creation logic goes here:', data)
   }
 
   return (
@@ -45,7 +52,7 @@ export function BookDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <BookForm book={book} />
+        <BookForm book={book} onSubmit={handleOnSubmit} isPending={isPending} />
       </DialogContent>
     </Dialog>
   )

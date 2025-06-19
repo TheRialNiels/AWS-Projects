@@ -1,14 +1,15 @@
-import { StrictMode } from 'react'
-import ReactDOM from 'react-dom/client'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
+import './styles.css'
 
 import * as TanStackQueryProvider from './integrations/tanstack-query/root-provider.tsx'
 
+import { RouterProvider, createRouter } from '@tanstack/react-router'
+
+import ReactDOM from 'react-dom/client'
+import { StrictMode } from 'react'
+import { Slide, ToastContainer, type ToastContainerProps } from 'react-toastify'
+import reportWebVitals from './reportWebVitals.ts'
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
-
-import './styles.css'
-import reportWebVitals from './reportWebVitals.ts'
 
 // Create a new router instance
 const router = createRouter({
@@ -33,10 +34,26 @@ declare module '@tanstack/react-router' {
 const rootElement = document.getElementById('app')
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
+    const toastConfig: ToastContainerProps = {
+    position: 'top-right',
+    autoClose: 3000,
+    hideProgressBar: false,
+    newestOnTop: true,
+    closeOnClick: true,
+    rtl: false,
+    pauseOnFocusLoss: true,
+    draggable: true,
+    pauseOnHover: true,
+    theme: 'dark',
+    transition: Slide,
+    toastClassName: 'bg-background! text-foreground!',
+  }
+
   root.render(
     <StrictMode>
       <TanStackQueryProvider.Provider>
         <RouterProvider router={router} />
+        <ToastContainer {...toastConfig} />
       </TanStackQueryProvider.Provider>
     </StrictMode>,
   )

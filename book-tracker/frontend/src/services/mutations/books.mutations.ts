@@ -3,6 +3,7 @@ import {
   patchBookApi,
   postBookApi,
 } from '@/services/api/books.api'
+import { useErrorToast, useSuccessToast } from '@/lib/toastify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import type { Book } from '@/interfaces/books.types'
@@ -20,15 +21,23 @@ export const useCreateBook = () => {
   })
 }
 
-export const useUpdateBook = () => {
+export const useUpdateBook = (
+  setOpen: (open: boolean) => void,
+  successMsg: string,
+  errorMsg: string,
+) => {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (data: Book) => patchBookApi(data),
-
-    onSettled: async (_, error) => {
-      if (error) return
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['getBooks'] })
+      setOpen(false)
+      useSuccessToast(successMsg)
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data.message || errorMsg
+      useErrorToast(errorMessage)
     },
   })
 }
