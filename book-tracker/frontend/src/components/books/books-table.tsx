@@ -12,20 +12,17 @@ interface BooksTableProps<TData extends Book> {
   data: TData[]
   isLoading: boolean
   isError: boolean
+  onEdit: (data: Book) => void
+  onDelete: (id: string) => void
 }
 
 export function BooksTable<TData extends Book>({
   data,
   isLoading,
   isError,
+  onEdit,
+  onDelete
 }: BooksTableProps<TData>) {
-  const onEdit = (row: Book) => {
-    console.log('🚀 ~ onEdit ~ row:', row)
-  }
-  const onDelete = (id: string) => {
-    console.log('🚀 ~ onDelete ~ id:', id)
-  }
-
   const showViewBtn = false
   const columnsConfig: GetBooksColumnsProps = {
     showViewBtn,

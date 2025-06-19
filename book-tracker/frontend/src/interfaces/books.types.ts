@@ -12,7 +12,7 @@ export const BookTitleSchema = stringField('Title', 3, 60)
 export const BookAuthorSchema = stringField('Author', 3, 60)
 const bookStatus = ['READING', 'COMPLETED', 'WISHLIST', 'ABANDONED']
 export const BookStatusSchema = enumField('Status', bookStatus)
-export const BookRatingSchema = numberField('Rating', 1, 5)
+export const BookRatingSchema = numberField('Rating', 0, 5)
 export const BookNotesSchema = stringField('Notes', 3, 500)
 
 export const BookSchema = createSchema({
@@ -25,6 +25,12 @@ export const BookSchema = createSchema({
 })
 
 export type Book = InferSchema<typeof BookSchema>
+export type BookId = InferSchema<typeof BookIdSchema>
+export type BookTitle = InferSchema<typeof BookTitleSchema>
+export type BookAuthor = InferSchema<typeof BookAuthorSchema>
+export type BookStatus = InferSchema<typeof BookStatusSchema>
+export type BookRating = InferSchema<typeof BookRatingSchema>
+export type BookNotes = InferSchema<typeof BookNotesSchema>
 
 export interface CreateBookResponse {
   message: string

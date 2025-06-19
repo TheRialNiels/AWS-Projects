@@ -1,14 +1,32 @@
+import type { Book } from '../interfaces/books.types'
+import { BookDialog } from '@/components/books/book-dialog'
 import { BooksTable } from '@/components/books/books-table'
 import { createFileRoute } from '@tanstack/react-router'
 import { useGetBooks } from '@/services/queries/books.queries'
+import { useState } from 'react'
 
 export const Route = createFileRoute('/')({
   component: App,
 })
 
 function App() {
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editBook, setEditBook] = useState<Book | null>(null)
   const { data, isError, isLoading } = useGetBooks()
   const books = data?.responseData.books ?? []
+
+  const handleSetDialogOpen = (open: boolean) => {
+    setDialogOpen(open)
+  }
+
+  const handleEditBook = (book: Book) => {
+    setEditBook(book)
+    setDialogOpen(true)
+  }
+
+  const handleDeleteBook = (id: string) => {
+    console.log('Delete book:', id)
+  }
 
   return (
     <>
@@ -21,7 +39,19 @@ function App() {
         needed.
       </p>
 
-      <BooksTable data={books} isLoading={isLoading} isError={isError} />
+      <BooksTable
+        data={books}
+        isLoading={isLoading}
+        isError={isError}
+        onEdit={handleEditBook}
+        onDelete={handleDeleteBook}
+      />
+
+      <BookDialog
+        open={dialogOpen}
+        book={editBook ?? undefined}
+        setOpen={handleSetDialogOpen}
+      />
     </>
   )
 }
