@@ -1,32 +1,14 @@
+import { BooksTable } from '@/components/books/books-table'
 import { createFileRoute } from '@tanstack/react-router'
-import { taskSchema, type Task } from '@/data/schema'
-import tasksJson from '@/data/tasks.json' with { type: 'json' }
-import { z } from 'zod'
-import { BooksTable } from '../components/books/books-table'
-import { useEffect, useState } from 'react'
+import { useGetBooks } from '@/services/queries/books.queries'
 
 export const Route = createFileRoute('/')({
   component: App,
 })
 
-function getTasks(): Task[] {
-  const tasks: Task[] = tasksJson
-
-  return z.array(taskSchema).parse(tasks)
-}
-
 function App() {
-  const [tasks, setTasks] = useState<[] | Task[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setTasks(getTasks())
-      setLoading(false)
-    }, 3000)
-
-    return () => clearTimeout(timeout)
-  }, [])
+  const { data, isError, isLoading } = useGetBooks()
+  const books = data?.responseData.books ?? []
 
   return (
     <>
@@ -39,11 +21,7 @@ function App() {
         needed.
       </p>
 
-      <BooksTable
-        data={tasks}
-        isLoading={loading}
-        isError={false}
-      />
+      <BooksTable data={books} isLoading={isLoading} isError={isError} />
     </>
   )
 }

@@ -25,9 +25,9 @@ export interface FacetedFilter {
   options: FilterOptions[]
 }
 
-interface FilterOptions {
+export interface FilterOptions {
   label: string
-  value: string
+  value: string | number
   icon?: React.ComponentType<{ className?: string }>
 }
 

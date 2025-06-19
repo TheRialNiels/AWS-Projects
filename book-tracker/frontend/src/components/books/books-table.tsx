@@ -1,22 +1,25 @@
-import { priorities, statuses } from '@/data/data'
+import { ratings, statuses } from '@/data/data'
 
+import {
+  getBooksColumns,
+  type GetBooksColumnsProps,
+} from '@/components/books/columns'
 import { DataTable } from '@/components/table/data-table'
 import type { FacetedFilter } from '@/components/table/data-table-toolbar'
-import type { Task } from '@/data/schema'
-import { getTaskColumns, type GetTaskColumnsProps } from '@/components/table/columns'
+import type { Book } from '@/interfaces/books.types'
 
-interface BooksTableProps<TData extends Task> {
+interface BooksTableProps<TData extends Book> {
   data: TData[]
   isLoading: boolean
   isError: boolean
 }
 
-export function BooksTable<TData extends Task>({
+export function BooksTable<TData extends Book>({
   data,
   isLoading,
   isError,
 }: BooksTableProps<TData>) {
-  const onEdit = (row: Task) => {
+  const onEdit = (row: Book) => {
     console.log('🚀 ~ onEdit ~ row:', row)
   }
   const onDelete = (id: string) => {
@@ -24,13 +27,13 @@ export function BooksTable<TData extends Task>({
   }
 
   const showViewBtn = false
-  const columnsConfig: GetTaskColumnsProps = {
+  const columnsConfig: GetBooksColumnsProps = {
     showViewBtn,
     rowActionsStyle: 'row',
     onEdit,
-    onDelete
+    onDelete,
   }
-  const columns = getTaskColumns(columnsConfig)
+  const columns = getBooksColumns(columnsConfig)
   const facetedFilters: FacetedFilter[] = [
     {
       key: 'status',
@@ -38,9 +41,9 @@ export function BooksTable<TData extends Task>({
       options: statuses,
     },
     {
-      key: 'priority',
-      title: 'Priority',
-      options: priorities,
+      key: 'rating',
+      title: 'Rating',
+      options: ratings,
     },
   ]
 

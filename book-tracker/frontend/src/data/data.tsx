@@ -1,71 +1,52 @@
-import {
-  ArrowDown,
-  ArrowRight,
-  ArrowUp,
-  CheckCircle,
-  Circle,
-  CircleOff,
-  HelpCircle,
-  Timer,
-} from 'lucide-react'
-
-export const labels = [
-  {
-    value: 'bug',
-    label: 'Bug',
-  },
-  {
-    value: 'feature',
-    label: 'Feature',
-  },
-  {
-    value: 'documentation',
-    label: 'Documentation',
-  },
-]
+import { BookCheck, BookHeart, BookOpenText, BookX, Star } from 'lucide-react'
 
 export const statuses = [
   {
-    value: 'backlog',
-    label: 'Backlog',
-    icon: HelpCircle,
+    value: 'READING',
+    label: 'Reading',
+    icon: BookOpenText,
   },
   {
-    value: 'todo',
-    label: 'Todo',
-    icon: Circle,
+    value: 'COMPLETED',
+    label: 'Completed',
+    icon: BookCheck,
   },
   {
-    value: 'in progress',
-    label: 'In Progress',
-    icon: Timer,
+    value: 'WISHLIST',
+    label: 'Wishlist',
+    icon: BookHeart,
   },
   {
-    value: 'done',
-    label: 'Done',
-    icon: CheckCircle,
-  },
-  {
-    value: 'canceled',
-    label: 'Canceled',
-    icon: CircleOff,
+    value: 'ABANDONED',
+    label: 'Abandoned',
+    icon: BookX,
   },
 ]
 
-export const priorities = [
+export const ratings = [
   {
-    label: 'Low',
-    value: 'low',
-    icon: ArrowDown,
+    label: '1 star',
+    value: 1,
+    icon: Star,
   },
   {
-    label: 'Medium',
-    value: 'medium',
-    icon: ArrowRight,
+    label: '2 stars',
+    value: 2,
+    icon: Star,
   },
   {
-    label: 'High',
-    value: 'high',
-    icon: ArrowUp,
+    label: '3 stars',
+    value: 3,
+    icon: Star,
+  },
+  {
+    label: '4 stars',
+    value: 4,
+    icon: Star,
+  },
+  {
+    label: '5 stars',
+    value: 5,
+    icon: Star,
   },
 ]

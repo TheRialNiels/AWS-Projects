@@ -1,9 +1,9 @@
 import { createEnv } from '@t3-oss/env-core'
-import { z } from 'zod'
+import { urlField } from '@/lib/zod'
 
 export const env = createEnv({
   server: {
-    SERVER_URL: z.string().url().optional(),
+    SERVER_URL: urlField('Server Url').optional(),
   },
 
   /**
@@ -13,7 +13,7 @@ export const env = createEnv({
   clientPrefix: 'VITE_',
 
   client: {
-    VITE_APP_TITLE: z.string().min(1).optional(),
+    VITE_BASE_URL: urlField('Base Url'),
   },
 
   /**

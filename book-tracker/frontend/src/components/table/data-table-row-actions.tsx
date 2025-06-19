@@ -1,13 +1,14 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { taskSchema, type Task } from '@/data/schema'
-import type { Row } from '@tanstack/react-table'
 import { SquarePen, Trash2 } from 'lucide-react'
+
+import { Button } from '@/components/ui/button'
+import { BookSchema, type Book } from '@/interfaces/books.types'
+import type { Row } from '@tanstack/react-table'
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
-  onEdit: (category: Task) => void
+  onEdit: (category: Book) => void
   onDelete: (id: string) => void
   editLabelBtn?: string
   deleteLabelBtn?: string
@@ -20,7 +21,7 @@ export function DataTableRowActions<TData>({
   editLabelBtn = 'Edit record',
   deleteLabelBtn = 'Delete record',
 }: DataTableRowActionsProps<TData>) {
-  const task = taskSchema.parse(row.original)
+  const task = BookSchema.parse(row.original)
 
   return (
     <div className="inline-flex gap-3">

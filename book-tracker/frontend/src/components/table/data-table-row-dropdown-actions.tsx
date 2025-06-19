@@ -4,20 +4,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+import { BookSchema } from '@/interfaces/books.types'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal } from 'lucide-react'
 import type { Row } from '@tanstack/react-table'
-import { labels } from '@/data/data'
-import { taskSchema } from '@/data/schema'
 
 interface DataTableRowDropdownActionsProps<TData> {
   row: Row<TData>
@@ -26,7 +20,8 @@ interface DataTableRowDropdownActionsProps<TData> {
 export function DataTableRowDropdownActions<TData>({
   row,
 }: DataTableRowDropdownActionsProps<TData>) {
-  const task = taskSchema.parse(row.original)
+  const book = BookSchema.parse(row.original)
+  console.log('🚀 ~ book:', book)
 
   return (
     <DropdownMenu>
@@ -42,21 +37,6 @@ export function DataTableRowDropdownActions<TData>({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[160px]">
         <DropdownMenuItem>Edit</DropdownMenuItem>
-        <DropdownMenuItem>Make a copy</DropdownMenuItem>
-        <DropdownMenuItem>Favorite</DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>Labels</DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuRadioGroup value={task.label}>
-              {labels.map((label) => (
-                <DropdownMenuRadioItem key={label.value} value={label.value}>
-                  {label.label}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
       </DropdownMenuContent>

@@ -1,30 +1,28 @@
-import { labels, priorities, statuses } from '@/data/data'
+import { ratings, statuses } from '@/data/data'
 
-import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
+import type { Book } from '@/interfaces/books.types'
 import type { ColumnDef } from '@tanstack/react-table'
-import { DataTableColumnHeader } from './data-table-column-header'
-import { DataTableRowActions } from './data-table-row-actions'
-import { DataTableRowDropdownActions } from './data-table-row-dropdown-actions'
-import type { Task } from '@/data/schema'
+import { DataTableColumnHeader } from '@/components/table/data-table-column-header'
+import { DataTableRowActions } from '@/components/table/data-table-row-actions'
+import { DataTableRowDropdownActions } from '@/components/table/data-table-row-dropdown-actions'
 
-export interface GetTaskColumnsProps {
+export interface GetBooksColumnsProps {
   showViewBtn: boolean
   rowActionsStyle: RowActionsStyles
-  onEdit: (task: Task) => void
+  onEdit: (task: Book) => void
   onDelete: (id: string) => void
 }
 
 type RowActionsStyles = 'row' | 'dropdown'
 
-export function getTaskColumns({
+export function getBooksColumns({
   showViewBtn = true,
   rowActionsStyle = 'row',
   onEdit,
   onDelete,
-}: GetTaskColumnsProps): ColumnDef<Task>[] {
+}: GetBooksColumnsProps): ColumnDef<Book>[] {
   return [
-    {
+    /*{
       id: 'select',
       header: ({ table }) => (
         <Checkbox
@@ -47,41 +45,39 @@ export function getTaskColumns({
       ),
       enableSorting: false,
       enableHiding: false,
-    },
-    {
-      accessorKey: 'id',
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title="Task"
-          showViewBtn={showViewBtn}
-        />
-      ),
-      cell: ({ row }) => <div className="w-[80px]">{row.getValue('id')}</div>,
-      enableSorting: false,
-      enableHiding: false,
-    },
+    },*/
     {
       accessorKey: 'title',
+      size: 400,
       header: ({ column }) => (
         <DataTableColumnHeader
+          className="pl-2"
           column={column}
           title="Title"
           showViewBtn={showViewBtn}
         />
       ),
       cell: ({ row }) => {
-        const label = labels.find((label) => label.value === row.original.label)
-
         return (
-          <div className="flex gap-2">
-            {label && <Badge variant="outline">{label.label}</Badge>}
-            <span className="max-w-[300px] truncate font-medium">
+          <div className="flex gap-2 pl-2">
+            <span className="truncate font-medium">
               {row.getValue('title')}
             </span>
           </div>
         )
       },
+    },
+    {
+      accessorKey: 'author',
+      size: 300,
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title="Author"
+          showViewBtn={showViewBtn}
+        />
+      ),
+      cell: ({ row }) => <div>{row.getValue('author')}</div>,
     },
     {
       accessorKey: 'status',
@@ -98,7 +94,7 @@ export function getTaskColumns({
         )
         if (!status) return null
         return (
-          <div className="flex w-[100px] items-center gap-2">
+          <div className="flex items-center gap-2">
             {status.icon && (
               <status.icon className="text-muted-foreground size-4" />
             )}
@@ -109,32 +105,36 @@ export function getTaskColumns({
       filterFn: (row, id, value) => value.includes(row.getValue(id)),
     },
     {
-      accessorKey: 'priority',
+      accessorKey: 'rating',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title="Priority"
+          title="Rating"
           showViewBtn={showViewBtn}
         />
       ),
       cell: ({ row }) => {
-        const priority = priorities.find(
-          (priority) => priority.value === row.getValue('priority'),
-        )
-        if (!priority) return null
+        const rowRating: number = row.getValue('rating')
+        const rating = ratings.find((rating) => rating.value === rowRating)
+        if (!rating) return null
         return (
           <div className="flex items-center gap-2">
-            {priority.icon && (
-              <priority.icon className="text-muted-foreground size-4" />
-            )}
-            <span>{priority.label}</span>
+            <div
+              className="flex items-center gap-1 text-muted-foreground"
+              title={rating.label}
+            >
+              {Array.from({ length: rowRating }, (_, i) => (
+                <rating.icon key={i} className="size-4" />
+              ))}
+            </div>
           </div>
         )
       },
-      filterFn: (row, id, value) => value.includes(row.getValue(id)),
+      filterFn: (row, id, value) => value.includes(String(row.getValue(id))),
     },
     {
       id: 'actions',
+      size: 100,
       cell: ({ row }) =>
         rowActionsStyle === 'row' ? (
           <DataTableRowActions
