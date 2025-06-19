@@ -59,6 +59,7 @@ export function BooksTable<TData extends Book>({
       facetedFilters={facetedFilters}
       showViewBtn={showViewBtn}
       addBtnLabel="Add book"
+      showRowsSelected={false}
       rowsPerPage={[10, 20, 25]}
     />
   )

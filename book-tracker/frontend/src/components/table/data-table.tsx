@@ -41,6 +41,7 @@ export interface DataTableProps<TData, TValue> {
   showViewBtn?: boolean
   showAddBtn?: boolean
   addBtnLabel?: string
+  showRowsSelected?: boolean
   rowsPerPage?: number[]
   noResultsMsg?: string
   errorMsg?: string
@@ -58,6 +59,7 @@ export function DataTable<TData, TValue>({
   showViewBtn,
   showAddBtn,
   addBtnLabel,
+  showRowsSelected,
   rowsPerPage,
   noResultsMsg = 'No results',
   errorMsg = 'There was an error fetching the data',
@@ -186,7 +188,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} rowsPerPage={rowsPerPage} />
+      <DataTablePagination table={table} showRowsSelected={showRowsSelected} rowsPerPage={rowsPerPage} />
     </div>
   )
 }
