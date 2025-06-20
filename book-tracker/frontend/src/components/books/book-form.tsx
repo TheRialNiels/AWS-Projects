@@ -105,14 +105,14 @@ export function BookForm({
             </field.FormItem>
           )}
         />
-        <div className="flex items-start gap-4 justify-between">
+        <div className="flex flex-col sm:flex-row items-start gap-4 justify-between">
           <form.AppField
             name="status"
             children={(field) => {
               const id = 'book-select'
 
               return (
-                <field.FormItem>
+                <field.FormItem className="w-full flex-1">
                   <field.FormLabel htmlFor={id}>Status</field.FormLabel>
                   <field.FormControl>
                     <Select
@@ -144,7 +144,7 @@ export function BookForm({
           <form.AppField
             name="rating"
             children={(field) => (
-              <field.FormItem>
+              <field.FormItem className="w-full sm:w-auto">
                 <field.FormLabel>Rating</field.FormLabel>
                 <field.FormControl>
                   <Input
@@ -159,7 +159,7 @@ export function BookForm({
                   />
                 </field.FormControl>
                 <field.FormDescription className="text-xs">
-                  Enter a rating from 0 to 5. Default is 0.
+                  Enter a rating from 0 to 5.
                 </field.FormDescription>
                 <field.FormMessage className="text-xs" />
               </field.FormItem>
@@ -189,12 +189,12 @@ export function BookForm({
         />
 
         {isPending ? (
-          <Button size="sm" disabled>
+          <Button size="sm" disabled className="w-full sm:w-auto">
             <Loader2 className="animate-spin" />
             Loading...
           </Button>
         ) : (
-          <Button type="submit" className="cursor-pointer">
+          <Button type="submit" className="w-full sm:w-auto">
             {book ? 'Update' : 'Submit'}
           </Button>
         )}

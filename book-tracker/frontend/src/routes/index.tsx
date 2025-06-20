@@ -19,6 +19,11 @@ function App() {
     setDialogOpen(open)
   }
 
+  const handleAddBook = () => {
+    setEditBook(null)
+    setDialogOpen(true)
+  }
+
   const handleEditBook = (book: Book) => {
     setEditBook(book)
     setDialogOpen(true)
@@ -43,6 +48,7 @@ function App() {
         data={books}
         isLoading={isLoading}
         isError={isError}
+        onAdd={handleAddBook}
         onEdit={handleEditBook}
         onDelete={handleDeleteBook}
       />

@@ -45,6 +45,7 @@ export interface DataTableProps<TData, TValue> {
   rowsPerPage?: number[]
   noResultsMsg?: string
   errorMsg?: string
+  onAdd?: () => void
 }
 
 export function DataTable<TData, TValue>({
@@ -63,6 +64,7 @@ export function DataTable<TData, TValue>({
   rowsPerPage,
   noResultsMsg = 'No results',
   errorMsg = 'There was an error fetching the data',
+  onAdd
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -106,6 +108,7 @@ export function DataTable<TData, TValue>({
         showViewBtn={showViewBtn}
         showAddBtn={showAddBtn}
         addBtnLabel={addBtnLabel}
+        onAdd={onAdd}
       />
 
       <div className="rounded-md border">

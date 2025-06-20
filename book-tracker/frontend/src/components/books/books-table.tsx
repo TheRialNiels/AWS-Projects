@@ -12,6 +12,7 @@ interface BooksTableProps<TData extends Book> {
   data: TData[]
   isLoading: boolean
   isError: boolean
+  onAdd: () => void
   onEdit: (data: Book) => void
   onDelete: (id: string) => void
 }
@@ -20,6 +21,7 @@ export function BooksTable<TData extends Book>({
   data,
   isLoading,
   isError,
+  onAdd,
   onEdit,
   onDelete
 }: BooksTableProps<TData>) {
@@ -58,6 +60,7 @@ export function BooksTable<TData extends Book>({
       addBtnLabel="Add book"
       showRowsSelected={false}
       rowsPerPage={[10, 20, 25]}
+      onAdd={onAdd}
     />
   )
 }
