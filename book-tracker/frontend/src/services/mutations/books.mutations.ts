@@ -4,8 +4,9 @@ import {
   patchBookApi,
   postBookApi,
 } from '@/services/api/books.api'
-import { useErrorToast, useSuccessToast } from '@/lib/toastify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+
+import { useOptimisticMutation } from '@/services/mutations/useOptimistic.mutations'
 
 export const useCreateBook = () => {
   const queryClient = useQueryClient()
@@ -25,64 +26,21 @@ export const useUpdateBook = (
   successMsg: string,
   errorMsg: string,
 ) => {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: (data: Book) => patchBookApi(data),
-
-    // * Optimistically update UI
-    onMutate: async (updatedBook) => {
-      await queryClient.cancelQueries({ queryKey: ['getBooks'] })
-
-      const previousBooks = queryClient.getQueryData<GetBooksResponse>([
-        'getBooks',
-      ])
-
-      queryClient.setQueryData<GetBooksResponse>(['getBooks'], (old) => {
-        return old
-          ? {
-              ...old,
-              responseData: {
-                ...old.responseData,
-                books: old.responseData.books.map((book) =>
-                  book.id === updatedBook.id
-                    ? { ...book, ...updatedBook }
-                    : book,
-                ),
-              },
-            }
-          : old
-      })
-
-      return { previousBooks }
-    },
-
-    // * If error, rollback
-    onError: (error: any, _variables, context) => {
-      const errorMessage = error?.response?.data.message || errorMsg
-      if (context?.previousBooks) {
-        queryClient.setQueryData(['getBooks'], context.previousBooks)
-      }
-      useErrorToast(errorMessage)
-    },
-
-    // * If success, keep optimistic update and notify
-    onSuccess: (response) => {
-      // * Validate response against optimistic data
-      if (response && response.responseData.id) {
-        setOpen(false)
-        useSuccessToast(successMsg)
-        return
-      }
-      // * If backend didn't confirm, rollback
-      queryClient.invalidateQueries({ queryKey: ['getBooks'] })
-      useErrorToast('Update not confirmed by server.')
-    },
-
-    // * Re-sync with server to ensure consistency (optional)
-    // onSettled: async () => {
-    //   await queryClient.invalidateQueries({ queryKey: ['getBooks'] })
-    // },
+  return useOptimisticMutation<Book, Book>({
+    queryKey: ['getBooks'],
+    getId: (book) => book.id!,
+    mutationFn: patchBookApi,
+    getItems: (data: GetBooksResponse) => data.responseData.books,
+    setItems: (newBooks, oldData: GetBooksResponse) => ({
+      ...oldData,
+      responseData: {
+        ...oldData.responseData,
+        books: newBooks,
+      },
+    }),
+    successMsg,
+    errorMsg,
+    onDone: () => setOpen(false),
   })
 }
 
