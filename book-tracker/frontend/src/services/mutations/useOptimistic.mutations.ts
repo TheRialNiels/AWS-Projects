@@ -10,6 +10,7 @@ interface UseOptimisticMutationOptions<TData, TVariables> {
   successMsg: string
   errorMsg: string
   onDone?: () => void
+  updateItems?: (prevItems: TData[], newItem: TVariables) => TData[]
 }
 
 export function useOptimisticMutation<TData, TVariables>({
@@ -21,13 +22,14 @@ export function useOptimisticMutation<TData, TVariables>({
   successMsg,
   errorMsg,
   onDone,
+  updateItems,
 }: UseOptimisticMutationOptions<TData, TVariables>) {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn,
 
-    onMutate: async (updatedItem: TVariables) => {
+    onMutate: async (newItem: TVariables) => {
       await queryClient.cancelQueries({ queryKey })
 
       const previousData = queryClient.getQueryData<any>(queryKey)
@@ -35,10 +37,13 @@ export function useOptimisticMutation<TData, TVariables>({
       queryClient.setQueryData<any>(queryKey, (old: any) => {
         if (!old) return old
         const items = getItems(old)
-        const updatedId = getId(updatedItem)
-        const newItems = items.map((item) =>
-          getId(item) === updatedId ? { ...item, ...updatedItem } : item,
-        )
+        const updatedId = getId(newItem)
+
+        const newItems = updateItems
+          ? updateItems(items, newItem)
+          : items.map((item) =>
+              getId(item) === updatedId ? { ...item, ...newItem } : item,
+            )
         return setItems(newItems, old)
       })
 
