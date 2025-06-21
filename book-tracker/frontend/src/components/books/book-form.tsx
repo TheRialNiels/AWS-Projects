@@ -10,15 +10,7 @@ import {
 import { useAppForm } from '@/components/ui/tanstack-form'
 import { Textarea } from '@/components/ui/textarea'
 import { statuses } from '@/data/data'
-import {
-  BookSchema,
-  type Book,
-  type BookAuthor,
-  type BookNotes,
-  type BookRating,
-  type BookStatus,
-  type BookTitle,
-} from '@/interfaces/books.types'
+import { BookSchema, type Book } from '@/interfaces/books.types'
 import { Loader2 } from 'lucide-react'
 import { useCallback } from 'react'
 
@@ -41,22 +33,21 @@ export function BookForm({
     defaultValues: book ?? {
       title: '',
       author: '',
-      status: '',
+      status: 'WISHLIST',
+      rating: 0,
+      notes: '',
     },
     onSubmit: ({ formApi, value }) => {
-      onSubmit(value)
+      onSubmit(value as Book)
       formApi.reset()
     },
-    // onSubmit: ({ value }: { value: Book }) => {
-    //   console.log('🚀 ~ BookForm ~ value:', value)
-    // },
   })
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
+    (e: React.FormEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      await form.handleSubmit()
+      form.handleSubmit()
     },
     [form],
   )
@@ -71,7 +62,7 @@ export function BookForm({
               <field.FormControl>
                 <Input
                   placeholder="Enter book title"
-                  value={field.state.value as BookTitle}
+                  value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
                   disabled={isPending}
@@ -92,7 +83,7 @@ export function BookForm({
               <field.FormControl>
                 <Input
                   placeholder="Enter book author"
-                  value={field.state.value as BookAuthor}
+                  value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
                   disabled={isPending}
@@ -116,7 +107,7 @@ export function BookForm({
                   <field.FormLabel htmlFor={id}>Status</field.FormLabel>
                   <field.FormControl>
                     <Select
-                      value={field.state.value as BookStatus}
+                      value={field.state.value}
                       onValueChange={(value) => field.handleChange(value)}
                       disabled={isPending}
                     >
@@ -152,7 +143,7 @@ export function BookForm({
                     inputMode="numeric"
                     min={0}
                     max={5}
-                    value={field.state.value as BookRating}
+                    value={field.state.value}
                     onChange={(e) => field.handleChange(Number(e.target.value))}
                     onBlur={field.handleBlur}
                     disabled={isPending}
@@ -175,7 +166,7 @@ export function BookForm({
               <field.FormControl>
                 <Textarea
                   placeholder="Enter any notes about the book"
-                  value={field.state.value as BookNotes}
+                  value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   disabled={isPending}
                 />

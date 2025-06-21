@@ -7,21 +7,40 @@ import {
   uuidField,
 } from '@/lib/zod'
 
-export const BookIdSchema = uuidField('Book ID')
-export const BookTitleSchema = stringField('Title', 3, 60)
-export const BookAuthorSchema = stringField('Author', 3, 60)
-const bookStatus = ['READING', 'COMPLETED', 'WISHLIST', 'ABANDONED']
+export const BookIdSchema = uuidField('Book ID', { optional: true })
+export const BookTitleSchema = stringField('Title', {
+  minLength: 3,
+  maxLength: 60
+})
+export const BookAuthorSchema = stringField('Author', {
+  minLength: 3,
+  maxLength: 60
+})
+const bookStatus: [string, ...string[]] = [
+  'READING',
+  'COMPLETED',
+  'WISHLIST',
+  'ABANDONED',
+]
 export const BookStatusSchema = enumField('Status', bookStatus)
-export const BookRatingSchema = numberField('Rating', 0, 5)
-export const BookNotesSchema = stringField('Notes', 3, 500)
+export const BookRatingSchema = numberField('Rating', {
+  minLength: 0,
+  maxLength: 5,
+  optional: true,
+})
+export const BookNotesSchema = stringField('Notes', {
+  minLength: 3,
+  maxLength: 500,
+  optional: true,
+})
 
 export const BookSchema = createSchema({
-  id: () => BookIdSchema.optional(),
+  id: () => BookIdSchema,
   title: () => BookTitleSchema,
   author: () => BookAuthorSchema,
   status: () => BookStatusSchema,
-  rating: () => BookRatingSchema.optional(),
-  notes: () => BookNotesSchema.optional(),
+  rating: () => BookRatingSchema,
+  notes: () => BookNotesSchema,
 })
 
 export type Book = InferSchema<typeof BookSchema>
