@@ -87,6 +87,7 @@ function App() {
         open={bookDeleteOpen}
         book={book as Book}
         setOpen={handleSetBookDeleteDialogOpen}
+        onResetPagination={() => setCursor(null)}
       />
     </>
   )

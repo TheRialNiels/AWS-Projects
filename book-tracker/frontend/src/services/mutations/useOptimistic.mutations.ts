@@ -47,7 +47,14 @@ export function useOptimisticMutation<TData, TVariables>({
           : items.map((item) =>
               getId(item) === updatedId ? { ...item, ...newItem } : item,
             )
-        return setItems(newItems, old)
+
+        const sortedItems = newItems.sort((a: any, b: any) => {
+          return (
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+          )
+        })
+
+        return setItems(sortedItems, old)
       })
 
       return { previousData }
@@ -66,6 +73,7 @@ export function useOptimisticMutation<TData, TVariables>({
       if (updatedItem && getId(updatedItem)) {
         onDone?.()
         useSuccessToast(successMsg)
+        queryClient.invalidateQueries({ queryKey })
         return
       }
       queryClient.invalidateQueries({ queryKey })

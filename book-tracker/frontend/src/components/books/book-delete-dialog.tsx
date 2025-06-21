@@ -15,17 +15,20 @@ interface BookDeleteDialogProps {
   open: boolean
   book: Book
   setOpen: (open: boolean) => void
+  onResetPagination: () => void
 }
 
 export function BookDeleteDialog({
   open,
   book,
-  setOpen: setOpen,
+  setOpen,
+  onResetPagination,
 }: BookDeleteDialogProps) {
   const { mutate: deleteBook, isPending } = useDeleteBook(
     setOpen,
     'Book deleted successfully',
     'There was an error deleting the book',
+    onResetPagination,
   )
 
   const handleDelete = () => {

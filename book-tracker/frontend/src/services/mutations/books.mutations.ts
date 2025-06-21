@@ -13,7 +13,7 @@ export const useCreateBook = (
   setOpen: (open: boolean) => void,
   successMsg: string,
   errorMsg: string,
-  onResetPagination?: () => void,
+  onResetPagination: () => void,
 ) => {
   return useOptimisticMutation<Book, Book>({
     mutationKey: ['create-book'],
@@ -57,6 +57,7 @@ export const useUpdateBook = (
   setOpen: (open: boolean) => void,
   successMsg: string,
   errorMsg: string,
+  onResetPagination: () => void,
 ) => {
   return useOptimisticMutation<Book, Book>({
     mutationKey: ['edit-book'],
@@ -73,7 +74,10 @@ export const useUpdateBook = (
     }),
     successMsg,
     errorMsg,
-    onDone: () => setOpen(false),
+    onDone: () => {
+      onResetPagination?.()
+      setOpen(false)
+    },
   })
 }
 
@@ -93,6 +97,7 @@ export const useDeleteBook = (
   setOpen: (open: boolean) => void,
   successMsg: string,
   errorMsg: string,
+  onResetPagination: () => void,
 ) => {
   return useOptimisticMutation<Book, Book>({
     mutationKey: ['delete-book'],
@@ -111,7 +116,10 @@ export const useDeleteBook = (
       prevBooks.filter((book) => book.id !== deletedBook.id),
     successMsg,
     errorMsg,
-    onDone: () => setOpen(false),
+    onDone: () => {
+      onResetPagination?.()
+      setOpen(false)
+    },
   })
 }
 

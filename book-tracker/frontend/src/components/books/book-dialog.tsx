@@ -18,15 +18,15 @@ import { BookForm } from './book-form'
 interface BookDialogProps {
   open: boolean
   setOpen: (open: boolean) => void
+  onResetPagination: () => void
   book?: Book
-  onResetPagination?: () => void
 }
 
 export function BookDialog({
   open,
-  setOpen: setOpen,
-  book: book,
+  setOpen,
   onResetPagination,
+  book: book,
 }: BookDialogProps) {
   const isEditMode = !!book
 
@@ -40,6 +40,7 @@ export function BookDialog({
     setOpen,
     successMsg,
     errorMsg,
+    onResetPagination,
   )
   const { mutate: createBook, isPending: isCreating } = useCreateBook(
     setOpen,
