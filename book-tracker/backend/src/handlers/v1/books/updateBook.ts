@@ -17,7 +17,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
 import { BooksDynamoDBClient } from '@lib/booksDynamoDBClient'
 import { env } from '@lib/packages/env'
-import { returnFlattenError } from '@lib/packages/zod'
+import { returnFlattenError, validateSchema } from '@lib/packages/zod'
 import { isString } from '@lib/utils'
 
 const dynamoDbConfig = {
@@ -58,12 +58,14 @@ export const handler = async (
     body.id = event.pathParameters?.id || ''
 
     // * Trim whitespace
-    isString(body.title) ? (body.title = body.title.trim()) : null
-    isString(body.author) ? (body.author = body.author.trim()) : null
+    body.title && isString(body.title) ? (body.title = body.title.trim()) : null
+    body.author && isString(body.author)
+      ? (body.author = body.author.trim())
+      : null
     body.notes && isString(body.notes) ? (body.notes = body.notes.trim()) : null
 
     // * Validate payload with schema
-    const schemaValidation = BookSchema.safeParse(body)
+    const schemaValidation = validateSchema(BookSchema, body)
     if (schemaValidation.error) {
       const error = returnFlattenError(schemaValidation.error)
       return errorResponse({
@@ -85,8 +87,8 @@ export const handler = async (
     if (titleChanged || authorChanged) {
       // * Validate if the book already exists
       const query: BooksQueryTitleGsiParams = {
-        title: body.title,
-        author: body.author,
+        title: body.title!,
+        author: body.author!,
       }
       const result = await dynamoDBClient.queryTitleGsi(query)
       const isAnotherItem = result.items?.some((item) => item.id?.S !== body.id)

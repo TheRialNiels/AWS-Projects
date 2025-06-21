@@ -17,7 +17,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
 import { BooksDynamoDBClient } from '@lib/booksDynamoDBClient'
 import { env } from '@lib/packages/env'
-import { returnFlattenError } from '@lib/packages/zod'
+import { returnFlattenError, validateSchema } from '@lib/packages/zod'
 
 const dynamoDbConfig = {
   region: env.REGION,
@@ -60,7 +60,7 @@ export const handler = async (
       event.queryStringParameters?.lastEvaluatedKey || null
 
     // * Validate query string params with schema
-    const queriesSchemaValidation = BooksScanPageParamsSchema.safeParse({
+    const queriesSchemaValidation = validateSchema(BooksScanPageParamsSchema, {
       limit,
       lastEvaluatedKey: lastEvaluatedKeyParam ?? undefined,
     })

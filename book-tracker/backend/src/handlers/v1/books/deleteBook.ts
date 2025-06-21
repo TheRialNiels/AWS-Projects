@@ -13,7 +13,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
 import { BooksDynamoDBClient } from '@lib/booksDynamoDBClient'
 import { env } from '@lib/packages/env'
-import { returnFlattenError } from '@lib/packages/zod'
+import { returnFlattenError, validateSchema } from '@lib/packages/zod'
 
 const dynamoDbConfig = {
   region: env.REGION,
@@ -52,7 +52,7 @@ export const handler = async (
 
   try {
     // * Validate id with schema
-    const schemaValidation = BookIdSchema.safeParse(id)
+    const schemaValidation = validateSchema(BookIdSchema, id)
     if (schemaValidation.error) {
       const error = returnFlattenError(schemaValidation.error)
       return errorResponse({
