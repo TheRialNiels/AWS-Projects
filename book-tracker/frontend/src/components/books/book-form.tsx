@@ -57,7 +57,9 @@ export function BookForm({
           name="title"
           children={(field) => (
             <field.FormItem>
-              <field.FormLabel>Title</field.FormLabel>
+              <field.FormLabel>
+                Title<span className="text-primary">*</span>
+              </field.FormLabel>
               <field.FormControl>
                 <Input
                   placeholder="Enter book title"
@@ -78,7 +80,9 @@ export function BookForm({
           name="author"
           children={(field) => (
             <field.FormItem>
-              <field.FormLabel>Author</field.FormLabel>
+              <field.FormLabel>
+                Author<span className="text-primary">*</span>
+              </field.FormLabel>
               <field.FormControl>
                 <Input
                   placeholder="Enter book author"
@@ -103,7 +107,9 @@ export function BookForm({
 
               return (
                 <field.FormItem className="w-full flex-1">
-                  <field.FormLabel htmlFor={id}>Status</field.FormLabel>
+                  <field.FormLabel htmlFor={id}>
+                    Status<span className="text-primary">*</span>
+                  </field.FormLabel>
                   <field.FormControl>
                     <Select
                       value={field.state.value}
