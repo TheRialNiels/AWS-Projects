@@ -8,8 +8,8 @@ import type { Row } from '@tanstack/react-table'
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
-  onEdit: (category: Book) => void
-  onDelete: (id: string) => void
+  onEdit: (book: Book) => void
+  onDelete: (book: Book) => void
   editLabelBtn?: string
   deleteLabelBtn?: string
 }
@@ -40,7 +40,7 @@ export function DataTableRowActions<TData>({
         variant="destructive"
         size="icon"
         title={deleteLabelBtn}
-        onClick={() => onDelete(task.id!)}
+        onClick={() => onDelete(task)}
       >
         <Trash2 />
         <span className="sr-only">{deleteLabelBtn}</span>

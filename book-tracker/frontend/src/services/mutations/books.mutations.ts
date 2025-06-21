@@ -4,13 +4,9 @@ import {
   patchBookApi,
   postBookApi,
 } from '@/services/api/books.api'
-import {
-  useMutation,
-  useMutationState,
-  useQueryClient,
-} from '@tanstack/react-query'
 
 import { generateUuid } from '@/lib/uuid'
+import { useMutationState } from '@tanstack/react-query'
 import { useOptimisticMutation } from '@/services/mutations/useOptimistic.mutations'
 
 export const useCreateBook = (
@@ -89,15 +85,39 @@ export const useOptimisticBook = (bookId?: string) => {
   return optimistic
 }
 
-export const useDeleteBook = () => {
-  const queryClient = useQueryClient()
+export const useDeleteBook = (
+  setOpen: (open: boolean) => void,
+  successMsg: string,
+  errorMsg: string,
+) => {
+  return useOptimisticMutation<Book, Book>({
+    mutationKey: ['delete-book'],
+    queryKey: ['getBooks'],
+    getId: (book) => book.id!,
+    mutationFn: deleteBookApi,
+    getItems: (data: GetBooksResponse) => data.responseData.books,
+    setItems: (newBooks, oldData: GetBooksResponse) => ({
+      ...oldData,
+      responseData: {
+        ...oldData.responseData,
+        books: newBooks,
+      },
+    }),
+    updateItems: (prevBooks, deletedBook) =>
+      prevBooks.filter((book) => book.id !== deletedBook.id),
+    successMsg,
+    errorMsg,
+    onDone: () => setOpen(false),
+  })
+}
 
-  return useMutation({
-    mutationFn: (id: string) => deleteBookApi(id),
-
-    onSettled: async (_, error) => {
-      if (error) return
-      await queryClient.invalidateQueries({ queryKey: ['getBooks'] })
+export const useOptimisticDeletingBook = (bookId?: string) => {
+  const mutations = useMutationState({
+    filters: {
+      mutationKey: ['delete-book'],
+      status: 'pending',
     },
   })
+
+  return mutations.some((m) => m.variables === bookId)
 }

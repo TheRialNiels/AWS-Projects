@@ -9,8 +9,8 @@ import { DataTableRowDropdownActions } from '@/components/table/data-table-row-d
 export interface GetBooksColumnsProps {
   showViewBtn: boolean
   rowActionsStyle: RowActionsStyles
-  onEdit: (task: Book) => void
-  onDelete: (id: string) => void
+  onEdit: (data: Book) => void
+  onDelete: (data: Book) => void
 }
 
 type RowActionsStyles = 'row' | 'dropdown'
@@ -140,7 +140,7 @@ export function getBooksColumns({
           <DataTableRowActions
             row={row}
             onEdit={() => onEdit(row.original)}
-            onDelete={() => onDelete(row.id)}
+            onDelete={() => onDelete(row.original)}
           />
         ) : (
           <DataTableRowDropdownActions row={row} />

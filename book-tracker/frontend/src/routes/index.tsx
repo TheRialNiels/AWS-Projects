@@ -1,4 +1,5 @@
 import type { Book } from '../interfaces/books.types'
+import { BookDeleteDialog } from '../components/books/book-delete-dialog'
 import { BookDialog } from '@/components/books/book-dialog'
 import { BooksTable } from '@/components/books/books-table'
 import { createFileRoute } from '@tanstack/react-router'
@@ -10,27 +11,33 @@ export const Route = createFileRoute('/')({
 })
 
 function App() {
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editBook, setEditBook] = useState<Book | null>(null)
+  const [bookDialogOpen, setBookDialogOpen] = useState(false)
+  const [bookDeleteOpen, setBookDeleteOpen] = useState(false)
+  const [book, setBook] = useState<Book | null>(null)
   const { data, isError, isLoading } = useGetBooks()
   const books = data?.responseData.books ?? []
 
   const handleSetDialogOpen = (open: boolean) => {
-    setDialogOpen(open)
+    setBookDialogOpen(open)
+  }
+
+  const handleSetBookDeleteDialogOpen = (open: boolean) => {
+    setBookDeleteOpen(open)
   }
 
   const handleAddBook = () => {
-    setEditBook(null)
-    setDialogOpen(true)
+    setBook(null)
+    setBookDialogOpen(true)
   }
 
   const handleEditBook = (book: Book) => {
-    setEditBook(book)
-    setDialogOpen(true)
+    setBook(book)
+    setBookDialogOpen(true)
   }
 
-  const handleDeleteBook = (id: string) => {
-    console.log('Delete book:', id)
+  const handleDeleteBook = (book: Book) => {
+    setBook(book)
+    setBookDeleteOpen(true)
   }
 
   return (
@@ -54,9 +61,15 @@ function App() {
       />
 
       <BookDialog
-        open={dialogOpen}
-        book={editBook ?? undefined}
+        open={bookDialogOpen}
+        book={book ?? undefined}
         setOpen={handleSetDialogOpen}
+      />
+
+      <BookDeleteDialog
+        open={bookDeleteOpen}
+        book={book as Book}
+        setOpen={handleSetBookDeleteDialogOpen}
       />
     </>
   )

@@ -71,3 +71,9 @@ export interface PatchBookResponse {
   responseData: Book
   success: boolean
 }
+
+export interface DeleteBookResponse {
+  message: string
+  responseData: Book
+  success: boolean
+}

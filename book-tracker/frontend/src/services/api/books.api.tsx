@@ -1,4 +1,10 @@
-import type { Book, CreateBookResponse, GetBooksResponse, PatchBookResponse } from '@/interfaces/books.types'
+import type {
+  Book,
+  CreateBookResponse,
+  DeleteBookResponse,
+  GetBooksResponse,
+  PatchBookResponse,
+} from '@/interfaces/books.types'
 
 import { api } from '@/lib/axios'
 
@@ -19,8 +25,9 @@ export const patchBookApi = async (data: Book): Promise<PatchBookResponse> => {
   return response.data
 }
 
-export const deleteBookApi = async (id: string): Promise<any> => {
-  const response = await api.delete(`${path}/${id}`)
+export const deleteBookApi = async (
+    data: Book
+): Promise<DeleteBookResponse> => {
+  const response = await api.delete(`${path}/${data.id}`, { data })
   return response.data
 }
-

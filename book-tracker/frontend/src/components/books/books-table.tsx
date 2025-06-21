@@ -14,7 +14,7 @@ interface BooksTableProps<TData extends Book> {
   isError: boolean
   onAdd: () => void
   onEdit: (data: Book) => void
-  onDelete: (id: string) => void
+  onDelete: (data: Book) => void
 }
 
 export function BooksTable<TData extends Book>({
