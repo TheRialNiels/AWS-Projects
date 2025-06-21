@@ -64,6 +64,11 @@ export interface GetBooksResponse {
 
 interface GetBooksResponseData {
   books: Book[]
+  lastEvaluatedKey: LastEvaluatedKey
+}
+
+interface LastEvaluatedKey {
+  id: { S: string }
 }
 
 export interface PatchBookResponse {

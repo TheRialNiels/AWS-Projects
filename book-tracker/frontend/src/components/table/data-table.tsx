@@ -32,39 +32,49 @@ import { Skeleton } from '@/components/ui/skeleton'
 export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
-  pageSize: number
-  isLoading: boolean
-  isError: boolean
   filterColumn: string
-  filterPlaceholder?: string
-  facetedFilters?: FacetedFilter[]
-  showViewBtn?: boolean
-  showAddBtn?: boolean
+  hasNextPage: boolean
+  isError: boolean
+  isLoading: boolean
+  pageSize: number
+  rowsPerPage: number[]
+  onNextPage: () => void
+  onPrevPage: () => void
+  setPageSize: (size: number) => void
   addBtnLabel?: string
-  showRowsSelected?: boolean
-  rowsPerPage?: number[]
-  noResultsMsg?: string
   errorMsg?: string
+  facetedFilters?: FacetedFilter[]
+  filterPlaceholder?: string
+  noResultsMsg?: string
+  showAddBtn?: boolean
+  showPageCount?: boolean
+  showRowsSelected?: boolean
+  showViewBtn?: boolean
   onAdd?: () => void
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  pageSize,
-  isLoading,
-  isError,
   filterColumn,
-  filterPlaceholder,
-  facetedFilters,
-  showViewBtn,
-  showAddBtn,
-  addBtnLabel,
-  showRowsSelected,
+  hasNextPage,
+  isError,
+  isLoading,
+  pageSize,
   rowsPerPage,
-  noResultsMsg = 'No results',
+  onNextPage,
+  onPrevPage,
+  setPageSize,
+  addBtnLabel,
   errorMsg = 'There was an error fetching the data',
-  onAdd
+  facetedFilters,
+  filterPlaceholder,
+  noResultsMsg = 'No results',
+  showAddBtn,
+  showPageCount,
+  showRowsSelected,
+  showViewBtn,
+  onAdd,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -85,6 +95,8 @@ export function DataTable<TData, TValue>({
         pageSize,
       },
     },
+    manualPagination: true,
+    pageCount: -1,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
@@ -191,7 +203,17 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} showRowsSelected={showRowsSelected} rowsPerPage={rowsPerPage} />
+      <DataTablePagination
+        hasNextPage={hasNextPage}
+        pageSize={pageSize}
+        rowsPerPage={rowsPerPage}
+        showPageCount={showPageCount}
+        showRowsSelected={showRowsSelected}
+        table={table}
+        onNextPage={onNextPage}
+        onPrevPage={onPrevPage}
+        setPageSize={setPageSize}
+      />
     </div>
   )
 }

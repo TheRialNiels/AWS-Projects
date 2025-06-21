@@ -10,20 +10,30 @@ import type { Book } from '@/interfaces/books.types'
 
 interface BooksTableProps<TData extends Book> {
   data: TData[]
-  isLoading: boolean
+  hasNextPage: boolean
   isError: boolean
+  isLoading: boolean
+  pageSize: number
   onAdd: () => void
-  onEdit: (data: Book) => void
   onDelete: (data: Book) => void
+  onEdit: (data: Book) => void
+  onNextPage: () => void
+  onPrevPage: () => void
+  setPageSize: (size: number) => void
 }
 
 export function BooksTable<TData extends Book>({
   data,
+  hasNextPage,
   isLoading,
   isError,
+  pageSize,
   onAdd,
   onEdit,
-  onDelete
+  onDelete,
+  onNextPage,
+  onPrevPage,
+  setPageSize,
 }: BooksTableProps<TData>) {
   const showViewBtn = false
   const columnsConfig: GetBooksColumnsProps = {
@@ -48,19 +58,24 @@ export function BooksTable<TData extends Book>({
 
   return (
     <DataTable
+      addBtnLabel="Add book"
       columns={columns}
       data={data}
-      pageSize={10}
-      isLoading={isLoading}
-      isError={isError}
+      facetedFilters={facetedFilters}
       filterColumn="title"
       filterPlaceholder="Search by title..."
-      facetedFilters={facetedFilters}
-      showViewBtn={showViewBtn}
-      addBtnLabel="Add book"
-      showRowsSelected={false}
-      rowsPerPage={[10, 20, 25]}
+      hasNextPage={hasNextPage}
+      showPageCount={false}
+      isError={isError}
+      isLoading={isLoading}
       onAdd={onAdd}
+      onNextPage={onNextPage}
+      onPrevPage={onPrevPage}
+      pageSize={pageSize}
+      rowsPerPage={[10, 20, 25]}
+      setPageSize={setPageSize}
+      showRowsSelected={false}
+      showViewBtn={showViewBtn}
     />
   )
 }

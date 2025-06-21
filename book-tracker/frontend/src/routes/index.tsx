@@ -1,9 +1,9 @@
-import type { Book } from '../interfaces/books.types'
-import { BookDeleteDialog } from '../components/books/book-delete-dialog'
+import type { Book } from '@/interfaces/books.types'
+import { BookDeleteDialog } from '@/components/books/book-delete-dialog'
 import { BookDialog } from '@/components/books/book-dialog'
 import { BooksTable } from '@/components/books/books-table'
 import { createFileRoute } from '@tanstack/react-router'
-import { useGetBooks } from '@/services/queries/books.queries'
+import { usePaginatedBooks } from '@/services/queries/books.queries'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/')({
@@ -14,8 +14,18 @@ function App() {
   const [bookDialogOpen, setBookDialogOpen] = useState(false)
   const [bookDeleteOpen, setBookDeleteOpen] = useState(false)
   const [book, setBook] = useState<Book | null>(null)
-  const { data, isError, isLoading } = useGetBooks()
+  const {
+    data,
+    isError,
+    isLoading,
+    pageSize,
+    setPageSize,
+    goToNextPage,
+    goToPreviousPage,
+    hasNextPage,
+  } = usePaginatedBooks()
   const books = data?.responseData.books ?? []
+
 
   const handleSetDialogOpen = (open: boolean) => {
     setBookDialogOpen(open)
@@ -53,11 +63,16 @@ function App() {
 
       <BooksTable
         data={books}
-        isLoading={isLoading}
+        hasNextPage={hasNextPage}
         isError={isError}
+        isLoading={isLoading}
+        pageSize={pageSize}
         onAdd={handleAddBook}
-        onEdit={handleEditBook}
         onDelete={handleDeleteBook}
+        onEdit={handleEditBook}
+        onNextPage={goToNextPage}
+        onPrevPage={goToPreviousPage}
+        setPageSize={setPageSize}
       />
 
       <BookDialog
