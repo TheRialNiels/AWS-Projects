@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { statuses } from '@/data/data'
 import { BookSchema, type Book } from '@/interfaces/books.types'
 import { Loader2 } from 'lucide-react'
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 
 interface BookFormProps {
   onSubmit: (data: Book) => void
@@ -26,23 +26,17 @@ export function BookForm({
   isPending,
   ...props
 }: BookFormProps) {
-  const initialBook = useMemo(
-    () =>
-      book ?? {
-        title: '',
-        author: '',
-        status: 'WISHLIST',
-        rating: 0,
-        notes: '',
-      },
-    [],
-  )
-
   const form = useAppForm({
     validators: {
       onChange: BookSchema,
     },
-    defaultValues: initialBook,
+    defaultValues: book ?? {
+      title: '',
+      author: '',
+      status: 'WISHLIST',
+      rating: 0,
+      notes: '',
+    },
     onSubmit: ({ value }) => {
       onSubmit(value as Book)
     },
@@ -170,6 +164,8 @@ export function BookForm({
               <field.FormLabel>Notes</field.FormLabel>
               <field.FormControl>
                 <Textarea
+                  className="max-h-36"
+                  rows={4}
                   placeholder="Enter any notes about the book"
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}

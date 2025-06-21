@@ -10,11 +10,11 @@ import {
 export const BookIdSchema = uuidField('Book ID', { optional: true })
 export const BookTitleSchema = stringField('Title', {
   minLength: 3,
-  maxLength: 60
+  maxLength: 60,
 })
 export const BookAuthorSchema = stringField('Author', {
   minLength: 3,
-  maxLength: 60
+  maxLength: 60,
 })
 const bookStatus: [string, ...string[]] = [
   'READING',
@@ -29,7 +29,6 @@ export const BookRatingSchema = numberField('Rating', {
   optional: true,
 })
 export const BookNotesSchema = stringField('Notes', {
-  minLength: 3,
   maxLength: 500,
   optional: true,
 })

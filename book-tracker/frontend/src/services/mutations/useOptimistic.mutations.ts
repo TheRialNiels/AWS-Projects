@@ -2,6 +2,7 @@ import { useErrorToast, useSuccessToast } from '@/lib/toastify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface UseOptimisticMutationOptions<TData, TVariables> {
+  mutationKey: string[]
   queryKey: unknown[]
   getId: (item: TData | TVariables) => string
   mutationFn: (variables: TVariables) => Promise<{ responseData: TData }>
@@ -14,6 +15,7 @@ interface UseOptimisticMutationOptions<TData, TVariables> {
 }
 
 export function useOptimisticMutation<TData, TVariables>({
+  mutationKey,
   queryKey,
   getId,
   mutationFn,
@@ -27,6 +29,7 @@ export function useOptimisticMutation<TData, TVariables>({
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey,
     mutationFn,
 
     onMutate: async (newItem: TVariables) => {

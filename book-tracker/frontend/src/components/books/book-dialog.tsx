@@ -5,10 +5,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  useCreateBook,
+  useOptimisticBook,
+  useOptimisticNewBook,
+  useUpdateBook,
+} from '@/services/mutations/books.mutations'
 
 import type { Book } from '@/interfaces/books.types'
 import { BookForm } from './book-form'
-import { useUpdateBook } from '@/services/mutations/books.mutations'
 
 interface BookDialogProps {
   open: boolean
@@ -21,23 +26,35 @@ export function BookDialog({
   setOpen: setOpen,
   book: book,
 }: BookDialogProps) {
+  const isEditMode = !!book
+
   const successMsg = book
     ? 'Book updated successfully'
     : 'Book created successfully'
   const errorMsg = book
     ? 'There was an error updating the category'
     : 'There was an error creating the category'
-  const { mutate, isPending } = useUpdateBook(setOpen, successMsg, errorMsg)
+  const { mutate: updateBook, isPending: isUpdating } = useUpdateBook(
+    setOpen,
+    successMsg,
+    errorMsg,
+  )
+  const { mutate: createBook, isPending: isCreating } = useCreateBook(
+    setOpen,
+    successMsg,
+    errorMsg,
+  )
+
+  const optimisticBook = useOptimisticBook(book?.id ?? '')
+  const optimisticNewBook = useOptimisticNewBook()
+  const currentBook = isEditMode ? (optimisticBook ?? book) : optimisticNewBook
 
   const handleOnSubmit = (data: Book) => {
-    // * Update existing book
-    if (book) {
-      mutate(data)
+    if (isEditMode) {
+      updateBook(data)
       return
     }
-
-    // * Handle create logic
-    console.log('Book creation logic goes here:', data)
+    createBook(data)
   }
 
   return (
@@ -52,7 +69,11 @@ export function BookDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <BookForm book={book} onSubmit={handleOnSubmit} isPending={isPending} />
+        <BookForm
+          book={currentBook}
+          onSubmit={handleOnSubmit}
+          isPending={isEditMode ? isUpdating : isCreating}
+        />
       </DialogContent>
     </Dialog>
   )

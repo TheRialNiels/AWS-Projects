@@ -17,7 +17,7 @@ export const createSchema = <T extends FieldMap>(
   return z.object(shape)
 }
 
-export const validateSchema = <T extends z.ZodAny>(
+export const validateSchema = <T extends z.ZodType>(
   schema: T,
   data: unknown,
 ): z.ZodSafeParseResult<z.infer<T>> => {

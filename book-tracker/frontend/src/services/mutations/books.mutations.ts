@@ -4,7 +4,11 @@ import {
   patchBookApi,
   postBookApi,
 } from '@/services/api/books.api'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  useMutation,
+  useMutationState,
+  useQueryClient,
+} from '@tanstack/react-query'
 
 import { generateUuid } from '@/lib/uuid'
 import { useOptimisticMutation } from '@/services/mutations/useOptimistic.mutations'
@@ -15,6 +19,7 @@ export const useCreateBook = (
   errorMsg: string,
 ) => {
   return useOptimisticMutation<Book, Book>({
+    mutationKey: ['create-book'],
     queryKey: ['getBooks'],
     getId: (book) => book.id!,
     mutationFn: postBookApi,
@@ -36,12 +41,25 @@ export const useCreateBook = (
   })
 }
 
+export const useOptimisticNewBook = () => {
+  const optimisticMutations = useMutationState({
+    filters: {
+      mutationKey: ['create-book'],
+      status: 'pending',
+    },
+  })
+
+  const optimistic = optimisticMutations[0]?.variables as Book | undefined
+  return optimistic
+}
+
 export const useUpdateBook = (
   setOpen: (open: boolean) => void,
   successMsg: string,
   errorMsg: string,
 ) => {
   return useOptimisticMutation<Book, Book>({
+    mutationKey: ['edit-book'],
     queryKey: ['getBooks'],
     getId: (book) => book.id!,
     mutationFn: patchBookApi,
@@ -57,6 +75,18 @@ export const useUpdateBook = (
     errorMsg,
     onDone: () => setOpen(false),
   })
+}
+
+export const useOptimisticBook = (bookId?: string) => {
+  const optimisticMutations = useMutationState({
+    filters: {
+      mutationKey: ['edit-book', bookId],
+      status: 'pending',
+    },
+  })
+
+  const optimistic = optimisticMutations[0]?.variables as Book | undefined
+  return optimistic
 }
 
 export const useDeleteBook = () => {
