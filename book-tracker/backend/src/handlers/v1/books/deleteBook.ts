@@ -1,4 +1,8 @@
-import { BookIdSchema, type DeleteItemParams } from '@interfaces/books.types'
+import {
+  Book,
+  BookIdSchema,
+  type DeleteItemParams,
+} from '@interfaces/books.types'
 import {
   createCORSHeaders,
   createPreflightResponse,
@@ -47,7 +51,8 @@ export const handler = async (
     })
   }
 
-  // * Get id param from request
+  // * Get the body payload and id param from request
+  const body: Book = JSON.parse(event.body || '{}')
   const id = event.pathParameters?.id
 
   try {
@@ -76,7 +81,7 @@ export const handler = async (
       statusCode: OK,
       additionalHeaders: createCORSHeaders(origin, [], methods),
       message: 'Book deleted successfully',
-      responseData: { id },
+      responseData: body,
     })
   } catch (err: any) {
     console.log(err) // TODO - Implement CW to log the error
@@ -85,7 +90,7 @@ export const handler = async (
         statusCode: BAD_REQUEST,
         additionalHeaders: createCORSHeaders(origin, [], methods),
         message: 'Book not found',
-        responseData: { id },
+        responseData: body,
       })
     }
 
