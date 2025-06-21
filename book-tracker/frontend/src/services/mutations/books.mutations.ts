@@ -13,6 +13,7 @@ export const useCreateBook = (
   setOpen: (open: boolean) => void,
   successMsg: string,
   errorMsg: string,
+  onResetPagination?: () => void,
 ) => {
   return useOptimisticMutation<Book, Book>({
     mutationKey: ['create-book'],
@@ -33,7 +34,10 @@ export const useCreateBook = (
     },
     successMsg,
     errorMsg,
-    onDone: () => setOpen(false),
+    onDone: () => {
+      onResetPagination?.()
+      setOpen(false)
+    },
   })
 }
 

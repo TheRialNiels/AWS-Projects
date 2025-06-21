@@ -19,6 +19,7 @@ function App() {
     isError,
     isLoading,
     pageSize,
+    setCursor,
     setPageSize,
     goToNextPage,
     goToPreviousPage,
@@ -79,6 +80,7 @@ function App() {
         open={bookDialogOpen}
         book={book ?? undefined}
         setOpen={handleSetDialogOpen}
+        onResetPagination={() => setCursor(null)}
       />
 
       <BookDeleteDialog

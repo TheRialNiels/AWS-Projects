@@ -19,12 +19,14 @@ interface BookDialogProps {
   open: boolean
   setOpen: (open: boolean) => void
   book?: Book
+  onResetPagination?: () => void
 }
 
 export function BookDialog({
   open,
   setOpen: setOpen,
   book: book,
+  onResetPagination,
 }: BookDialogProps) {
   const isEditMode = !!book
 
@@ -43,6 +45,7 @@ export function BookDialog({
     setOpen,
     successMsg,
     errorMsg,
+    onResetPagination,
   )
 
   const optimisticBook = useOptimisticBook(book?.id ?? '')
