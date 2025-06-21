@@ -26,7 +26,6 @@ const dynamoDbConfig = {
   region: env.REGION,
   tableName: env.BOOKS_TABLE,
   titleGsi: env.BOOKS_TITLE_GSI,
-  authorGsi: env.BOOKS_AUTHOR_GSI,
 }
 const dynamoDBClient = new BooksDynamoDBClient(dynamoDbConfig)
 
@@ -57,6 +56,9 @@ export const handler = async (
 
     // * Get the body payload from request
     const body: Book = JSON.parse(event.body || '{}')
+    const now = new Date().toISOString()
+    body.createdAt = now
+    body.updatedAt = now
     body.id = body.id || generateUuid()
 
     // * Trim whitespace
@@ -104,6 +106,8 @@ export const handler = async (
         title: { S: body.title },
         author: { S: body.author },
         status: { S: body.status },
+        createdAt: { S: body.createdAt },
+        updatedAt: { S: body.updatedAt },
       },
     }
     body.rating ? (params.item.rating = { N: String(body.rating) }) : null

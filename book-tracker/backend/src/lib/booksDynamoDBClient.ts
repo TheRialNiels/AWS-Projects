@@ -11,11 +11,14 @@ import type {
 import {
   DeleteItemCommand,
   DeleteItemCommandInput,
+  DeleteItemCommandOutput,
   DynamoDBClient,
   GetItemCommand,
   GetItemCommandInput,
+  GetItemCommandOutput,
   PutItemCommand,
   PutItemCommandInput,
+  PutItemCommandOutput,
   QueryCommand,
   QueryCommandInput,
   ReturnValue,
@@ -23,19 +26,18 @@ import {
   ScanCommandInput,
   UpdateItemCommand,
   UpdateItemCommandInput,
+  UpdateItemCommandOutput,
 } from '@aws-sdk/client-dynamodb'
 
 export class BooksDynamoDBClient {
   private client: DynamoDBClient
   private tableName: string
   private titleGsi: string
-  private authorGsi: string
 
   constructor(config: any) {
     this.client = new DynamoDBClient({ region: config.region })
     this.tableName = config.tableName
     this.titleGsi = config.titleGsi
-    this.authorGsi = config.authorGsi
   }
 
   static buildUpdateExpression(data: Record<string, any>) {
@@ -80,7 +82,9 @@ export class BooksDynamoDBClient {
     }
   }
 
-  async createItem(params: BooksCreateItemParams): Promise<Item | null> {
+  async createItem(
+    params: BooksCreateItemParams,
+  ): Promise<PutItemCommandOutput> {
     const input: PutItemCommandInput = {
       TableName: this.tableName,
       Item: params.item,
@@ -90,13 +94,13 @@ export class BooksDynamoDBClient {
 
     try {
       const result = await this.client.send(new PutItemCommand(input))
-      return result.Attributes || null
+      return result
     } catch (err) {
       throw err
     }
   }
 
-  async getItem(key: Item): Promise<Item | null> {
+  async getItem(key: Item): Promise<GetItemCommandOutput> {
     const input: GetItemCommandInput = {
       TableName: this.tableName,
       Key: key,
@@ -104,13 +108,13 @@ export class BooksDynamoDBClient {
 
     try {
       const result = await this.client.send(new GetItemCommand(input))
-      return result.Item || null
+      return result
     } catch (err) {
       throw err
     }
   }
 
-  async updateItem(params: UpdateItemParams): Promise<Item | null> {
+  async updateItem(params: UpdateItemParams): Promise<UpdateItemCommandOutput> {
     const input: UpdateItemCommandInput = {
       TableName: this.tableName,
       Key: params.key,
@@ -123,13 +127,13 @@ export class BooksDynamoDBClient {
 
     try {
       const result = await this.client.send(new UpdateItemCommand(input))
-      return result.Attributes || null
+      return result
     } catch (err) {
       throw err
     }
   }
 
-  async deleteItem(params: DeleteItemParams): Promise<Item | null> {
+  async deleteItem(params: DeleteItemParams): Promise<DeleteItemCommandOutput> {
     const input: DeleteItemCommandInput = {
       TableName: this.tableName,
       Key: params.key,
@@ -138,7 +142,7 @@ export class BooksDynamoDBClient {
 
     try {
       const result = await this.client.send(new DeleteItemCommand(input))
-      return result.Attributes || null
+      return result
     } catch (err) {
       throw err
     }
@@ -185,8 +189,13 @@ export class BooksDynamoDBClient {
 
     try {
       const result = await this.client.send(new ScanCommand(input))
+      const sortedItems = (result.Items ?? []).sort((a, b) => {
+        const aTime = a.createdAt?.S || ''
+        const bTime = b.createdAt?.S || ''
+        return bTime.localeCompare(aTime)
+      })
       return {
-        items: result.Items ?? [],
+        items: sortedItems,
         lastEvaluatedKey: result.LastEvaluatedKey,
       }
     } catch (err) {

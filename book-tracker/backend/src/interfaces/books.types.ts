@@ -35,6 +35,8 @@ export const BookNotesSchema = stringField('Notes', {
   maxLength: 500,
   optional: true,
 })
+export const BookCreatedAtSchema = stringField('Created at', { optional: true })
+export const BookUpdatedAtSchema = stringField('Updated at', { optional: true })
 
 export const BookSchema = createSchema({
   id: () => BookIdSchema,
@@ -43,6 +45,8 @@ export const BookSchema = createSchema({
   status: () => BookStatusSchema,
   rating: () => BookRatingSchema,
   notes: () => BookNotesSchema,
+  createdAt: () => BookCreatedAtSchema,
+  updatedAt: () => BookUpdatedAtSchema,
 })
 
 export type Book = InferSchema<typeof BookSchema>

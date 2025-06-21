@@ -39,7 +39,6 @@ Globals:
         ENVIRONMENT: !Ref Environment
         BOOKS_TABLE: !Ref BooksTable
         BOOKS_TITLE_GSI: TitleIndex
-        BOOKS_AUTHOR_GSI: AuthorIndex
 
 Resources:
   BookTrackerAppApiGW:
@@ -76,14 +75,6 @@ Resources:
             - AttributeName: title
               KeyType: HASH
             - AttributeName: author
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-        - IndexName: AuthorIndex
-          KeySchema:
-            - AttributeName: author
-              KeyType: HASH
-            - AttributeName: title
               KeyType: RANGE
           Projection:
             ProjectionType: ALL

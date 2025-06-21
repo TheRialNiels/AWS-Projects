@@ -7,5 +7,4 @@ export const env = {
   ENVIRONMENT: get('ENVIRONMENT').required().asString(),
   BOOKS_TABLE: get('BOOKS_TABLE').required().asString(),
   BOOKS_TITLE_GSI: get('BOOKS_TITLE_GSI').required().asString(),
-  BOOKS_AUTHOR_GSI: get('BOOKS_AUTHOR_GSI').required().asString(),
 }

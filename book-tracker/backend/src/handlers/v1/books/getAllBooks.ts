@@ -23,7 +23,6 @@ const dynamoDbConfig = {
   region: env.REGION,
   tableName: env.BOOKS_TABLE,
   titleGsi: env.BOOKS_TITLE_GSI,
-  authorGsi: env.BOOKS_AUTHOR_GSI,
 }
 const dynamoDBClient = new BooksDynamoDBClient(dynamoDbConfig)
 
@@ -93,12 +92,14 @@ export const handler = async (
 
     // * Return success response
     const books: Book[] = items.map((item) => ({
-      id: item.id.S!,
-      title: item.title.S!,
-      author: item.author.S!,
-      status: item.status.S!,
+      id: item.id.S,
+      title: item.title.S,
+      author: item.author.S,
+      status: item.status.S,
       rating: item.rating?.N !== undefined ? +item.rating.N : undefined,
-      notes: item.notes?.S ?? undefined,
+      notes: item.notes?.S,
+      createdAt: item.createdAt?.S,
+      updatedAt: item.updatedAt?.S
     }))
     return successResponse({
       statusCode: OK,

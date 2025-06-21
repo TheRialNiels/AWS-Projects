@@ -24,7 +24,6 @@ const dynamoDbConfig = {
   region: env.REGION,
   tableName: env.BOOKS_TABLE,
   titleGsi: env.BOOKS_TITLE_GSI,
-  authorGsi: env.BOOKS_AUTHOR_GSI,
 }
 const dynamoDBClient = new BooksDynamoDBClient(dynamoDbConfig)
 
@@ -55,6 +54,7 @@ export const handler = async (
 
     // * Get the body payload and id param from request
     const body: Book = JSON.parse(event.body || '{}')
+    body.updatedAt = new Date().toISOString()
     body.id = event.pathParameters?.id || ''
 
     // * Trim whitespace
@@ -78,7 +78,7 @@ export const handler = async (
 
     // * Get original item
     const key = { id: { S: body.id } }
-    const originalItem = await dynamoDBClient.getItem(key)
+    const { Item: originalItem } = await dynamoDBClient.getItem(key)
 
     // * Validate if the title or author was changed
     const titleChanged = originalItem?.title?.S !== body.title
@@ -117,10 +117,11 @@ export const handler = async (
       status: body.status,
       rating: body.rating,
       notes: body.notes,
+      updatedAt: body.updatedAt,
     })
 
     // * Update item in DynamoDB
-    await dynamoDBClient.updateItem({
+    const result = await dynamoDBClient.updateItem({
       key,
       updateExpression,
       expressionAttributeNames,
@@ -128,6 +129,7 @@ export const handler = async (
     })
 
     // * Return success response
+    body.createdAt = result?.Attributes?.createdAt.S
     return successResponse({
       statusCode: OK,
       additionalHeaders: createCORSHeaders(origin, [], methods),

@@ -23,7 +23,6 @@ const dynamoDbConfig = {
   region: env.REGION,
   tableName: env.BOOKS_TABLE,
   titleGsi: env.BOOKS_TITLE_GSI,
-  authorGsi: env.BOOKS_AUTHOR_GSI,
 }
 const dynamoDBClient = new BooksDynamoDBClient(dynamoDbConfig)
 
