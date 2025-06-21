@@ -190,8 +190,8 @@ export class BooksDynamoDBClient {
     try {
       const result = await this.client.send(new ScanCommand(input))
       const sortedItems = (result.Items ?? []).sort((a, b) => {
-        const aTime = a.createdAt?.S || ''
-        const bTime = b.createdAt?.S || ''
+        const aTime = a.updatedAt?.S || ''
+        const bTime = b.updatedAt?.S || ''
         return bTime.localeCompare(aTime)
       })
       return {
