@@ -3,12 +3,15 @@ import {
   InferSchema,
   createSchema,
   enumField,
+  isoDateTimeField,
   numberField,
   preprocessNumber,
   queryParamRecordField,
   stringField,
   uuidField,
 } from '@lib/packages/zod'
+
+import z from 'zod/v4'
 
 export const BookIdSchema = uuidField('Book ID', { optional: true })
 export const BookTitleSchema = stringField('Title', {
@@ -35,8 +38,12 @@ export const BookNotesSchema = stringField('Notes', {
   maxLength: 500,
   optional: true,
 })
-export const BookCreatedAtSchema = stringField('Created at', { optional: true })
-export const BookUpdatedAtSchema = stringField('Updated at', { optional: true })
+export const BookCreatedAtSchema = isoDateTimeField('Created at', {
+  optional: true,
+})
+export const BookUpdatedAtSchema = isoDateTimeField('Updated at', {
+  optional: true,
+})
 
 export const BookSchema = createSchema({
   id: () => BookIdSchema,
@@ -49,6 +56,7 @@ export const BookSchema = createSchema({
   updatedAt: () => BookUpdatedAtSchema,
 })
 
+export const BooksImportSchema = z.array(BookSchema)
 export type Book = InferSchema<typeof BookSchema>
 export type Item = Record<string, AttributeValue>
 

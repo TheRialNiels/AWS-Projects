@@ -35,6 +35,26 @@ export const httpStatusCodes = {
 }
 
 /**
+ * Normalizes the headers object by converting all keys to lowercase and ensuring
+ * all values are strings. If a value is undefined, it defaults to an empty string.
+ *
+ * @param headers - An object representing HTTP headers, where keys are header names
+ * and values are their corresponding values (or undefined).
+ * @returns A new object with all header keys converted to lowercase and values
+ * guaranteed to be strings.
+ */
+export const normalizeHeaders = (
+  headers: Record<string, string | undefined>,
+): Record<string, string> => {
+  return Object.fromEntries(
+    Object.entries(headers).map(([key, value]) => [
+      key.toLowerCase(),
+      value ?? '',
+    ]),
+  )
+}
+
+/**
  * Generates a set of JSON headers for HTTP responses, including a default
  * `Content-Type` header and optionally additional headers.
  *

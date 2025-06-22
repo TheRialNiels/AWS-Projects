@@ -23,6 +23,12 @@
     "ENVIRONMENT": "staging",
     "REGION": "us-east-1"
   },
+  "ImportBooksCsvFunction": {
+    "BOOKS_TABLE": "staging-book-tracker-app-books-table",
+    "BOOKS_TITLE_GSI": "TitleIndex",
+    "ENVIRONMENT": "staging",
+    "REGION": "us-east-1"
+  },
   "Parameters": {
     "AllowCredentials": "false",
     "AllowOrigin": "'*'",

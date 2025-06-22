@@ -27,6 +27,16 @@ export const isString = (value: any): boolean => {
 }
 
 /**
+ * Checks if the provided value is of type `number`.
+ *
+ * @param value - The value to be checked.
+ * @returns `true` if the value is a number, otherwise `false`.
+ */
+export const isNumber = (value: any): boolean => {
+  return typeof value === 'number'
+}
+
+/**
  * Converts a given text string to camelCase format.
  *
  * This function transforms the input string to lowercase, removes spaces and numbers,

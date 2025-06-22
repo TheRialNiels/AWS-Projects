@@ -9,6 +9,9 @@ import type {
   UpdateItemParams,
 } from '@interfaces/books.types'
 import {
+  BatchWriteItemCommand,
+  BatchWriteItemCommandInput,
+  BatchWriteItemCommandOutput,
   DeleteItemCommand,
   DeleteItemCommandInput,
   DeleteItemCommandOutput,
@@ -127,6 +130,23 @@ export class BooksDynamoDBClient {
 
     try {
       const result = await this.client.send(new UpdateItemCommand(input))
+      return result
+    } catch (err) {
+      throw err
+    }
+  }
+
+  async batchWrite(
+    requestItems: { PutRequest: { Item: Item } }[],
+  ): Promise<BatchWriteItemCommandOutput> {
+    const input: BatchWriteItemCommandInput = {
+      RequestItems: {
+        [this.tableName]: requestItems,
+      },
+    }
+
+    try {
+      const result = await this.client.send(new BatchWriteItemCommand(input))
       return result
     } catch (err) {
       throw err

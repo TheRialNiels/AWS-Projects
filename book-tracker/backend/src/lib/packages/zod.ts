@@ -228,6 +228,30 @@ export const arrayField = <T extends z.ZodArray = z.ZodArray>(
   return schema
 }
 
+export const isoDateTimeField = <T extends z.ZodISODateTime = z.ZodISODateTime>(
+  field: string,
+  options?: FieldOptions,
+):
+  | T
+  | z.ZodOptional<T>
+  | z.ZodNullable<T>
+  | z.ZodNullable<z.ZodOptional<T>> => {
+  let schema = z.iso
+    .datetime(
+      defaultError(field, 'must be a valid ISO date-time', options?.message),
+    )
+    .refine((date) => !isNaN(Date.parse(date)), {
+      message: defaultError(
+        field,
+        'must be a valid ISO date-time',
+        options?.message,
+      ),
+    }) as T
+  if (options?.nullable) schema = schema.nullable() as any
+  if (options?.optional) schema = schema.optional() as any
+  return schema
+}
+
 export const DynamoAttributeValueSchema = z
   .object({
     S: z.string('Must be a string!').optional(),
