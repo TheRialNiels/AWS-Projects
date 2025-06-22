@@ -1,6 +1,7 @@
 import { ratings, statuses } from '@/data/data'
 
 import type { Book } from '@/interfaces/books.types'
+import { Checkbox } from '@/components/ui/checkbox'
 import type { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header'
 import { DataTableRowActions } from '@/components/table/data-table-row-actions'
@@ -15,37 +16,38 @@ export interface GetBooksColumnsProps {
 
 type RowActionsStyles = 'row' | 'dropdown'
 
-export function getBooksColumns({
+export function getBooksColumns<TData extends Book>({
   showViewBtn = true,
   rowActionsStyle = 'row',
   onEdit,
   onDelete,
-}: GetBooksColumnsProps): ColumnDef<Book>[] {
+}: GetBooksColumnsProps): ColumnDef<TData>[] {
   return [
-    /*{
-      id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && 'indeterminate')
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          className="translate-y-[2px]"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },*/
+    // {
+    //   id: 'select',
+    //   size: 45,
+    //   header: ({ table }) => (
+    //     <Checkbox
+    //       checked={
+    //         table.getIsAllPageRowsSelected() ||
+    //         (table.getIsSomePageRowsSelected() && 'indeterminate')
+    //       }
+    //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+    //       aria-label="Select all"
+    //       className="translate-y-[2px]"
+    //     />
+    //   ),
+    //   cell: ({ row }) => (
+    //     <Checkbox
+    //       checked={row.getIsSelected()}
+    //       onCheckedChange={(value) => row.toggleSelected(!!value)}
+    //       aria-label="Select row"
+    //       className="translate-y-[2px]"
+    //     />
+    //   ),
+    //   enableSorting: false,
+    //   enableHiding: false,
+    // },
     {
       accessorKey: 'title',
       size: 400,

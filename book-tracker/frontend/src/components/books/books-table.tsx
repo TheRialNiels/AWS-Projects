@@ -20,6 +20,8 @@ interface BooksTableProps<TData extends Book> {
   onNextPage: () => void
   onPrevPage: () => void
   setPageSize: (size: number) => void
+  onSelectionChange?: (selected: TData[]) => void
+  onClearSelectionRef?: (fn: () => void) => void
 }
 
 export function BooksTable<TData extends Book>({
@@ -34,6 +36,8 @@ export function BooksTable<TData extends Book>({
   onNextPage,
   onPrevPage,
   setPageSize,
+  onSelectionChange,
+  onClearSelectionRef
 }: BooksTableProps<TData>) {
   const showViewBtn = false
   const columnsConfig: GetBooksColumnsProps = {
@@ -42,7 +46,7 @@ export function BooksTable<TData extends Book>({
     onEdit,
     onDelete,
   }
-  const columns = getBooksColumns(columnsConfig)
+  const columns = getBooksColumns<TData>(columnsConfig)
   const facetedFilters: FacetedFilter[] = [
     {
       key: 'status',
@@ -76,6 +80,8 @@ export function BooksTable<TData extends Book>({
       setPageSize={setPageSize}
       showRowsSelected={false}
       showViewBtn={showViewBtn}
+      onSelectionChange={onSelectionChange}
+      onClearSelectionRef={onClearSelectionRef}
     />
   )
 }

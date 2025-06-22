@@ -23,7 +23,7 @@ import {
   type VisibilityState,
 } from '@tanstack/react-table'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DataTablePagination } from './data-table-pagination'
 import { DataTableToolbar, type FacetedFilter } from './data-table-toolbar'
 import { SearchXIcon, TriangleAlertIcon } from 'lucide-react'
@@ -51,6 +51,8 @@ export interface DataTableProps<TData, TValue> {
   showRowsSelected?: boolean
   showViewBtn?: boolean
   onAdd?: () => void
+  onSelectionChange?: (selected: TData[]) => void
+  onClearSelectionRef?: (fn: () => void) => void
 }
 
 export function DataTable<TData, TValue>({
@@ -75,6 +77,8 @@ export function DataTable<TData, TValue>({
   showRowsSelected,
   showViewBtn,
   onAdd,
+  onSelectionChange,
+  onClearSelectionRef,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -109,6 +113,23 @@ export function DataTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
+
+  const selectedRows = table
+    .getSelectedRowModel()
+    .rows.map((row) => row.original)
+
+  // * Notify parent when selection changes
+  useEffect(() => {
+    onSelectionChange?.(selectedRows)
+  }, [selectedRows.length])
+
+  useEffect(() => {
+    if (onClearSelectionRef) {
+      onClearSelectionRef(() => {
+        table.resetRowSelection()
+      })
+    }
+  }, [table, onClearSelectionRef])
 
   return (
     <div className="flex flex-col gap-4">

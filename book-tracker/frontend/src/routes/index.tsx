@@ -1,10 +1,12 @@
+import { useRef, useState } from 'react'
+
 import type { Book } from '@/interfaces/books.types'
 import { BookDeleteDialog } from '@/components/books/book-delete-dialog'
 import { BookDialog } from '@/components/books/book-dialog'
+import { BooksPopup } from '../components/books/books-popup'
 import { BooksTable } from '@/components/books/books-table'
 import { createFileRoute } from '@tanstack/react-router'
 import { usePaginatedBooks } from '@/services/queries/books.queries'
-import { useState } from 'react'
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -13,6 +15,7 @@ export const Route = createFileRoute('/')({
 function App() {
   const [bookDialogOpen, setBookDialogOpen] = useState(false)
   const [bookDeleteOpen, setBookDeleteOpen] = useState(false)
+  const [selectedBooks, setSelectedBooks] = useState<Book[]>([])
   const [book, setBook] = useState<Book | null>(null)
   const {
     data,
@@ -25,8 +28,8 @@ function App() {
     goToPreviousPage,
     hasNextPage,
   } = usePaginatedBooks()
+  const clearSelectionRef = useRef<() => void>(null)
   const books = data?.responseData.books ?? []
-
 
   const handleSetDialogOpen = (open: boolean) => {
     setBookDialogOpen(open)
@@ -49,6 +52,10 @@ function App() {
   const handleDeleteBook = (book: Book) => {
     setBook(book)
     setBookDeleteOpen(true)
+  }
+
+  const handleClearSelection = () => {
+    clearSelectionRef.current?.()
   }
 
   return (
@@ -74,7 +81,18 @@ function App() {
         onNextPage={goToNextPage}
         onPrevPage={goToPreviousPage}
         setPageSize={setPageSize}
+        onSelectionChange={setSelectedBooks}
+        onClearSelectionRef={(fn) => {
+          clearSelectionRef.current = fn
+        }}
       />
+
+      {selectedBooks.length > 0 && (
+        <BooksPopup
+          selectedBooks={selectedBooks}
+          onClearSelection={handleClearSelection}
+        />
+      )}
 
       <BookDialog
         open={bookDialogOpen}
