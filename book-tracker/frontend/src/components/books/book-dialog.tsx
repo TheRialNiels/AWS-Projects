@@ -34,8 +34,8 @@ export function BookDialog({
     ? 'Book updated successfully'
     : 'Book created successfully'
   const errorMsg = book
-    ? 'There was an error updating the category'
-    : 'There was an error creating the category'
+    ? 'There was an error updating the book'
+    : 'There was an error creating the book'
   const { mutate: updateBook, isPending: isUpdating } = useUpdateBook(
     setOpen,
     successMsg,
