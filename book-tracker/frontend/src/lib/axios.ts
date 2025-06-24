@@ -1,17 +1,18 @@
 import axios from 'axios'
 import { env } from '@/env'
+import { AuthService } from '@/services/auth.service'
 
 export const api = axios.create({
-  baseURL: env.VITE_BASE_URL,
+  baseURL: env.VITE_BASE_URL || '',
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
-// api.interceptors.request.use((config) => {
-//   const token = localStorage.getItem('token')
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`
-//   }
-//   return config
-// })
+api.interceptors.request.use(async (config) => {
+  const token = await AuthService.getAccessToken()
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})

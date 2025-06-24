@@ -8,8 +8,10 @@ import { BooksPopup } from '../components/books/books-popup'
 import { BooksTable } from '@/components/books/books-table'
 import { createFileRoute } from '@tanstack/react-router'
 import { usePaginatedBooks } from '@/services/queries/books.queries'
+import { requireAuth } from '@/lib/auth-guard'
 
 export const Route = createFileRoute('/')({
+  beforeLoad: requireAuth,
   component: App,
 })
 
