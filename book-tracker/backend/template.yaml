@@ -41,6 +41,26 @@ Globals:
         BOOKS_TITLE_GSI: TitleIndex
 
 Resources:
+  BookTrackerUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${Environment}-${AppName}-user-pool
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+
+  BookTrackerUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub ${Environment}-${AppName}-user-pool-client
+      UserPoolId: !Ref BookTrackerUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+
   BookTrackerAppApiGW:
     Type: AWS::Serverless::Api
     Properties:
@@ -51,6 +71,11 @@ Resources:
         AllowMethods: "'*'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
         AllowOrigin: !Ref AllowOrigin
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt BookTrackerUserPool.Arn
 
   BooksTable:
     Type: AWS::DynamoDB::Table
@@ -60,21 +85,23 @@ Resources:
       SSESpecification:
         SSEEnabled: true
       AttributeDefinitions:
-        - AttributeName: id
+        - AttributeName: userId
           AttributeType: S
-        - AttributeName: title
+        - AttributeName: bookId
           AttributeType: S
-        - AttributeName: author
+        - AttributeName: bookKey
           AttributeType: S
       KeySchema:
-        - AttributeName: id
+        - AttributeName: userId
           KeyType: HASH
+        - AttributeName: bookId
+          KeyType: RANGE
       GlobalSecondaryIndexes:
-        - IndexName: TitleIndex
+        - IndexName: UserBookKeyIndex
           KeySchema:
-            - AttributeName: title
+            - AttributeName: userId
               KeyType: HASH
-            - AttributeName: author
+            - AttributeName: bookKey
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
@@ -92,6 +119,8 @@ Resources:
             RestApiId: !Ref BookTrackerAppApiGW
             Path: /v1/books
             Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
       Policies:
         Statement:
           - Sid: DynamoDBWrite
@@ -127,6 +156,8 @@ Resources:
             RestApiId: !Ref BookTrackerAppApiGW
             Path: /v1/books
             Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
       Policies:
         Statement:
           - Sid: DynamoDBRead
@@ -163,6 +194,8 @@ Resources:
             RestApiId: !Ref BookTrackerAppApiGW
             Path: /v1/books/{id}
             Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
       Policies:
         Statement:
           - Sid: DynamoDBRead
@@ -197,6 +230,8 @@ Resources:
             RestApiId: !Ref BookTrackerAppApiGW
             Path: /v1/books/{id}
             Method: PATCH
+            Auth:
+              Authorizer: CognitoAuthorizer
       Policies:
         Statement:
           - Sid: DynamoDBUpdate
@@ -231,6 +266,8 @@ Resources:
             RestApiId: !Ref BookTrackerAppApiGW
             Path: /v1/books/{id}
             Method: DELETE
+            Auth:
+              Authorizer: CognitoAuthorizer
       Policies:
         Statement:
           - Sid: DynamoDBDelete
@@ -265,6 +302,8 @@ Resources:
             RestApiId: !Ref BookTrackerAppApiGW
             Path: /v1/books/import
             Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
       Policies:
         Statement:
           - Sid: DynamoDBBatchWrite
@@ -289,6 +328,12 @@ Outputs:
   BookTrackerAppApiGW:
     Description: 'API Gateway endpoint URL'
     Value: !Sub 'https://${BookTrackerAppApiGW}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/'
+  UserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref BookTrackerUserPool
+  UserPoolClientId:
+    Description: Cognito User Pool Client ID
+    Value: !Ref BookTrackerUserPoolClient
   CreateBookFunction:
     Description: 'Create Book Lambda Function ARN'
     Value: !GetAtt CreateBookFunction.Arn
