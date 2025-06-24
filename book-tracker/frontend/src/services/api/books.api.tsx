@@ -3,6 +3,7 @@ import type {
   CreateBookResponse,
   DeleteBookResponse,
   GetBooksResponse,
+  ImportBooksResponse,
   PatchBookResponse,
 } from '@/interfaces/books.types'
 
@@ -44,5 +45,20 @@ export const deleteBookApi = async (
   data: Book,
 ): Promise<DeleteBookResponse> => {
   const response = await api.delete(`${path}/${data.id}`, { data })
+  return response.data
+}
+
+export const importBooksApi = async (
+  file: File,
+): Promise<ImportBooksResponse> => {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await api.post(`${path}/import`, formData, {
+    headers: {
+      'Content-Type': 'text/csv',
+    },
+  })
+
   return response.data
 }

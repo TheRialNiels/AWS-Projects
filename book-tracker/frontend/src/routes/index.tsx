@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import type { Book } from '@/interfaces/books.types'
 import { BookDeleteDialog } from '@/components/books/book-delete-dialog'
 import { BookDialog } from '@/components/books/book-dialog'
+import { BookFileDialog } from '../components/books/book-file-dialog'
 import { BooksPopup } from '../components/books/books-popup'
 import { BooksTable } from '@/components/books/books-table'
 import { createFileRoute } from '@tanstack/react-router'
@@ -14,7 +15,8 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const [bookDialogOpen, setBookDialogOpen] = useState(false)
-  const [bookDeleteOpen, setBookDeleteOpen] = useState(false)
+  const [bookDeleteDialogOpen, setBookDeleteDialogOpen] = useState(false)
+  const [bookFileDialogOpen, setBookFileDialogOpen] = useState(false)
   const [selectedBooks, setSelectedBooks] = useState<Book[]>([])
   const [book, setBook] = useState<Book | null>(null)
   const {
@@ -36,7 +38,11 @@ function App() {
   }
 
   const handleSetBookDeleteDialogOpen = (open: boolean) => {
-    setBookDeleteOpen(open)
+    setBookDeleteDialogOpen(open)
+  }
+
+  const handleSetBookFileDialogOpen = (open: boolean) => {
+    setBookFileDialogOpen(open)
   }
 
   const handleAddBook = () => {
@@ -51,7 +57,11 @@ function App() {
 
   const handleDeleteBook = (book: Book) => {
     setBook(book)
-    setBookDeleteOpen(true)
+    setBookDeleteDialogOpen(true)
+  }
+
+  const handleFileBook = () => {
+    setBookFileDialogOpen(true)
   }
 
   const handleClearSelection = () => {
@@ -78,6 +88,7 @@ function App() {
         onAdd={handleAddBook}
         onDelete={handleDeleteBook}
         onEdit={handleEditBook}
+        onImport={handleFileBook}
         onNextPage={goToNextPage}
         onPrevPage={goToPreviousPage}
         setPageSize={setPageSize}
@@ -102,9 +113,15 @@ function App() {
       />
 
       <BookDeleteDialog
-        open={bookDeleteOpen}
+        open={bookDeleteDialogOpen}
         book={book as Book}
         setOpen={handleSetBookDeleteDialogOpen}
+        onResetPagination={() => setCursor(null)}
+      />
+
+      <BookFileDialog
+        open={bookFileDialogOpen}
+        setOpen={handleSetBookFileDialogOpen}
         onResetPagination={() => setCursor(null)}
       />
     </>

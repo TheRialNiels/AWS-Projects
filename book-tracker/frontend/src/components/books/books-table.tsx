@@ -20,6 +20,7 @@ interface BooksTableProps<TData extends Book> {
   onNextPage: () => void
   onPrevPage: () => void
   setPageSize: (size: number) => void
+  onImport?: () => void
   onSelectionChange?: (selected: TData[]) => void
   onClearSelectionRef?: (fn: () => void) => void
 }
@@ -36,8 +37,9 @@ export function BooksTable<TData extends Book>({
   onNextPage,
   onPrevPage,
   setPageSize,
+  onImport,
   onSelectionChange,
-  onClearSelectionRef
+  onClearSelectionRef,
 }: BooksTableProps<TData>) {
   const showViewBtn = false
   const columnsConfig: GetBooksColumnsProps = {
@@ -73,6 +75,7 @@ export function BooksTable<TData extends Book>({
       isError={isError}
       isLoading={isLoading}
       onAdd={onAdd}
+      onImport={onImport}
       onNextPage={onNextPage}
       onPrevPage={onPrevPage}
       pageSize={pageSize}

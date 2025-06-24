@@ -51,6 +51,7 @@ export interface DataTableProps<TData, TValue> {
   showRowsSelected?: boolean
   showViewBtn?: boolean
   onAdd?: () => void
+  onImport?: () => void
   onSelectionChange?: (selected: TData[]) => void
   onClearSelectionRef?: (fn: () => void) => void
 }
@@ -77,6 +78,7 @@ export function DataTable<TData, TValue>({
   showRowsSelected,
   showViewBtn,
   onAdd,
+  onImport,
   onSelectionChange,
   onClearSelectionRef,
 }: DataTableProps<TData, TValue>) {
@@ -142,6 +144,7 @@ export function DataTable<TData, TValue>({
         showAddBtn={showAddBtn}
         addBtnLabel={addBtnLabel}
         onAdd={onAdd}
+        onImport={onImport}
       />
 
       <div className="rounded-md border">

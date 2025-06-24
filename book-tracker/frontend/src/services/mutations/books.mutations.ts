@@ -1,12 +1,18 @@
 import type { Book, GetBooksResponse } from '@/interfaces/books.types'
 import {
   deleteBookApi,
+  importBooksApi,
   patchBookApi,
   postBookApi,
 } from '@/services/api/books.api'
+import { useErrorToast, useSuccessToast } from '../../lib/toastify'
+import {
+  useMutation,
+  useMutationState,
+  useQueryClient,
+} from '@tanstack/react-query'
 
 import { generateUuid } from '@/lib/uuid'
-import { useMutationState } from '@tanstack/react-query'
 import { useOptimisticMutation } from '@/services/mutations/useOptimistic.mutations'
 
 export const useCreateBook = (
@@ -132,4 +138,29 @@ export const useOptimisticDeletingBook = (bookId?: string) => {
   })
 
   return mutations.some((m) => m.variables === bookId)
+}
+
+export const useImportBooks = (
+  setOpen: (open: boolean) => void,
+  successMsg: string,
+  errorMsg: string,
+  onResetPagination: () => void,
+) => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationKey: ['import-books'],
+    mutationFn: importBooksApi,
+    onSuccess: (response) => {
+      console.log('🚀 ~ response:', response)
+      useSuccessToast(successMsg)
+      setOpen(false)
+      onResetPagination()
+      queryClient.invalidateQueries({ queryKey: ['getBooks'] })
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || errorMsg
+      useErrorToast(message)
+    },
+  })
 }

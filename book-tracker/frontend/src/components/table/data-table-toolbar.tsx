@@ -18,6 +18,7 @@ interface DataTableToolbarProps<TData> {
   addBtnLabel?: string
   onFilterChange?: (value: string) => void
   onAdd?: () => void
+  onImport?: () => void
 }
 
 export interface FacetedFilter {
@@ -42,6 +43,7 @@ export function DataTableToolbar<TData>({
   addBtnLabel = 'Add',
   onFilterChange,
   onAdd,
+  onImport,
 }: DataTableToolbarProps<TData>) {
   const column = table.getColumn(filterColumn ?? '')
   const filterValue = (column?.getFilterValue() as string) ?? ''
@@ -92,6 +94,14 @@ export function DataTableToolbar<TData>({
           )}
         >
           {showViewBtn && <DataTableViewOptions table={table} />}
+          <Button
+            variant={'secondary'}
+            size="sm"
+            className="h-8"
+            onClick={() => onImport?.()}
+          >
+            Import from CSV
+          </Button>
           {showAddBtn && (
             <Button size="sm" className="h-8" onClick={() => onAdd?.()}>
               {addBtnLabel}

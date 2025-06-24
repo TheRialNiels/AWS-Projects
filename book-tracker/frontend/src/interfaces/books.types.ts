@@ -82,3 +82,13 @@ export interface DeleteBookResponse {
   responseData: Book
   success: boolean
 }
+
+export interface ImportBooksResponse {
+  message: string
+  responseData: ImportBooksResponseData
+  success: boolean
+}
+
+export interface ImportBooksResponseData {
+  count: number
+}
