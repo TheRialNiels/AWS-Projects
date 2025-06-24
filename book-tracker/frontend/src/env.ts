@@ -1,5 +1,6 @@
+import { stringField, urlField } from '@/lib/zod'
+
 import { createEnv } from '@t3-oss/env-core'
-import { urlField } from '@/lib/zod'
 
 export const env = createEnv({
   server: {
@@ -14,6 +15,9 @@ export const env = createEnv({
 
   client: {
     VITE_BASE_URL: urlField('Base Url'),
+    VITE_AWS_REGION: stringField('AWS Region'),
+    VITE_COGNITO_USER_POOL_ID: stringField('Cognito User Pool ID'),
+    VITE_COGNITO_APP_CLIENT_ID: stringField('Cognito App Client ID')
   },
 
   /**

@@ -1,4 +1,4 @@
-import { signIn, signOut, getCurrentUser, fetchAuthSession } from '@aws-amplify/auth'
+import { fetchAuthSession, getCurrentUser, signIn, signOut } from '@aws-amplify/auth'
 
 export interface AuthUser {
   username: string

@@ -1,7 +1,6 @@
 import { ratings, statuses } from '@/data/data'
 
 import type { Book } from '@/interfaces/books.types'
-import { Checkbox } from '@/components/ui/checkbox'
 import type { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/table/data-table-column-header'
 import { DataTableRowActions } from '@/components/table/data-table-row-actions'

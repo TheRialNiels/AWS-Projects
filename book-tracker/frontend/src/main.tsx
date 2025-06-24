@@ -1,4 +1,5 @@
 import './styles.css'
+import './lib/amplify'
 
 import * as TanStackQueryProvider from './integrations/tanstack-query/root-provider.tsx'
 
