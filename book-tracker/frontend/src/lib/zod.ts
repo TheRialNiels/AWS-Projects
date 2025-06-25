@@ -54,6 +54,18 @@ export const urlField = <T extends z.ZodURL = z.ZodURL>(
   return schema
 }
 
+export const emailField = <T extends z.ZodEmail = z.ZodEmail>(
+  field: string,
+  options?: FieldOptions,
+): z.ZodEmail => {
+  let schema = z.email(
+    defaultError(field, 'must be a valid email', options?.message),
+  ) as T
+  if (options?.nullable) schema = schema.nullable() as any
+  if (options?.optional) schema = schema.optional() as any
+  return schema
+}
+
 export const uuidField = <T extends z.ZodUUID = z.ZodUUID>(
   field: string,
   options?: FieldOptions,
@@ -73,11 +85,7 @@ export const uuidField = <T extends z.ZodUUID = z.ZodUUID>(
 export const stringField = <T extends z.ZodString = z.ZodString>(
   field: string,
   options?: FieldOptions,
-):
-  | T
-  | z.ZodOptional<T>
-  | z.ZodNullable<T>
-  | z.ZodNullable<z.ZodOptional<T>> => {
+): z.ZodString => {
   let schema = z
     .string(defaultError(field, 'must be a string', options?.message))
     .trim() as T

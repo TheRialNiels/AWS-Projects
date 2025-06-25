@@ -1,6 +1,11 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { LoginForm } from '@/components/auth/login-form'
+
 import { AuthService } from '@/services/auth.service'
+import type { Login } from '@/interfaces/auth.types'
+import { LoginForm } from '@/components/auth/login-form'
+import { useAuth } from '@/lib/auth-context'
+import { useErrorToast } from '@/lib/toastify'
+import { useState } from 'react'
 
 export const Route = createFileRoute('/login')({
   beforeLoad: async () => {
@@ -13,11 +18,24 @@ export const Route = createFileRoute('/login')({
 })
 
 function LoginPage() {
+  const [isPending, setIsPending] = useState(false)
+  const { login } = useAuth()
+  const handleOnSubmit = async (data: Login) => {
+    setIsPending(true)
+    try {
+      await login(data.email, data.password)
+      redirect({ to: '/' })
+    } catch (error: any) {
+      useErrorToast(error.message || 'There was an error logging in')
+    } finally {
+      setIsPending(false)
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-8">Sign In</h1>
-        <LoginForm />
+      <div className="w-full max-w-md mx-4 sm:mx-8 lg:mx-0">
+        <LoginForm onSubmit={handleOnSubmit} isPending={isPending} />
       </div>
     </div>
   )
