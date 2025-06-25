@@ -9,7 +9,7 @@ Parameters:
     Description: Application name
   AllowOrigin:
     Type: String
-    Default: "'*'"
+    Default: "'http://localhost:3000'"
     Description: Define the allow origin for CORS
   AllowCredentials:
     Type: String

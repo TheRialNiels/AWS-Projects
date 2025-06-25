@@ -99,7 +99,7 @@ export const handler = async (
       rating: item.rating?.N !== undefined ? +item.rating.N : undefined,
       notes: item.notes?.S,
       createdAt: item.createdAt?.S,
-      updatedAt: item.updatedAt?.S
+      updatedAt: item.updatedAt?.S,
     }))
     return successResponse({
       statusCode: OK,
