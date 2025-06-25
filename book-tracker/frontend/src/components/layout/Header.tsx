@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/auth-context'
 import { useRouter } from '@tanstack/react-router'
 
 export default function Header() {
-  const { logout, user } = useAuth()
+  const { logout } = useAuth()
   const router = useRouter()
 
   const handleLogout = async () => {
@@ -21,7 +21,6 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2">
-          {user && <span className="text-sm text-muted-foreground">{user.username}</span>}
           <Button variant="ghost" size="sm" onClick={handleLogout}>
             Logout
           </Button>

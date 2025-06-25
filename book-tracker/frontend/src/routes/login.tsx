@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 
 import { AuthService } from '@/services/auth.service'
 import type { Login } from '@/interfaces/auth.types'
@@ -20,11 +20,13 @@ export const Route = createFileRoute('/login')({
 function LoginPage() {
   const [isPending, setIsPending] = useState(false)
   const { login } = useAuth()
+  const router = useRouter()
+
   const handleOnSubmit = async (data: Login) => {
     setIsPending(true)
     try {
       await login(data.email, data.password)
-      redirect({ to: '/' })
+      router.navigate({ to: '/' })
     } catch (error: any) {
       useErrorToast(error.message || 'There was an error logging in')
     } finally {
