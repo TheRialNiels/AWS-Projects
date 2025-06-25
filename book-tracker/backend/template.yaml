@@ -13,7 +13,7 @@ Parameters:
     Description: Define the allow origin for CORS
   AllowCredentials:
     Type: String
-    Default: 'true'
+    Default: "'true'"
     Description: Boolean variable to specify credentials for CORS headers
   Environment:
     Type: String
@@ -68,11 +68,13 @@ Resources:
       Description: API Gateway for Book Tracker App Endpoints
       StageName: !Ref Environment
       Cors:
-        AllowMethods: "'*'"
+        AllowMethods: "'GET,POST,PATCH,DELETE,OPTIONS'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
         AllowOrigin: !Ref AllowOrigin
+        AllowCredentials: !Ref AllowCredentials
       Auth:
         DefaultAuthorizer: CognitoAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false
         Authorizers:
           CognitoAuthorizer:
             UserPoolArn: !GetAtt BookTrackerUserPool.Arn
