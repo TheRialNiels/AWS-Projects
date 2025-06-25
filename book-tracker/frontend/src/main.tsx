@@ -1,16 +1,16 @@
 import './styles.css'
 import './lib/amplify'
 
-import * as TanStackQueryProvider from './integrations/tanstack-query/root-provider.tsx'
+import * as TanStackQueryProvider from '@/integrations/tanstack-query/root-provider.tsx'
 
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 
 import ReactDOM from 'react-dom/client'
 import { StrictMode } from 'react'
 import { Slide, ToastContainer, type ToastContainerProps } from 'react-toastify'
-import reportWebVitals from './reportWebVitals.ts'
+import reportWebVitals from '@/reportWebVitals.ts'
 // Import the generated route tree
-import { routeTree } from './routeTree.gen'
+import { routeTree } from '@/routeTree.gen'
 
 // Create a new router instance
 const router = createRouter({
@@ -35,7 +35,7 @@ declare module '@tanstack/react-router' {
 const rootElement = document.getElementById('app')
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
-    const toastConfig: ToastContainerProps = {
+  const toastConfig: ToastContainerProps = {
     position: 'top-right',
     autoClose: 3000,
     hideProgressBar: false,
