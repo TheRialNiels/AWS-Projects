@@ -73,31 +73,30 @@ export const createCORSHeaders = (
       ? methods!.join(',')
       : DEFAULT_ALLOWED_METHODS.join(',')
 
-  // * If "*" is explicitly allowed and credentials are off, return wildcards
-  if (ALLOWED_ORIGINS.includes('*') && !ALLOW_CREDENTIALS) {
-    return {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': allowedHeaders,
-      'Access-Control-Allow-Methods': allowedMethods,
-    }
+  const corsHeaders: Record<string, string> = {
+    'Access-Control-Allow-Headers': allowedHeaders,
+    'Access-Control-Allow-Methods': allowedMethods,
   }
 
-  // * If credentials are on, we must return the exact origin
-  if (origin && isOriginAllowed(origin)) {
-    const corsHeaders: Record<string, string> = {
-      'Access-Control-Allow-Origin': origin,
-      'Access-Control-Allow-Headers': allowedHeaders,
-      'Access-Control-Allow-Methods': allowedMethods,
-    }
-
-    if (ALLOW_CREDENTIALS) {
-      corsHeaders['Access-Control-Allow-Credentials'] = 'true'
-    }
-
+  // * If "*" is explicitly allowed and credentials are off, return wildcards
+  if (ALLOWED_ORIGINS.includes('*') && !ALLOW_CREDENTIALS) {
+    corsHeaders['Access-Control-Allow-Origin'] = '*'
     return corsHeaders
   }
 
-  // * Fallback: not allowed
+  // * If origin is allowed, return exact origin
+  if (origin && isOriginAllowed(origin)) {
+    corsHeaders['Access-Control-Allow-Origin'] = origin
+    
+    // * Add credentials header only if enabled
+    if (ALLOW_CREDENTIALS) {
+      corsHeaders['Access-Control-Allow-Credentials'] = 'true'
+    }
+    
+    return corsHeaders
+  }
+
+  // * Fallback: return empty headers for disallowed origins
   return {}
 }
 
