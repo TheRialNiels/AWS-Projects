@@ -11,14 +11,16 @@ import { api } from '@/lib/axios'
 
 const path = '/v1/books'
 
-export const getBooksApi = async (params?: {
+export const getBooksApi = async (params: {
+  userId: string
   limit?: number
   lastEvaluatedKey?: Record<string, any>
 }): Promise<GetBooksResponse> => {
   const searchParams = new URLSearchParams()
 
-  if (params?.limit) searchParams.append('limit', params.limit.toString())
-  if (params?.lastEvaluatedKey)
+  searchParams.append('userId', params.userId.toString())
+  if (params.limit) searchParams.append('limit', params.limit.toString())
+  if (params.lastEvaluatedKey)
     searchParams.append(
       'lastEvaluatedKey',
       encodeURIComponent(JSON.stringify(params.lastEvaluatedKey)),
