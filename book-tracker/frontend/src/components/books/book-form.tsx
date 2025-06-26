@@ -11,6 +11,7 @@ import { useAppForm } from '@/components/ui/tanstack-form'
 import { Textarea } from '@/components/ui/textarea'
 import { statuses } from '@/data/data'
 import { BookSchema, type Book } from '@/interfaces/books.types'
+import { useAuth } from '@/lib/auth-context'
 import { Loader2 } from 'lucide-react'
 import { useCallback } from 'react'
 
@@ -26,11 +27,13 @@ export function BookForm({
   isPending,
   ...props
 }: BookFormProps) {
+  const { user } = useAuth()
   const form = useAppForm({
     validators: {
       onChange: BookSchema,
     },
     defaultValues: book ?? {
+      userId: user?.username,
       title: '',
       author: '',
       status: 'WISHLIST',

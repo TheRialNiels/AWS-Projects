@@ -7,6 +7,9 @@ import {
   uuidField,
 } from '@/lib/zod'
 
+export const BookUserIdSchema = stringField('User ID', {
+  regex: /^[0-9a-fA-F-]{36}$/,
+})
 export const BookIdSchema = uuidField('Book ID', { optional: true })
 export const BookTitleSchema = stringField('Title', {
   minLength: 3,
@@ -34,7 +37,8 @@ export const BookNotesSchema = stringField('Notes', {
 })
 
 export const BookSchema = createSchema({
-  id: () => BookIdSchema,
+  userId: () => BookUserIdSchema,
+  bookId: () => BookIdSchema,
   title: () => BookTitleSchema,
   author: () => BookAuthorSchema,
   status: () => BookStatusSchema,

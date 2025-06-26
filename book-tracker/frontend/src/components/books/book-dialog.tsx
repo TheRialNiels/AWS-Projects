@@ -14,7 +14,6 @@ import {
 
 import type { Book } from '@/interfaces/books.types'
 import { BookForm } from '@/components/books/book-form'
-import { useAuth } from '@/lib/auth-context'
 
 interface BookDialogProps {
   open: boolean
@@ -29,7 +28,6 @@ export function BookDialog({
   onResetPagination,
   book: book,
 }: BookDialogProps) {
-  const { user } = useAuth()
   const isEditMode = !!book
 
   const successMsg = book
@@ -51,20 +49,16 @@ export function BookDialog({
     onResetPagination,
   )
 
-  const optimisticBook = useOptimisticBook(book?.id ?? '')
+  const optimisticBook = useOptimisticBook(book?.userId ?? '')
   const optimisticNewBook = useOptimisticNewBook()
   const currentBook = isEditMode ? (optimisticBook ?? book) : optimisticNewBook
 
   const handleOnSubmit = (data: Book) => {
-    const payload = {
-      userId: user?.username,
-      ...data,
-    }
     if (isEditMode) {
-      updateBook(payload)
+      updateBook(data)
       return
     }
-    createBook(payload)
+    createBook(data)
   }
 
   return (

@@ -24,6 +24,10 @@ export const validateSchema = <T extends z.ZodType>(
   return schema.safeParse(data)
 }
 
+export const returnFlattenError = (error: z.ZodError) => {
+  return z.flattenError(error)
+}
+
 // * Helper for dynamic error message
 const defaultError = (field: string, fallback: string, custom?: string) =>
   custom || `${field} ${fallback}`
@@ -35,60 +39,41 @@ type FieldOptions = {
   minLength?: number
   maxLength?: number
   includesValue?: string
+  regex?: RegExp
   message?: string
 }
 
-export const urlField = <T extends z.ZodURL = z.ZodURL>(
-  field: string,
-  options?: FieldOptions,
-):
-  | T
-  | z.ZodOptional<T>
-  | z.ZodNullable<T>
-  | z.ZodNullable<z.ZodOptional<T>> => {
+export const urlField = (field: string, options?: FieldOptions): z.ZodURL => {
   let schema = z.url(
     defaultError(field, 'must be a valid URL', options?.message),
-  ) as T
+  )
   if (options?.nullable) schema = schema.nullable() as any
   if (options?.optional) schema = schema.optional() as any
   return schema
 }
 
-export const emailField = <T extends z.ZodEmail = z.ZodEmail>(
-  field: string,
-  options?: FieldOptions,
-): z.ZodEmail => {
-  let schema = z.email(
-    defaultError(field, 'must be a valid email', options?.message),
-  ) as T
-  if (options?.nullable) schema = schema.nullable() as any
-  if (options?.optional) schema = schema.optional() as any
-  return schema
-}
-
-export const uuidField = <T extends z.ZodUUID = z.ZodUUID>(
-  field: string,
-  options?: FieldOptions,
-):
-  | T
-  | z.ZodOptional<T>
-  | z.ZodNullable<T>
-  | z.ZodNullable<z.ZodOptional<T>> => {
+export const uuidField = (field: string, options?: FieldOptions): z.ZodUUID => {
   let schema = z.uuid(
     defaultError(field, 'must be a valid UUID', options?.message),
-  ) as T
+  )
   if (options?.nullable) schema = schema.nullable() as any
   if (options?.optional) schema = schema.optional() as any
   return schema
 }
 
-export const stringField = <T extends z.ZodString = z.ZodString>(
+export const stringField = (
   field: string,
   options?: FieldOptions,
 ): z.ZodString => {
   let schema = z
     .string(defaultError(field, 'must be a string', options?.message))
-    .trim() as T
+    .trim()
+  if (options?.regex) {
+    schema = schema.regex(
+      options.regex,
+      defaultError(field, 'must match the pattern', options?.message),
+    )
+  }
   if (options?.minLength) {
     schema = schema.min(
       options.minLength,
@@ -123,38 +108,30 @@ export const stringField = <T extends z.ZodString = z.ZodString>(
   return schema
 }
 
-export const enumField = <T extends z.ZodEnum = z.ZodEnum>(
+export const enumField = (
   field: string,
   values: [string, ...string[]],
   options?: FieldOptions,
-):
-  | T
-  | z.ZodOptional<T>
-  | z.ZodNullable<T>
-  | z.ZodNullable<z.ZodOptional<T>> => {
+): z.ZodEnum => {
   let schema = z.enum(values, {
     error: defaultError(
       field,
       `must be one of ${values.join(', ')}`,
       options?.message,
     ),
-  }) as T
+  })
   if (options?.nullable) schema = schema.nullable() as any
   if (options?.optional) schema = schema.optional() as any
   return schema
 }
 
-export const numberField = <T extends z.ZodNumber = z.ZodNumber>(
+export const numberField = (
   field: string,
   options?: FieldOptions,
-):
-  | T
-  | z.ZodOptional<T>
-  | z.ZodNullable<T>
-  | z.ZodNullable<z.ZodOptional<T>> => {
+): z.ZodNumber => {
   let schema = z.number(
     defaultError(field, 'must be a number', options?.message),
-  ) as T
+  )
   if (options?.minLength) {
     schema = schema.min(
       options.minLength,
@@ -180,33 +157,22 @@ export const numberField = <T extends z.ZodNumber = z.ZodNumber>(
   return schema
 }
 
-export const objectField = <T extends z.ZodObject = z.ZodObject>(
-  shape: T,
+export const objectField = (
+  shape: z.ZodAny,
   options?: FieldOptions,
-):
-  | T
-  | z.ZodOptional<T>
-  | z.ZodNullable<T>
-  | z.ZodNullable<z.ZodOptional<T>> => {
+): z.ZodObject => {
   let schema = z.object(shape, {
     error: options?.message || 'Must be an object',
-  }) as T
+  })
   if (options?.nullable) schema = schema.nullable() as any
   if (options?.optional) schema = schema.optional() as any
   return schema
 }
 
-export const arrayField = <T extends z.ZodArray = z.ZodArray>(
-  items: T,
-  options?: FieldOptions,
-):
-  | T
-  | z.ZodOptional<T>
-  | z.ZodNullable<T>
-  | z.ZodNullable<z.ZodOptional<T>> => {
+export const arrayField = (items: any, options?: FieldOptions): z.ZodArray => {
   let schema = z.array(items, {
     error: options?.message || 'Must be an array',
-  }) as unknown as T
+  })
   if (options?.minLength) {
     schema = schema.min(
       options.minLength,
@@ -227,6 +193,26 @@ export const arrayField = <T extends z.ZodArray = z.ZodArray>(
       ),
     )
   }
+  if (options?.nullable) schema = schema.nullable() as any
+  if (options?.optional) schema = schema.optional() as any
+  return schema
+}
+
+export const isoDateTimeField = (
+  field: string,
+  options?: FieldOptions,
+): z.ZodISODateTime => {
+  let schema = z.iso
+    .datetime(
+      defaultError(field, 'must be a valid ISO date-time', options?.message),
+    )
+    .refine((date) => !isNaN(Date.parse(date)), {
+      message: defaultError(
+        field,
+        'must be a valid ISO date-time',
+        options?.message,
+      ),
+    })
   if (options?.nullable) schema = schema.nullable() as any
   if (options?.optional) schema = schema.optional() as any
   return schema

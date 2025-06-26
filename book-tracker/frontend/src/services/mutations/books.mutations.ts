@@ -1,15 +1,15 @@
 import type { Book, GetBooksResponse } from '@/interfaces/books.types'
 import {
-    deleteBookApi,
-    importBooksApi,
-    patchBookApi,
-    postBookApi,
+  deleteBookApi,
+  importBooksApi,
+  patchBookApi,
+  postBookApi,
 } from '@/services/api/books.api'
 import { useErrorToast, useSuccessToast } from '@/lib/toastify'
 import {
-    useMutation,
-    useMutationState,
-    useQueryClient,
+  useMutation,
+  useMutationState,
+  useQueryClient,
 } from '@tanstack/react-query'
 
 import { generateUuid } from '@/lib/uuid'
@@ -24,7 +24,7 @@ export const useCreateBook = (
   return useOptimisticMutation<Book, Book>({
     mutationKey: ['create-book'],
     queryKey: ['getBooks'],
-    getId: (book) => book.id!,
+    getId: (book) => book.bookId!,
     mutationFn: postBookApi,
     getItems: (data: GetBooksResponse) => data.responseData.books,
     setItems: (newBooks, oldData: GetBooksResponse) => ({
@@ -68,7 +68,7 @@ export const useUpdateBook = (
   return useOptimisticMutation<Book, Book>({
     mutationKey: ['edit-book'],
     queryKey: ['getBooks'],
-    getId: (book) => book.id!,
+    getId: (book) => book.bookId!,
     mutationFn: patchBookApi,
     getItems: (data: GetBooksResponse) => data.responseData.books,
     setItems: (newBooks, oldData: GetBooksResponse) => ({
@@ -108,7 +108,7 @@ export const useDeleteBook = (
   return useOptimisticMutation<Book, Book>({
     mutationKey: ['delete-book'],
     queryKey: ['getBooks'],
-    getId: (book) => book.id!,
+    getId: (book) => book.bookId!,
     mutationFn: deleteBookApi,
     getItems: (data: GetBooksResponse) => data.responseData.books,
     setItems: (newBooks, oldData: GetBooksResponse) => ({
