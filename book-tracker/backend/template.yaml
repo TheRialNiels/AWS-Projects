@@ -38,7 +38,7 @@ Globals:
         REGION: !Sub ${AWS::Region}
         ENVIRONMENT: !Ref Environment
         BOOKS_TABLE: !Ref BooksTable
-        BOOKS_TITLE_GSI: TitleIndex
+        BOOKS_USER_BOOK_KEY_GSI: UserBookKeyIndex
 
 Resources:
   BookTrackerUserPool:

@@ -2,7 +2,7 @@ import {
   BookSchema,
   type Book,
   type BooksCreateItemParams,
-  type BooksQueryTitleGsiParams,
+  type BooksQueryUserBookKeyGsiParams,
 } from '@interfaces/books.types'
 import {
   createCORSHeaders,
@@ -20,12 +20,11 @@ import { BooksDynamoDBClient } from '@lib/booksDynamoDBClient'
 import { env } from '@lib/packages/env'
 import { generateUuid } from '@lib/packages/uuid'
 import { returnFlattenError, validateSchema } from '@lib/packages/zod'
-import { isString } from '@lib/utils'
 
 const dynamoDbConfig = {
   region: env.REGION,
   tableName: env.BOOKS_TABLE,
-  titleGsi: env.BOOKS_TITLE_GSI,
+  userBookKeyGsi: env.BOOKS_USER_BOOK_KEY_GSI,
 }
 const dynamoDBClient = new BooksDynamoDBClient(dynamoDbConfig)
 
@@ -56,17 +55,10 @@ export const handler = async (
 
     // * Get the body payload from request
     const body: Book = JSON.parse(event.body || '{}')
+    body.bookId = body.bookId || generateUuid()
     const now = new Date().toISOString()
     body.createdAt = now
     body.updatedAt = now
-    body.id = body.id || generateUuid()
-
-    // * Trim whitespace
-    body.title && isString(body.title) ? (body.title = body.title.trim()) : null
-    body.author && isString(body.author)
-      ? (body.author = body.author.trim())
-      : null
-    body.notes && isString(body.notes) ? (body.notes = body.notes.trim()) : null
 
     // * Validate payload with schema
     const schemaValidation = validateSchema(BookSchema, body)
@@ -81,11 +73,12 @@ export const handler = async (
     }
 
     // * Validate if the book already exists
-    const query: BooksQueryTitleGsiParams = {
-      title: body.title!,
-      author: body.author!,
+    const bookKey = `${body.title.toLowerCase()}#${body.author.toLowerCase()}`
+    const query: BooksQueryUserBookKeyGsiParams = {
+      userId: body.userId,
+      bookKey: bookKey,
     }
-    const result = await dynamoDBClient.queryTitleGsi(query)
+    const result = await dynamoDBClient.queryUserBookKeyGsi(query)
 
     // * Return an error if the item already exists
     if (result && result.items.length > 0) {
@@ -102,7 +95,8 @@ export const handler = async (
     // * Prepare the params to insert the item in DynamoDB
     const params: BooksCreateItemParams = {
       item: {
-        id: { S: body.id },
+        userId: { S: body.userId },
+        bookId: { S: body.bookId },
         title: { S: body.title },
         author: { S: body.author },
         status: { S: body.status },

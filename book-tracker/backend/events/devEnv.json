@@ -3,7 +3,7 @@
     "ALLOW_CREDENTIALS": "'true'",
     "ALLOW_ORIGIN": "'*'",
     "BOOKS_TABLE": "staging-book-tracker-app-books-table",
-    "BOOKS_TITLE_GSI": "TitleIndex",
+    "BOOKS_USER_BOOK_KEY_GSI": "UserBookKeyIndex",
     "ENVIRONMENT": "staging",
     "REGION": "us-east-1"
   },
@@ -11,7 +11,7 @@
     "ALLOW_CREDENTIALS": "'true'",
     "ALLOW_ORIGIN": "'*'",
     "BOOKS_TABLE": "staging-book-tracker-app-books-table",
-    "BOOKS_TITLE_GSI": "TitleIndex",
+    "BOOKS_USER_BOOK_KEY_GSI": "UserBookKeyIndex",
     "ENVIRONMENT": "staging",
     "REGION": "us-east-1"
   },
@@ -19,7 +19,7 @@
     "ALLOW_CREDENTIALS": "'true'",
     "ALLOW_ORIGIN": "'*'",
     "BOOKS_TABLE": "staging-book-tracker-app-books-table",
-    "BOOKS_TITLE_GSI": "TitleIndex",
+    "BOOKS_USER_BOOK_KEY_GSI": "UserBookKeyIndex",
     "ENVIRONMENT": "staging",
     "REGION": "us-east-1"
   },
@@ -27,7 +27,7 @@
     "ALLOW_CREDENTIALS": "'true'",
     "ALLOW_ORIGIN": "'*'",
     "BOOKS_TABLE": "staging-book-tracker-app-books-table",
-    "BOOKS_TITLE_GSI": "TitleIndex",
+    "BOOKS_USER_BOOK_KEY_GSI": "UserBookKeyIndex",
     "ENVIRONMENT": "staging",
     "REGION": "us-east-1"
   },
@@ -35,7 +35,7 @@
     "ALLOW_CREDENTIALS": "'true'",
     "ALLOW_ORIGIN": "'*'",
     "BOOKS_TABLE": "staging-book-tracker-app-books-table",
-    "BOOKS_TITLE_GSI": "TitleIndex",
+    "BOOKS_USER_BOOK_KEY_GSI": "UserBookKeyIndex",
     "ENVIRONMENT": "staging",
     "REGION": "us-east-1"
   },
@@ -49,7 +49,7 @@
     "ALLOW_CREDENTIALS": "'true'",
     "ALLOW_ORIGIN": "'*'",
     "BOOKS_TABLE": "staging-book-tracker-app-books-table",
-    "BOOKS_TITLE_GSI": "TitleIndex",
+    "BOOKS_USER_BOOK_KEY_GSI": "UserBookKeyIndex",
     "ENVIRONMENT": "staging",
     "REGION": "us-east-1"
   }

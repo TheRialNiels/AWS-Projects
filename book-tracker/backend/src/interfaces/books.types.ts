@@ -13,6 +13,9 @@ import {
 
 import z from 'zod/v4'
 
+export const BookUserIdSchema = stringField('User ID', {
+  regex: /^[0-9a-fA-F-]{36}$/,
+})
 export const BookIdSchema = uuidField('Book ID', { optional: true })
 export const BookTitleSchema = stringField('Title', {
   minLength: 3,
@@ -46,7 +49,8 @@ export const BookUpdatedAtSchema = isoDateTimeField('Updated at', {
 })
 
 export const BookSchema = createSchema({
-  id: () => BookIdSchema,
+  userId: () => BookUserIdSchema,
+  bookId: () => BookIdSchema,
   title: () => BookTitleSchema,
   author: () => BookAuthorSchema,
   status: () => BookStatusSchema,
@@ -74,14 +78,14 @@ export interface UpdateItemParams {
   returnValues?: ReturnValue
 }
 
-export interface BooksQueryTitleGsiParams {
-  title: string
-  author?: string
+export interface BooksQueryUserBookKeyGsiParams {
+  userId: string
+  bookKey: string
   limit?: number
   lastEvaluatedKey?: Item
 }
 
-export interface BooksQueryTitleGsiResult {
+export interface BooksQueryUserBookKeyGsiResult {
   items: Item[]
   lastEvaluatedKey?: Record<string, AttributeValue>
 }
