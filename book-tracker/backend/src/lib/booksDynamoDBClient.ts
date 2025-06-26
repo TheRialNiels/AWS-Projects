@@ -192,8 +192,13 @@ export class BooksDynamoDBClient {
     }
     try {
       const result = await this.client.send(new QueryCommand(input))
+      const sortedItems = (result.Items ?? []).sort((a, b) => {
+        const aTime = a.updatedAt?.S || ''
+        const bTime = b.updatedAt?.S || ''
+        return bTime.localeCompare(aTime)
+      })
       return {
-        items: result.Items || [],
+        items: sortedItems || [],
         lastEvaluatedKey: result.LastEvaluatedKey,
       }
     } catch (err) {
