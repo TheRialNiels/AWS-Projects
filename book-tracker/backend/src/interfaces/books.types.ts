@@ -85,15 +85,22 @@ export interface BooksQueryUserBookKeyGsiParams {
   lastEvaluatedKey?: Item
 }
 
-export interface BooksQueryUserBookKeyGsiResult {
+export interface BooksQueryResult {
   items: Item[]
   lastEvaluatedKey?: Record<string, AttributeValue>
 }
 
-export const BooksScanPageParamsSchema = createSchema({
+export const BooksPaginationParamsSchema = createSchema({
+  userId: () => BookUserIdSchema,
   limit: () => preprocessNumber().optional(),
   lastEvaluatedKey: () => queryParamRecordField().optional(),
 })
+
+export interface BooksQueryUserItemsParams {
+  userId: string
+  limit?: number
+  lastEvaluatedKey?: Item
+}
 
 export interface BooksScanPageParams {
   limit?: number

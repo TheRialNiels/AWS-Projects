@@ -1,13 +1,3 @@
-import type {
-  BooksCreateItemParams,
-  BooksQueryTitleGsiParams,
-  BooksQueryTitleGsiResult,
-  BooksScanPageParams,
-  BooksScanPageResult,
-  DeleteItemParams,
-  Item,
-  UpdateItemParams,
-} from '@interfaces/books.types'
 import {
   BatchWriteItemCommand,
   BatchWriteItemCommandInput,
@@ -31,16 +21,30 @@ import {
   UpdateItemCommandInput,
   UpdateItemCommandOutput,
 } from '@aws-sdk/client-dynamodb'
+import type {
+  BooksCreateItemParams,
+  BooksQueryResult,
+  BooksQueryUserBookKeyGsiParams,
+  BooksScanPageParams,
+  BooksScanPageResult,
+  DeleteItemParams,
+  Item,
+  UpdateItemParams,
+} from '@interfaces/books.types'
 
 export class BooksDynamoDBClient {
   private client: DynamoDBClient
   private tableName: string
-  private titleGsi: string
+  private userBookKeyGsi: string
 
-  constructor(config: any) {
+  constructor(config: {
+    region: string
+    tableName: string
+    userBookKeyGsi: string
+  }) {
     this.client = new DynamoDBClient({ region: config.region })
     this.tableName = config.tableName
-    this.titleGsi = config.titleGsi
+    this.userBookKeyGsi = config.userBookKeyGsi
   }
 
   static buildUpdateExpression(data: Record<string, any>) {
@@ -168,22 +172,49 @@ export class BooksDynamoDBClient {
     }
   }
 
-  async queryTitleGsi(
-    params: BooksQueryTitleGsiParams,
-  ): Promise<BooksQueryTitleGsiResult> {
+  async queryUserItems(params: {
+    userId: string
+    limit?: number
+    lastEvaluatedKey?: Item
+  }): Promise<BooksQueryResult> {
     const input: QueryCommandInput = {
       TableName: this.tableName,
-      IndexName: this.titleGsi,
-      KeyConditionExpression: params.author
-        ? '#title = :title AND #author = :author'
-        : '#title = :title',
+      IndexName: this.userBookKeyGsi,
+      KeyConditionExpression: '#userId = :userId',
       ExpressionAttributeNames: {
-        '#title': 'title',
-        ...(params.author && { '#author': 'author' }),
+        '#userId': 'userId',
       },
       ExpressionAttributeValues: {
-        ':title': { S: params.title },
-        ...(params.author && { ':author': { S: params.author } }),
+        ':userId': { S: params.userId },
+      },
+      Limit: params.limit,
+      ExclusiveStartKey: params.lastEvaluatedKey,
+    }
+    try {
+      const result = await this.client.send(new QueryCommand(input))
+      return {
+        items: result.Items || [],
+        lastEvaluatedKey: result.LastEvaluatedKey,
+      }
+    } catch (err) {
+      throw err
+    }
+  }
+
+  async queryUserBookKeyGsi(
+    params: BooksQueryUserBookKeyGsiParams,
+  ): Promise<BooksQueryResult> {
+    const input: QueryCommandInput = {
+      TableName: this.tableName,
+      IndexName: this.userBookKeyGsi,
+      KeyConditionExpression: '#userId = :userId AND #bookKey = :bookKey',
+      ExpressionAttributeNames: {
+        '#userId': 'userId',
+        '#bookKey': 'bookKey',
+      },
+      ExpressionAttributeValues: {
+        ':userId': { S: params.userId },
+        ':bookKey': { S: params.bookKey },
       },
       Limit: params.limit,
       ExclusiveStartKey: params.lastEvaluatedKey,

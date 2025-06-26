@@ -1,7 +1,7 @@
 import {
-  BooksScanPageParamsSchema,
+  BooksPaginationParamsSchema,
+  BooksQueryUserItemsParams,
   type Book,
-  type BooksScanPageParams,
 } from '@interfaces/books.types'
 import {
   createCORSHeaders,
@@ -22,7 +22,7 @@ import { returnFlattenError, validateSchema } from '@lib/packages/zod'
 const dynamoDbConfig = {
   region: env.REGION,
   tableName: env.BOOKS_TABLE,
-  titleGsi: env.BOOKS_TITLE_GSI,
+  userBookKeyGsi: env.BOOKS_USER_BOOK_KEY_GSI,
 }
 const dynamoDBClient = new BooksDynamoDBClient(dynamoDbConfig)
 
@@ -51,7 +51,8 @@ export const handler = async (
       })
     }
 
-    // * Get the limit and lastEvaluatedKey from query string params
+    // * Get query string params
+    const userId = event.queryStringParameters?.userId
     const limit = event.queryStringParameters?.limit
       ? parseInt(event.queryStringParameters.limit)
       : 10 // * Default limit
@@ -59,10 +60,14 @@ export const handler = async (
       event.queryStringParameters?.lastEvaluatedKey || null
 
     // * Validate query string params with schema
-    const queriesSchemaValidation = validateSchema(BooksScanPageParamsSchema, {
-      limit,
-      lastEvaluatedKey: lastEvaluatedKeyParam ?? undefined,
-    })
+    const queriesSchemaValidation = validateSchema(
+      BooksPaginationParamsSchema,
+      {
+        userId,
+        limit,
+        lastEvaluatedKey: lastEvaluatedKeyParam ?? undefined,
+      },
+    )
     if (queriesSchemaValidation.error) {
       const error = returnFlattenError(queriesSchemaValidation.error)
       return errorResponse({
@@ -74,11 +79,11 @@ export const handler = async (
     }
 
     // * Prepare the params to get the items from DynamoDB
-    const params = queriesSchemaValidation.data
+    const params = queriesSchemaValidation.data as BooksQueryUserItemsParams
 
-    // * Scan items in DynamoDB
-    const { items, lastEvaluatedKey } = await dynamoDBClient.scanPage(
-      params as BooksScanPageParams,
+    // * Query user items in DynamoDB
+    const { items, lastEvaluatedKey } = await dynamoDBClient.queryUserItems(
+      params,
     )
 
     // * Validate if the items were returned
@@ -92,14 +97,15 @@ export const handler = async (
 
     // * Return success response
     const books: Book[] = items.map((item) => ({
-      id: item.id.S,
-      title: item.title.S,
-      author: item.author.S,
-      status: item.status.S,
-      rating: item.rating?.N !== undefined ? +item.rating.N : undefined,
-      notes: item.notes?.S,
-      createdAt: item.createdAt?.S,
-      updatedAt: item.updatedAt?.S,
+      userId: item.userId.S!,
+      bookId: item.bookId.S!,
+      title: item.title.S!,
+      author: item.author.S!,
+      status: item.status.S!,
+      rating: +item.rating.N!,
+      notes: item.notes?.S!,
+      createdAt: item.createdAt?.S!,
+      updatedAt: item.updatedAt?.S!,
     }))
     return successResponse({
       statusCode: OK,
