@@ -13,7 +13,8 @@ import {
 } from '@/services/mutations/books.mutations'
 
 import type { Book } from '@/interfaces/books.types'
-import { BookForm } from './book-form'
+import { BookForm } from '@/components/books/book-form'
+import { useAuth } from '@/lib/auth-context'
 
 interface BookDialogProps {
   open: boolean
@@ -28,6 +29,7 @@ export function BookDialog({
   onResetPagination,
   book: book,
 }: BookDialogProps) {
+  const { user } = useAuth()
   const isEditMode = !!book
 
   const successMsg = book
@@ -54,11 +56,15 @@ export function BookDialog({
   const currentBook = isEditMode ? (optimisticBook ?? book) : optimisticNewBook
 
   const handleOnSubmit = (data: Book) => {
+    const payload = {
+      userId: user?.username,
+      ...data,
+    }
     if (isEditMode) {
-      updateBook(data)
+      updateBook(payload)
       return
     }
-    createBook(data)
+    createBook(payload)
   }
 
   return (
