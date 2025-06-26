@@ -97,15 +97,16 @@ export const handler = async (
       item: {
         userId: { S: body.userId },
         bookId: { S: body.bookId },
+        bookKey: { S: bookKey },
         title: { S: body.title },
         author: { S: body.author },
         status: { S: body.status },
+        rating: { N: String(body.rating) },
+        notes: { S: body.notes },
         createdAt: { S: body.createdAt },
         updatedAt: { S: body.updatedAt },
       },
     }
-    body.rating ? (params.item.rating = { N: String(body.rating) }) : null
-    body.notes ? (params.item.notes = { S: body.notes }) : null
 
     // * Insert item in DynamoDB
     await dynamoDBClient.createItem(params)
