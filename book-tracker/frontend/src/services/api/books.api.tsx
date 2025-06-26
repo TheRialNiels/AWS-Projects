@@ -39,14 +39,14 @@ export const postBookApi = async (data: Book): Promise<CreateBookResponse> => {
 }
 
 export const patchBookApi = async (data: Book): Promise<PatchBookResponse> => {
-  const response = await api.patch(`${path}/${data.id}`, data)
+  const response = await api.patch(`${path}/${data.bookId}`, data)
   return response.data
 }
 
 export const deleteBookApi = async (
   data: Book,
 ): Promise<DeleteBookResponse> => {
-  const response = await api.delete(`${path}/${data.id}`, { data })
+  const response = await api.delete(`${path}/${data.bookId}`, { data })
   return response.data
 }
 

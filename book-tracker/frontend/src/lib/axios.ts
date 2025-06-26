@@ -1,6 +1,6 @@
+import { AuthService } from '@/services/auth.service'
 import axios from 'axios'
 import { env } from '@/env'
-import { AuthService } from '@/services/auth.service'
 
 export const api = axios.create({
   baseURL: env.VITE_BASE_URL || '',
