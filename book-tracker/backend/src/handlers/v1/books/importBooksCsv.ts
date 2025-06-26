@@ -22,7 +22,7 @@ import { parse } from 'csv-parse/sync'
 const dynamoDbConfig = {
   region: env.REGION,
   tableName: env.BOOKS_TABLE,
-  titleGsi: env.BOOKS_TITLE_GSI,
+  userBookKeyGsi: env.BOOKS_USER_BOOK_KEY_GSI,
 }
 const dynamoDBClient = new BooksDynamoDBClient(dynamoDbConfig)
 
@@ -75,10 +75,21 @@ export const handler = async (
       trim: true,
     })
 
+    // * Get userId from query params
+    const userId = event.queryStringParameters?.userId
+    if (!userId) {
+      return errorResponse({
+        statusCode: BAD_REQUEST,
+        additionalHeaders: createCORSHeaders(origin, [], methods),
+        message: 'Missing userId parameter',
+      })
+    }
+
     // * Normalize and clean the book data
     const now = new Date().toISOString()
     rawBooks = rawBooks.map((book) => ({
-      id: book.id || generateUuid(),
+      userId: userId,
+      bookId: book.bookId || generateUuid(),
       title: book.title && isString(book.title) ? book.title.trim() : null,
       author: book.author && isString(book.author) ? book.author.trim() : null,
       status: book.status && isString(book.status) ? book.status : undefined,
@@ -104,22 +115,27 @@ export const handler = async (
     const chunks = chunkArray(rawBooks, 25)
 
     for (const chunk of chunks) {
-      const requestItems = chunk.map((book) => ({
-        PutRequest: {
-          Item: {
-            id: { S: book.id! },
-            title: { S: book.title! },
-            author: { S: book.author! },
-            status: { S: String(book.status) },
-            createdAt: { S: book.createdAt! },
-            updatedAt: { S: book.updatedAt! },
-            ...(book.rating != null
-              ? { rating: { N: String(book.rating) } }
-              : {}),
-            ...(book.notes != null ? { notes: { S: book.notes } } : {}),
+      const requestItems = chunk.map((book) => {
+        const bookKey = `${book.title!.toLowerCase()}#${book.author!.toLowerCase()}`
+        return {
+          PutRequest: {
+            Item: {
+              userId: { S: book.userId! },
+              bookId: { S: book.bookId! },
+              bookKey: { S: bookKey },
+              title: { S: book.title! },
+              author: { S: book.author! },
+              status: { S: String(book.status) },
+              createdAt: { S: book.createdAt! },
+              updatedAt: { S: book.updatedAt! },
+              ...(book.rating != null
+                ? { rating: { N: String(book.rating) } }
+                : {}),
+              ...(book.notes != null ? { notes: { S: book.notes } } : {}),
+            },
           },
-        },
-      }))
+        }
+      })
 
       await dynamoDBClient.batchWrite(requestItems)
     }

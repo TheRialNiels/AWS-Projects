@@ -194,7 +194,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref BookTrackerAppApiGW
-            Path: /v1/books/{id}
+            Path: /v1/books/{bookId}
             Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
@@ -230,7 +230,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref BookTrackerAppApiGW
-            Path: /v1/books/{id}
+            Path: /v1/books/{bookId}
             Method: PATCH
             Auth:
               Authorizer: CognitoAuthorizer
@@ -266,7 +266,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref BookTrackerAppApiGW
-            Path: /v1/books/{id}
+            Path: /v1/books/{bookId}
             Method: DELETE
             Auth:
               Authorizer: CognitoAuthorizer

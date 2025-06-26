@@ -1,6 +1,5 @@
 import {
   Book,
-  BookIdSchema,
   type DeleteItemParams,
 } from '@interfaces/books.types'
 import {
@@ -17,12 +16,11 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
 import { BooksDynamoDBClient } from '@lib/booksDynamoDBClient'
 import { env } from '@lib/packages/env'
-import { returnFlattenError, validateSchema } from '@lib/packages/zod'
 
 const dynamoDbConfig = {
   region: env.REGION,
   tableName: env.BOOKS_TABLE,
-  titleGsi: env.BOOKS_TITLE_GSI,
+  userBookKeyGsi: env.BOOKS_USER_BOOK_KEY_GSI,
 }
 const dynamoDBClient = new BooksDynamoDBClient(dynamoDbConfig)
 
@@ -50,26 +48,27 @@ export const handler = async (
     })
   }
 
-  // * Get the body payload and id param from request
+  // * Get params from request
+  const bookId = event.pathParameters?.bookId
   const body: Book = JSON.parse(event.body || '{}')
-  const id = event.pathParameters?.id
+  const userId = body.userId
 
   try {
-    // * Validate id with schema
-    const schemaValidation = validateSchema(BookIdSchema, id)
-    if (schemaValidation.error) {
-      const error = returnFlattenError(schemaValidation.error)
+    if (!bookId || !userId) {
       return errorResponse({
         statusCode: BAD_REQUEST,
         additionalHeaders: createCORSHeaders(origin, [], methods),
-        message: 'Invalid request',
-        responseData: { message: error },
+        message: 'Missing required parameters',
+        responseData: { message: 'userId and bookId are required' },
       })
     }
 
     // * Prepare the params to delete the item in DynamoDB
     const params: DeleteItemParams = {
-      key: { id: { S: id } },
+      key: {
+        userId: { S: userId },
+        bookId: { S: bookId },
+      },
     }
 
     // * Delete item in DynamoDB

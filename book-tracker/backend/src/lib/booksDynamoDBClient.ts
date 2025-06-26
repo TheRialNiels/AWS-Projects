@@ -96,7 +96,7 @@ export class BooksDynamoDBClient {
       TableName: this.tableName,
       Item: params.item,
       ConditionExpression:
-        params.conditionExpression ?? 'attribute_not_exists(id)',
+        params.conditionExpression ?? 'attribute_not_exists(userId) AND attribute_not_exists(bookId)',
     }
 
     try {
@@ -128,7 +128,7 @@ export class BooksDynamoDBClient {
       UpdateExpression: params.updateExpression,
       ExpressionAttributeNames: params.expressionAttributeNames,
       ExpressionAttributeValues: params.expressionAttributeValues,
-      ConditionExpression: params.conditionExpression ?? 'attribute_exists(id)',
+      ConditionExpression: params.conditionExpression ?? 'attribute_exists(userId) AND attribute_exists(bookId)',
       ReturnValues: (params.returnValues as ReturnValue) || 'ALL_NEW',
     }
 
@@ -161,7 +161,7 @@ export class BooksDynamoDBClient {
     const input: DeleteItemCommandInput = {
       TableName: this.tableName,
       Key: params.key,
-      ConditionExpression: params.conditionExpression ?? 'attribute_exists(id)',
+      ConditionExpression: params.conditionExpression ?? 'attribute_exists(userId) AND attribute_exists(bookId)',
     }
 
     try {

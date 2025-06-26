@@ -1,7 +1,7 @@
 import {
   BookSchema,
   type Book,
-  type BooksQueryTitleGsiParams,
+  type BooksQueryUserBookKeyGsiParams,
 } from '@interfaces/books.types'
 import {
   createCORSHeaders,
@@ -23,7 +23,7 @@ import { isString } from '@lib/utils'
 const dynamoDbConfig = {
   region: env.REGION,
   tableName: env.BOOKS_TABLE,
-  titleGsi: env.BOOKS_TITLE_GSI,
+  userBookKeyGsi: env.BOOKS_USER_BOOK_KEY_GSI,
 }
 const dynamoDBClient = new BooksDynamoDBClient(dynamoDbConfig)
 
@@ -55,14 +55,6 @@ export const handler = async (
     // * Get the body payload and id param from request
     const body: Book = JSON.parse(event.body || '{}')
     body.updatedAt = new Date().toISOString()
-    body.id = event.pathParameters?.id || ''
-
-    // * Trim whitespace
-    body.title && isString(body.title) ? (body.title = body.title.trim()) : null
-    body.author && isString(body.author)
-      ? (body.author = body.author.trim())
-      : null
-    body.notes && isString(body.notes) ? (body.notes = body.notes.trim()) : null
 
     // * Validate payload with schema
     const schemaValidation = validateSchema(BookSchema, body)
@@ -77,21 +69,27 @@ export const handler = async (
     }
 
     // * Get original item
-    const key = { id: { S: body.id } }
+    const key = {
+      userId: { S: body.userId },
+      bookId: { S: body.bookId }
+    }
     const { Item: originalItem } = await dynamoDBClient.getItem(key)
 
     // * Validate if the title or author was changed
     const titleChanged = originalItem?.title?.S !== body.title
     const authorChanged = originalItem?.author?.S !== body.author
+    let newBookKey: string | undefined
 
     if (titleChanged || authorChanged) {
+      newBookKey = `${body.title!.toLowerCase()}#${body.author!.toLowerCase()}`
+
       // * Validate if the book already exists
-      const query: BooksQueryTitleGsiParams = {
-        title: body.title!,
-        author: body.author!,
+      const query: BooksQueryUserBookKeyGsiParams = {
+        userId: body.userId,
+        bookKey: newBookKey,
       }
-      const result = await dynamoDBClient.queryTitleGsi(query)
-      const isAnotherItem = result.items?.some((item) => item.id?.S !== body.id)
+      const result = await dynamoDBClient.queryUserBookKeyGsi(query)
+      const isAnotherItem = result.items?.some((item) => item.bookId?.S !== body.bookId)
 
       if (isAnotherItem) {
         // * Return an error if the item already exists
@@ -107,18 +105,25 @@ export const handler = async (
     }
 
     // * Prepare the item to be updated in DynamoDB
-    const {
-      expressionAttributeNames,
-      expressionAttributeValues,
-      updateExpression,
-    } = BooksDynamoDBClient.buildUpdateExpression({
+    const updateData: Record<string, any> = {
       title: body.title,
       author: body.author,
       status: body.status,
       rating: body.rating,
       notes: body.notes,
       updatedAt: body.updatedAt,
-    })
+    }
+
+    // * Add bookKey if title or author changed
+    if (newBookKey) {
+      updateData.bookKey = newBookKey
+    }
+
+    const {
+      expressionAttributeNames,
+      expressionAttributeValues,
+      updateExpression,
+    } = BooksDynamoDBClient.buildUpdateExpression(updateData)
 
     // * Update item in DynamoDB
     const result = await dynamoDBClient.updateItem({
@@ -129,7 +134,7 @@ export const handler = async (
     })
 
     // * Return success response
-    body.createdAt = result?.Attributes?.createdAt.S
+    body.createdAt = result?.Attributes?.createdAt.S!
     return successResponse({
       statusCode: OK,
       additionalHeaders: createCORSHeaders(origin, [], methods),
