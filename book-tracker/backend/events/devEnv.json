@@ -2,7 +2,9 @@
   "CreateBookFunction": {
     "ALLOW_CREDENTIALS": "'true'",
     "ALLOW_ORIGIN": "'*'",
+    "BOOKS_FILES_UPLOADS_TABLE": "staging-book-tracker-app-books-files-uploads-table",
     "BOOKS_TABLE": "staging-book-tracker-app-books-table",
+    "BOOKS_UPLOAD_BUCKET": "staging-book-tracker-app-books-uploads",
     "BOOKS_USER_BOOK_KEY_GSI": "UserBookKeyIndex",
     "ENVIRONMENT": "staging",
     "REGION": "us-east-1"
@@ -10,7 +12,19 @@
   "DeleteBookFunction": {
     "ALLOW_CREDENTIALS": "'true'",
     "ALLOW_ORIGIN": "'*'",
+    "BOOKS_FILES_UPLOADS_TABLE": "staging-book-tracker-app-books-files-uploads-table",
     "BOOKS_TABLE": "staging-book-tracker-app-books-table",
+    "BOOKS_UPLOAD_BUCKET": "staging-book-tracker-app-books-uploads",
+    "BOOKS_USER_BOOK_KEY_GSI": "UserBookKeyIndex",
+    "ENVIRONMENT": "staging",
+    "REGION": "us-east-1"
+  },
+  "GeneratePresignedUrlFunction": {
+    "ALLOW_CREDENTIALS": "'true'",
+    "ALLOW_ORIGIN": "'*'",
+    "BOOKS_FILES_UPLOADS_TABLE": "staging-book-tracker-app-books-files-uploads-table",
+    "BOOKS_TABLE": "staging-book-tracker-app-books-table",
+    "BOOKS_UPLOAD_BUCKET": "staging-book-tracker-app-books-uploads",
     "BOOKS_USER_BOOK_KEY_GSI": "UserBookKeyIndex",
     "ENVIRONMENT": "staging",
     "REGION": "us-east-1"
@@ -18,7 +32,9 @@
   "GetAllBooksFunction": {
     "ALLOW_CREDENTIALS": "'true'",
     "ALLOW_ORIGIN": "'*'",
+    "BOOKS_FILES_UPLOADS_TABLE": "staging-book-tracker-app-books-files-uploads-table",
     "BOOKS_TABLE": "staging-book-tracker-app-books-table",
+    "BOOKS_UPLOAD_BUCKET": "staging-book-tracker-app-books-uploads",
     "BOOKS_USER_BOOK_KEY_GSI": "UserBookKeyIndex",
     "ENVIRONMENT": "staging",
     "REGION": "us-east-1"
@@ -26,7 +42,9 @@
   "GetBookFunction": {
     "ALLOW_CREDENTIALS": "'true'",
     "ALLOW_ORIGIN": "'*'",
+    "BOOKS_FILES_UPLOADS_TABLE": "staging-book-tracker-app-books-files-uploads-table",
     "BOOKS_TABLE": "staging-book-tracker-app-books-table",
+    "BOOKS_UPLOAD_BUCKET": "staging-book-tracker-app-books-uploads",
     "BOOKS_USER_BOOK_KEY_GSI": "UserBookKeyIndex",
     "ENVIRONMENT": "staging",
     "REGION": "us-east-1"
@@ -34,7 +52,9 @@
   "ImportBooksCsvFunction": {
     "ALLOW_CREDENTIALS": "'true'",
     "ALLOW_ORIGIN": "'*'",
+    "BOOKS_FILES_UPLOADS_TABLE": "staging-book-tracker-app-books-files-uploads-table",
     "BOOKS_TABLE": "staging-book-tracker-app-books-table",
+    "BOOKS_UPLOAD_BUCKET": "staging-book-tracker-app-books-uploads",
     "BOOKS_USER_BOOK_KEY_GSI": "UserBookKeyIndex",
     "ENVIRONMENT": "staging",
     "REGION": "us-east-1"
@@ -48,7 +68,9 @@
   "UpdateBookFunction": {
     "ALLOW_CREDENTIALS": "'true'",
     "ALLOW_ORIGIN": "'*'",
+    "BOOKS_FILES_UPLOADS_TABLE": "staging-book-tracker-app-books-files-uploads-table",
     "BOOKS_TABLE": "staging-book-tracker-app-books-table",
+    "BOOKS_UPLOAD_BUCKET": "staging-book-tracker-app-books-uploads",
     "BOOKS_USER_BOOK_KEY_GSI": "UserBookKeyIndex",
     "ENVIRONMENT": "staging",
     "REGION": "us-east-1"
