@@ -291,41 +291,6 @@ Resources:
         Banner:
           - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
 
-  ImportBooksCsvFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub ${Environment}-${AppName}-import-books-csv
-      Description: Import books from CSV
-      Handler: !Sub ${BookHandlersPath}/importBooksCsv.handler
-      Events:
-        ApiEvent:
-          Type: Api
-          Properties:
-            RestApiId: !Ref BookTrackerAppApiGW
-            Path: /v1/books/import
-            Method: POST
-            Auth:
-              Authorizer: CognitoAuthorizer
-      Policies:
-        Statement:
-          - Sid: DynamoDBBatchWrite
-            Effect: Allow
-            Action:
-              - dynamodb:BatchWriteItem
-            Resource: !GetAtt BooksTable.Arn
-    Metadata:
-      BuildMethod: esbuild
-      BuildProperties:
-        Format: esm
-        OutExtension:
-          - .js=.mjs
-        Minify: true
-        Target: es2022
-        EntryPoints:
-          - !Sub ${BookHandlersPath}/importBooksCsv.ts
-        Banner:
-          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
-
 Outputs:
   BookTrackerAppApiGW:
     Description: 'API Gateway endpoint URL'
