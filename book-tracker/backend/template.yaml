@@ -137,6 +137,16 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - PUT
+              - POST
+            AllowedOrigins:
+              - !Ref AllowOrigin
+            MaxAge: 3000
 
   CreateBookFunction:
     Type: AWS::Serverless::Function
