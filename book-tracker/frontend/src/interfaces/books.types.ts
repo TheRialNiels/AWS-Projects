@@ -86,13 +86,28 @@ export interface DeleteBookResponse {
   responseData: Book
   success: boolean
 }
-
-export interface ImportBooksResponse {
+export interface GeneratePresignedUrlResponse {
   message: string
-  responseData: ImportBooksResponseData
+  responseData: {
+    updateId: string
+    presignedUrl: string
+    key: string
+  }
   success: boolean
 }
 
-export interface ImportBooksResponseData {
-  count: number
+export interface ImportStatus {
+  updateId: string
+  stage: 'processing' | 'completed' | 'failed'
+  totalRows: number
+  processedRows: number
+  successCount: number
+  errorCount: number
+  errors: any[]
+}
+
+export interface ImportStatusResponse {
+  message: string
+  responseData: ImportStatus
+  success: boolean
 }

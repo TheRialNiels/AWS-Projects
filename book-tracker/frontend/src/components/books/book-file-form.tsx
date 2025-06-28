@@ -6,8 +6,10 @@ import { useCallback } from 'react'
 import { z } from 'zod/v4'
 
 interface BookFileFormProps {
-  onSubmit: (data: any) => void
+  onSubmit: (data: { file: File }) => void
   isPending?: boolean
+  isImporting?: boolean
+  importStatus?: any
 }
 
 const FileUploadSchema = z.object({
@@ -18,11 +20,7 @@ const FileUploadSchema = z.object({
     }),
 })
 
-export function BookFileForm({
-  onSubmit,
-  isPending,
-  ...props
-}: BookFileFormProps) {
+export function BookFileForm({ onSubmit, isPending, isImporting, importStatus, ...props }: BookFileFormProps) {
   const form = useAppForm({
     validators: {
       onChange: FileUploadSchema,
@@ -72,10 +70,29 @@ export function BookFileForm({
           )}
         />
 
-        {isPending ? (
+        {/* TODO: Show import progress when status polling is active */}
+        {isImporting && importStatus && (
+          <div className="space-y-2">
+            <div className="text-sm text-muted-foreground">
+              Import Status: {importStatus.stage}
+            </div>
+            {importStatus.totalRows > 0 && (
+              <div className="text-sm">
+                Progress: {importStatus.processedRows}/{importStatus.totalRows} rows
+              </div>
+            )}
+            {importStatus.errorCount > 0 && (
+              <div className="text-sm text-destructive">
+                Errors: {importStatus.errorCount}
+              </div>
+            )}
+          </div>
+        )}
+        
+        {isPending || isImporting ? (
           <Button size="sm" disabled className="w-full sm:w-auto">
             <Loader2 className="animate-spin" />
-            Loading...
+            {isImporting ? 'Importing...' : 'Uploading...'}
           </Button>
         ) : (
           <Button type="submit" className="w-full sm:w-auto">

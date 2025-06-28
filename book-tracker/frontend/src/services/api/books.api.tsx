@@ -3,7 +3,6 @@ import type {
   CreateBookResponse,
   DeleteBookResponse,
   GetBooksResponse,
-  ImportBooksResponse,
   PatchBookResponse,
 } from '@/interfaces/books.types'
 
@@ -50,17 +49,57 @@ export const deleteBookApi = async (
   return response.data
 }
 
-export const importBooksApi = async (
-  file: File,
-): Promise<ImportBooksResponse> => {
-  const formData = new FormData()
-  formData.append('file', file)
+export const generatePresignedUrlApi = async (data: {
+  userId: string
+}): Promise<{
+  updateId: string
+  presignedUrl: string
+  key: string
+}> => {
+  const response = await api.post(`${path}/generate-presigned-url`, data)
+  return response.data.responseData
+}
 
-  const response = await api.post(`${path}/import`, formData, {
+export const uploadFileToS3 = async (
+  presignedUrl: string,
+  file: File
+): Promise<void> => {
+  await api.put(presignedUrl, file, {
     headers: {
       'Content-Type': 'text/csv',
     },
   })
-
-  return response.data
 }
+
+export const getImportStatusApi = async (
+  updateId: string
+): Promise<{
+  updateId: string
+  stage: string
+  totalRows: number
+  processedRows: number
+  successCount: number
+  errorCount: number
+  errors: any[]
+}> => {
+  // TODO: Implement when backend endpoint is ready
+  // const response = await api.get(`${path}/import/status/${updateId}`)
+  // return response.data.responseData
+
+  // Mock response for now
+  return {
+    updateId,
+    stage: 'processing',
+    totalRows: 0,
+    processedRows: 0,
+    successCount: 0,
+    errorCount: 0,
+    errors: [],
+  }
+}
+
+// TODO: Add trigger import endpoint when backend is ready
+// export const triggerImportApi = async (updateId: string): Promise<void> => {
+//   const response = await api.post(`${path}/import/trigger`, { updateId })
+//   return response.data
+// }

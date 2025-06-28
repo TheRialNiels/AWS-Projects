@@ -1,9 +1,10 @@
 import type { Book, GetBooksResponse } from '@/interfaces/books.types'
 import {
   deleteBookApi,
-  importBooksApi,
+  generatePresignedUrlApi,
   patchBookApi,
   postBookApi,
+  uploadFileToS3,
 } from '@/services/api/books.api'
 import { useErrorToast, useSuccessToast } from '@/lib/toastify'
 import {
@@ -140,27 +141,88 @@ export const useOptimisticDeletingBook = (bookId?: string) => {
   return mutations.some((m) => m.variables === bookId)
 }
 
-export const useImportBooks = (
-  setOpen: (open: boolean) => void,
-  successMsg: string,
-  errorMsg: string,
-  onResetPagination: () => void,
-) => {
-  const queryClient = useQueryClient()
-
+export const useGeneratePresignedUrl = () => {
   return useMutation({
-    mutationKey: ['import-books'],
-    mutationFn: importBooksApi,
-    onSuccess: (response) => {
-      console.log('🚀 ~ response:', response)
-      useSuccessToast(successMsg)
-      setOpen(false)
-      onResetPagination()
-      queryClient.invalidateQueries({ queryKey: ['getBooks'] })
-    },
+    mutationKey: ['generate-presigned-url'],
+    mutationFn: generatePresignedUrlApi,
     onError: (error: any) => {
-      const message = error?.response?.data?.message || errorMsg
+      const message = error?.response?.data?.message || 'Error generating upload URL'
       useErrorToast(message)
     },
   })
 }
+
+export const useUploadFile = () => {
+  return useMutation({
+    mutationKey: ['upload-file'],
+    mutationFn: ({ presignedUrl, file }: { presignedUrl: string; file: File }) =>
+      uploadFileToS3(presignedUrl, file),
+    onError: (error: any) => {
+      useErrorToast('Error uploading file')
+    },
+  })
+}
+
+// TODO: Complete import workflow mutation - handles the entire process
+export const useCompleteImportWorkflow = (
+  setOpen: (open: boolean) => void,
+  onResetPagination?: () => void,
+) => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationKey: ['complete-import-workflow'],
+    mutationFn: async ({ userId, file }: { userId: string; file: File }) => {
+      // Step 1: Generate presigned URL
+      const { updateId, presignedUrl } = await generatePresignedUrlApi({ userId })
+
+      // Step 2: Upload file to S3
+      await uploadFileToS3(presignedUrl, file)
+
+      // TODO: Step 3: Trigger import process (when backend endpoint is ready)
+      // await triggerImportApi(updateId)
+
+      return { updateId }
+    },
+    onSuccess: ({ updateId }) => {
+      useSuccessToast('File uploaded successfully. Import process started.')
+      // TODO: Start polling for status instead of closing immediately
+      // For now, close the dialog
+      setOpen(false)
+      onResetPagination?.()
+      queryClient.invalidateQueries({ queryKey: ['getBooks'] })
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || 'Error during import process'
+      useErrorToast(message)
+    },
+  })
+}
+
+// TODO: Add mutation for handling import completion with optimistic updates
+// export const useHandleImportCompletion = (
+//   setOpen: (open: boolean) => void,
+//   onResetPagination?: () => void,
+// ) => {
+//   return useOptimisticMutation<Book[], { updateId: string; importedBooks: Book[] }>({
+//     mutationKey: ['handle-import-completion'],
+//     queryKey: ['getBooks'],
+//     getId: () => 'import-completion', // Special case for bulk operations
+//     mutationFn: async ({ importedBooks }) => ({ responseData: importedBooks }),
+//     getItems: (data: GetBooksResponse) => data.responseData.books,
+//     setItems: (newBooks, oldData: GetBooksResponse) => ({
+//       ...oldData,
+//       responseData: {
+//         ...oldData.responseData,
+//         books: newBooks,
+//       },
+//     }),
+//     updateItems: (prevBooks, { importedBooks }) => [...importedBooks, ...prevBooks],
+//     successMsg: 'Books imported successfully!',
+//     errorMsg: 'Error completing import',
+//     onDone: () => {
+//       onResetPagination?.()
+//       setOpen(false)
+//     },
+//   })
+// }

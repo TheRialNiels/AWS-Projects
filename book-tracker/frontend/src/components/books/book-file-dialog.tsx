@@ -6,8 +6,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-import { BookFileForm } from './book-file-form'
-import { useImportBooks } from '../../services/mutations/books.mutations'
+import { BookFileForm } from '@/components/books/book-file-form'
+import { useAuth } from '@/lib/auth-context'
+import { useCompleteImportWorkflow } from '@/services/mutations/books.mutations'
+import { useImportStatus } from '@/services/queries/books.queries'
+import { useState } from 'react'
 
 interface BookFileDialogProps {
   open: boolean
@@ -20,18 +23,29 @@ export function BookFileDialog({
   setOpen,
   onResetPagination,
 }: BookFileDialogProps) {
-  const successMsg = 'Books imported successfully'
-  const errorMsg = 'There was an error importing the books'
+  const [updateId, setUpdateId] = useState<string | null>(null)
+  const { user } = useAuth()
 
-  const { mutate: importBooks, isPending } = useImportBooks(
+  const completeImportWorkflow = useCompleteImportWorkflow(
     setOpen,
-    successMsg,
-    errorMsg,
     onResetPagination,
   )
 
-  const handleOnSubmit = (data: { file: File }) => {
-    importBooks(data.file)
+  // TODO: Enable when backend endpoint is ready - polling for import status
+  const { data: importStatus } = useImportStatus(updateId, !!updateId)
+
+  const isPending = completeImportWorkflow.isPending
+  const isImporting = !!updateId && importStatus?.stage === 'processing'
+
+  const handleOnSubmit = async (data: { file: File }) => {
+    const result = await completeImportWorkflow.mutateAsync({
+      file: data.file,
+      userId: user?.username || '',
+    })
+    console.log('🚀 ~ handleOnSubmit ~ result:', result)
+
+    // TODO: Set updateId to start polling when backend is ready
+    // setUpdateId(result.updateId)
   }
 
   return (
@@ -42,7 +56,12 @@ export function BookFileDialog({
           <DialogDescription>Add new books from a CSV file.</DialogDescription>
         </DialogHeader>
 
-        <BookFileForm onSubmit={handleOnSubmit} isPending={isPending} />
+        <BookFileForm
+          onSubmit={handleOnSubmit}
+          isPending={isPending}
+          isImporting={isImporting}
+          importStatus={importStatus}
+        />
       </DialogContent>
     </Dialog>
   )
