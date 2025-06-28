@@ -39,6 +39,8 @@ Globals:
         ENVIRONMENT: !Ref Environment
         BOOKS_TABLE: !Ref BooksTable
         BOOKS_USER_BOOK_KEY_GSI: UserBookKeyIndex
+        BOOKS_FILES_UPLOADS_TABLE: !Ref BooksFilesUploadsTable
+        BOOKS_UPLOAD_BUCKET: !Ref BooksUploadBucket
 
 Resources:
   BookTrackerUserPool:
@@ -107,6 +109,30 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
+
+  BooksFilesUploadsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${Environment}-${AppName}-books-files-uploads-table
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: updateId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: updateId
+          KeyType: HASH
+
+  BooksUploadBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${Environment}-${AppName}-books-files-uploads
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
 
   CreateBookFunction:
     Type: AWS::Serverless::Function
@@ -291,6 +317,47 @@ Resources:
         Banner:
           - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
 
+  GeneratePresignedUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-generate-presigned-url
+      Description: Generate presigned URL for file upload
+      Handler: !Sub ${BookHandlersPath}/generatePresignedUrl.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BookTrackerAppApiGW
+            Path: /v1/books/generate-presigned-url
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        Statement:
+          - Sid: DynamoDBWrite
+            Effect: Allow
+            Action:
+              - dynamodb:PutItem
+            Resource: !GetAtt BooksFilesUploadsTable.Arn
+          - Sid: S3PresignedUrl
+            Effect: Allow
+            Action:
+              - s3:PutObject
+            Resource: !Sub '${BooksUploadBucket.Arn}/*'
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${BookHandlersPath}/generatePresignedUrl.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
 Outputs:
   BookTrackerAppApiGW:
     Description: 'API Gateway endpoint URL'
@@ -316,3 +383,12 @@ Outputs:
   DeleteBookFunction:
     Description: 'Delete Book Lambda Function ARN'
     Value: !GetAtt DeleteBookFunction.Arn
+  GeneratePresignedUrlFunction:
+    Description: 'Generate Presigned URL Lambda Function ARN'
+    Value: !GetAtt GeneratePresignedUrlFunction.Arn
+  BooksFilesUploadsTable:
+    Description: 'Books Files Uploads DynamoDB Table Name'
+    Value: !Ref BooksFilesUploadsTable
+  BooksUploadBucket:
+    Description: 'Books Upload S3 Bucket Name'
+    Value: !Ref BooksUploadBucket
