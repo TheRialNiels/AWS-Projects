@@ -1,11 +1,15 @@
 import {
   DynamoDBClient,
+  GetItemCommand,
+  GetItemCommandInput,
+  GetItemCommandOutput,
   PutItemCommand,
   PutItemCommandInput,
   PutItemCommandOutput,
+  QueryCommand,
+  QueryCommandInput,
 } from '@aws-sdk/client-dynamodb'
-
-import type { UploadsFilesCreateItemParams } from '@interfaces/books-uploads.types'
+import type { UploadsFilesCreateItemParams, Item } from '@interfaces/books-uploads.types'
 
 export class UploadsFilesDynamoDBClient {
   private client: DynamoDBClient
@@ -26,6 +30,23 @@ export class UploadsFilesDynamoDBClient {
 
     try {
       const result = await this.client.send(new PutItemCommand(input))
+      return result
+    } catch (err) {
+      throw err
+    }
+  }
+
+  async getItem(updateId: string, userId: string): Promise<GetItemCommandOutput> {
+    const input: GetItemCommandInput = {
+      TableName: this.tableName,
+      Key: {
+        updateId: { S: updateId },
+        userId: { S: userId },
+      },
+    }
+
+    try {
+      const result = await this.client.send(new GetItemCommand(input))
       return result
     } catch (err) {
       throw err

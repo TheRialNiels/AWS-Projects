@@ -24,3 +24,5 @@ export interface FileUploadRecord {
   errorCount: number
   errors: string[]
 }
+
+export type Item = Record<string, any>

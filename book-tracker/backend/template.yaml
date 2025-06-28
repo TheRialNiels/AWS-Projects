@@ -120,14 +120,18 @@ Resources:
       AttributeDefinitions:
         - AttributeName: updateId
           AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
       KeySchema:
         - AttributeName: updateId
           KeyType: HASH
+        - AttributeName: userId
+          KeyType: RANGE
 
   BooksUploadBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ${Environment}-${AppName}-books-files-uploads
+      BucketName: !Sub ${Environment}-${AppName}-books-uploads
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
