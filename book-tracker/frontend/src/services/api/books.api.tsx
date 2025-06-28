@@ -64,11 +64,18 @@ export const uploadFileToS3 = async (
   presignedUrl: string,
   file: File
 ): Promise<void> => {
-  await api.put(presignedUrl, file, {
+  // * Using fetch for S3 presigned URL uploads (axios can cause issues)
+  const response = await fetch(presignedUrl, {
+    method: 'PUT',
+    body: file,
     headers: {
       'Content-Type': 'text/csv',
     },
   })
+
+  if (!response.ok) {
+    throw new Error(`Upload failed: ${response.status} ${response.statusText}`)
+  }
 }
 
 export const getImportStatusApi = async (
