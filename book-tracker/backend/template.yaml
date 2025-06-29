@@ -9,7 +9,7 @@ Parameters:
     Description: Application name
   AllowOrigin:
     Type: String
-    Default: "'http://localhost:3000'"
+    Default: http://localhost:3000
     Description: Define the allow origin for CORS
   AllowCredentials:
     Type: String
@@ -72,7 +72,7 @@ Resources:
       Cors:
         AllowMethods: "'GET,POST,PATCH,DELETE,OPTIONS'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-        AllowOrigin: !Ref AllowOrigin
+        AllowOrigin: !Sub "'${AllowOrigin}'"
         AllowCredentials: !Ref AllowCredentials
       Auth:
         DefaultAuthorizer: CognitoAuthorizer
