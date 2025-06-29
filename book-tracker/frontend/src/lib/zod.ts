@@ -61,6 +61,18 @@ export const uuidField = (field: string, options?: FieldOptions): z.ZodUUID => {
   return schema
 }
 
+export const emailField = (
+  field: string,
+  options?: FieldOptions,
+): z.ZodEmail => {
+  let schema = z.email(
+    defaultError(field, 'must be a valid email', options?.message),
+  )
+  if (options?.nullable) schema = schema.nullable() as any
+  if (options?.optional) schema = schema.optional() as any
+  return schema
+}
+
 export const stringField = (
   field: string,
   options?: FieldOptions,
