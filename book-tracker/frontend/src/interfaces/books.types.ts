@@ -98,12 +98,19 @@ export interface GeneratePresignedUrlResponse {
 
 export interface ImportStatus {
   updateId: string
+  userId: string
   stage: 'processing' | 'completed' | 'failed'
   totalRows: number
   processedRows: number
   successCount: number
   errorCount: number
-  errors: any[]
+  errors: ImportError[]
+}
+
+export interface ImportError {
+  row: number
+  field: string
+  message: string
 }
 
 export interface ImportStatusResponse {

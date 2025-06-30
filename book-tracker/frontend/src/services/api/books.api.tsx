@@ -3,6 +3,8 @@ import type {
   CreateBookResponse,
   DeleteBookResponse,
   GetBooksResponse,
+  ImportStatus,
+  ImportStatusResponse,
   PatchBookResponse,
 } from '@/interfaces/books.types'
 
@@ -62,7 +64,7 @@ export const generatePresignedUrlApi = async (data: {
 
 export const uploadFileToS3 = async (
   presignedUrl: string,
-  file: File
+  file: File,
 ): Promise<void> => {
   // * Using fetch for S3 presigned URL uploads (axios can cause issues)
   const response = await fetch(presignedUrl, {
@@ -78,35 +80,10 @@ export const uploadFileToS3 = async (
   }
 }
 
-export const getImportStatusApi = async (
-  updateId: string
-): Promise<{
-  updateId: string
-  stage: string
-  totalRows: number
-  processedRows: number
-  successCount: number
-  errorCount: number
-  errors: any[]
-}> => {
-  // TODO: Implement when backend endpoint is ready
-  // const response = await api.get(`${path}/import/status/${updateId}`)
-  // return response.data.responseData
-
-  // Mock response for now
-  return {
-    updateId,
-    stage: 'processing',
-    totalRows: 0,
-    processedRows: 0,
-    successCount: 0,
-    errorCount: 0,
-    errors: [],
-  }
+export const getBooksStatusApi = async (
+  updateId: string,
+  userId: string,
+): Promise<ImportStatus> => {
+  const response = await api.get<ImportStatusResponse>(`${path}/status/${updateId}?userId=${userId}`)
+  return response.data.responseData
 }
-
-// TODO: Add trigger import endpoint when backend is ready
-// export const triggerImportApi = async (updateId: string): Promise<void> => {
-//   const response = await api.post(`${path}/import/trigger`, { updateId })
-//   return response.data
-// }

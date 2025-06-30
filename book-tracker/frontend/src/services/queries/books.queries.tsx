@@ -1,6 +1,6 @@
+import { getBooksApi, getBooksStatusApi } from '@/services/api/books.api'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
-import { getBooksApi, getImportStatusApi } from '@/services/api/books.api'
 import { useAuth } from '@/lib/auth-context'
 import { useState } from 'react'
 
@@ -58,19 +58,16 @@ export const usePaginatedBooks = () => {
   }
 }
 
-// TODO: Implement when backend endpoint is ready
-export const useImportStatus = (updateId: string | null, enabled: boolean = false) => {
+export const useBooksStatus = (
+  updateId: string | null,
+  userId: string | null,
+  enabled: boolean = false,
+) => {
   return useQuery({
-    queryKey: ['import-status', updateId],
-    queryFn: () => getImportStatusApi(updateId!),
-    enabled: enabled && !!updateId,
-    refetchInterval: (data) => {
-      // Stop polling when import is completed or failed
-      if (data?.stage === 'completed' || data?.stage === 'failed') {
-        return false
-      }
-      return 2000 // Poll every 2 seconds
-    },
+    queryKey: ['books-status', updateId, userId],
+    queryFn: () => getBooksStatusApi(updateId!, userId!),
+    enabled: enabled && !!updateId && !!userId,
+    refetchInterval: () => 2000, // * Poll every 2 seconds
     refetchIntervalInBackground: true,
   })
 }

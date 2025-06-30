@@ -70,7 +70,6 @@ export function BookFileForm({ onSubmit, isPending, isImporting, importStatus, .
           )}
         />
 
-        {/* TODO: Show import progress when status polling is active */}
         {isImporting && importStatus && (
           <div className="space-y-2">
             <div className="text-sm text-muted-foreground">
@@ -88,7 +87,7 @@ export function BookFileForm({ onSubmit, isPending, isImporting, importStatus, .
             )}
           </div>
         )}
-        
+
         {isPending || isImporting ? (
           <Button size="sm" disabled className="w-full sm:w-auto">
             <Loader2 className="animate-spin" />

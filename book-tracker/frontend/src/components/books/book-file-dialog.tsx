@@ -5,12 +5,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { useCompleteImportWorkflow, useHandleImportCompletion } from '@/services/mutations/books.mutations'
+import { useEffect, useState } from 'react'
 
 import { BookFileForm } from '@/components/books/book-file-form'
 import { useAuth } from '@/lib/auth-context'
-import { useCompleteImportWorkflow } from '@/services/mutations/books.mutations'
-import { useImportStatus } from '@/services/queries/books.queries'
-import { useState } from 'react'
+import { useBooksStatus } from '@/services/queries/books.queries'
 
 interface BookFileDialogProps {
   open: boolean
@@ -31,21 +31,36 @@ export function BookFileDialog({
     onResetPagination,
   )
 
-  // TODO: Enable when backend endpoint is ready - polling for import status
-  const { data: importStatus } = useImportStatus(updateId, !!updateId)
+  const handleImportCompletion = useHandleImportCompletion(
+    setOpen,
+    onResetPagination,
+  )
+
+  // * Polling for import status
+  const { data: importStatus } = useBooksStatus(
+    updateId,
+    user?.username || null,
+    !!updateId
+  )
 
   const isPending = completeImportWorkflow.isPending
   const isImporting = !!updateId && importStatus?.stage === 'processing'
+
+  useEffect(() => {
+    if (importStatus && (importStatus.stage === 'completed' || importStatus.stage === 'failed')) {
+      handleImportCompletion.mutate(importStatus)
+      setUpdateId(null)
+    }
+  }, [importStatus, handleImportCompletion])
 
   const handleOnSubmit = async (data: { file: File }) => {
     const result = await completeImportWorkflow.mutateAsync({
       file: data.file,
       userId: user?.username || '',
     })
-    console.log('🚀 ~ handleOnSubmit ~ result:', result)
 
-    // TODO: Set updateId to start polling when backend is ready
-    // setUpdateId(result.updateId)
+    // * Set updateId to start polling
+    setUpdateId(result.updateId)
   }
 
   return (

@@ -146,7 +146,8 @@ export const useGeneratePresignedUrl = () => {
     mutationKey: ['generate-presigned-url'],
     mutationFn: generatePresignedUrlApi,
     onError: (error: any) => {
-      const message = error?.response?.data?.message || 'Error generating upload URL'
+      const message =
+        error?.response?.data?.message || 'Error generating upload URL'
       useErrorToast(message)
     },
   })
@@ -155,15 +156,19 @@ export const useGeneratePresignedUrl = () => {
 export const useUploadFile = () => {
   return useMutation({
     mutationKey: ['upload-file'],
-    mutationFn: ({ presignedUrl, file }: { presignedUrl: string; file: File }) =>
-      uploadFileToS3(presignedUrl, file),
+    mutationFn: ({
+      presignedUrl,
+      file,
+    }: {
+      presignedUrl: string
+      file: File
+    }) => uploadFileToS3(presignedUrl, file),
     onError: (error: any) => {
       useErrorToast('Error uploading file')
     },
   })
 }
 
-// TODO: Complete import workflow mutation - handles the entire process
 export const useCompleteImportWorkflow = (
   setOpen: (open: boolean) => void,
   onResetPagination?: () => void,
@@ -173,56 +178,55 @@ export const useCompleteImportWorkflow = (
   return useMutation({
     mutationKey: ['complete-import-workflow'],
     mutationFn: async ({ userId, file }: { userId: string; file: File }) => {
-      // Step 1: Generate presigned URL
-      const { updateId, presignedUrl } = await generatePresignedUrlApi({ userId })
+      const { updateId, presignedUrl } = await generatePresignedUrlApi({
+        userId,
+      })
 
-      // Step 2: Upload file to S3
       await uploadFileToS3(presignedUrl, file)
-
-      // TODO: Step 3: Trigger import process (when backend endpoint is ready)
-      // await triggerImportApi(updateId)
-
       return { updateId }
     },
     onSuccess: ({ updateId }) => {
       useSuccessToast('File uploaded successfully. Import process started.')
-      // TODO: Start polling for status instead of closing immediately
-      // For now, close the dialog
-      setOpen(false)
-      onResetPagination?.()
-      queryClient.invalidateQueries({ queryKey: ['getBooks'] })
+      // Don't close dialog immediately, let polling handle completion
+      // setOpen(false)
+      // onResetPagination?.()
+      // queryClient.invalidateQueries({ queryKey: ['getBooks'] })
     },
     onError: (error: any) => {
-      const message = error?.response?.data?.message || 'Error during import process'
+      const message =
+        error?.response?.data?.message || 'Error during import process'
       useErrorToast(message)
     },
   })
 }
 
-// TODO: Add mutation for handling import completion with optimistic updates
-// export const useHandleImportCompletion = (
-//   setOpen: (open: boolean) => void,
-//   onResetPagination?: () => void,
-// ) => {
-//   return useOptimisticMutation<Book[], { updateId: string; importedBooks: Book[] }>({
-//     mutationKey: ['handle-import-completion'],
-//     queryKey: ['getBooks'],
-//     getId: () => 'import-completion', // Special case for bulk operations
-//     mutationFn: async ({ importedBooks }) => ({ responseData: importedBooks }),
-//     getItems: (data: GetBooksResponse) => data.responseData.books,
-//     setItems: (newBooks, oldData: GetBooksResponse) => ({
-//       ...oldData,
-//       responseData: {
-//         ...oldData.responseData,
-//         books: newBooks,
-//       },
-//     }),
-//     updateItems: (prevBooks, { importedBooks }) => [...importedBooks, ...prevBooks],
-//     successMsg: 'Books imported successfully!',
-//     errorMsg: 'Error completing import',
-//     onDone: () => {
-//       onResetPagination?.()
-//       setOpen(false)
-//     },
-//   })
-// }
+export const useHandleImportCompletion = (
+  setOpen: (open: boolean) => void,
+  onResetPagination: () => void,
+) => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationKey: ['handle-import-completion'],
+    mutationFn: async (importStatus: any) => {
+      return importStatus
+    },
+    onSuccess: (importStatus) => {
+      if (importStatus.stage === 'completed') {
+        useSuccessToast(
+          `Import completed! ${importStatus.successCount} books imported successfully.`,
+        )
+        onResetPagination()
+        queryClient.invalidateQueries({ queryKey: ['getBooks'] })
+        setOpen(false)
+      } else if (importStatus.stage === 'failed') {
+        useErrorToast(
+          `Import failed. ${importStatus.errorCount} errors occurred.`,
+        )
+      }
+    },
+    onError: () => {
+      useErrorToast('Error handling import completion')
+    },
+  })
+}
