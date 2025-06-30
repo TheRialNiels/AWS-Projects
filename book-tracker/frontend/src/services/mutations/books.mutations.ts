@@ -203,19 +203,34 @@ export const useCompleteImportWorkflow = (
 export const useHandleImportCompletion = (
   setOpen: (open: boolean) => void,
   onResetPagination: () => void,
+  onShowErrors?: (
+    errors: any[],
+    successCount: number,
+    totalRows: number,
+  ) => void,
 ) => {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationKey: ['handle-import-completion'],
     mutationFn: async (importStatus: any) => {
-      return importStatus
+        return importStatus
     },
     onSuccess: (importStatus) => {
       if (importStatus.stage === 'completed') {
-        useSuccessToast(
-          `Import completed! ${importStatus.successCount} books imported successfully.`,
-        )
+        if (importStatus.errors && importStatus.errors.length > 0) {
+          // * Show errors dialog instead of toast
+          onShowErrors?.(
+            importStatus.errors,
+            importStatus.successCount,
+            importStatus.totalRows,
+          )
+        } else {
+          // * Only success toast if no errors
+          useSuccessToast(
+            `Import completed! ${importStatus.successCount} books imported successfully.`,
+          )
+        }
         onResetPagination()
         queryClient.invalidateQueries({ queryKey: ['getBooks'] })
         setOpen(false)

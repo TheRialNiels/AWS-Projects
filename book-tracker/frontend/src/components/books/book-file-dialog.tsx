@@ -9,6 +9,8 @@ import { useCompleteImportWorkflow, useHandleImportCompletion } from '@/services
 import { useEffect, useState } from 'react'
 
 import { BookFileForm } from '@/components/books/book-file-form'
+import type { ImportError } from '@/interfaces/books.types'
+import { ImportErrorsDialog } from '@/components/books/import-errors-dialog'
 import { useAuth } from '@/lib/auth-context'
 import { useBooksStatus } from '@/services/queries/books.queries'
 
@@ -24,6 +26,9 @@ export function BookFileDialog({
   onResetPagination,
 }: BookFileDialogProps) {
   const [updateId, setUpdateId] = useState<string | null>(null)
+  const [showErrorsDialog, setShowErrorsDialog] = useState(false)
+  const [importErrors, setImportErrors] = useState<ImportError[]>([])
+  const [importStats, setImportStats] = useState({ successCount: 0, totalRows: 0 })
   const { user } = useAuth()
 
   const completeImportWorkflow = useCompleteImportWorkflow(
@@ -34,6 +39,11 @@ export function BookFileDialog({
   const handleImportCompletion = useHandleImportCompletion(
     setOpen,
     onResetPagination,
+    (errors, successCount, totalRows) => {
+      setImportErrors(errors)
+      setImportStats({ successCount, totalRows })
+      setShowErrorsDialog(true)
+    },
   )
 
   // * Polling for import status
@@ -78,6 +88,13 @@ export function BookFileDialog({
           importStatus={importStatus}
         />
       </DialogContent>
+
+      <ImportErrorsDialog
+        open={showErrorsDialog}
+        setOpen={setShowErrorsDialog}
+        errors={importErrors}
+        successCount={importStats.successCount}
+      />
     </Dialog>
   )
 }
