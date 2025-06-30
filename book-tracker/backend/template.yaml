@@ -147,6 +147,66 @@ Resources:
             AllowedOrigins:
               - !Ref AllowOrigin
             MaxAge: 3000
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
+
+  ProcessCsvBookFileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-process-csv-book-file
+      Description: Process CSV file uploaded to S3 and import books
+      Handler: !Sub ${BookHandlersPath}/processCsvBookFile.handler
+      Timeout: 300
+      Events:
+        S3EventBridge:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.s3
+              detail-type:
+                - Object Created
+              detail:
+                bucket:
+                  name:
+                    - !Ref BooksUploadBucket
+                object:
+                  key:
+                    - prefix: uploads/
+                    - suffix: .csv
+      Policies:
+        Statement:
+          - Sid: S3Read
+            Effect: Allow
+            Action:
+              - s3:GetObject
+            Resource: !Sub '${BooksUploadBucket.Arn}/*'
+          - Sid: DynamoDBReadWrite
+            Effect: Allow
+            Action:
+              - dynamodb:UpdateItem
+              - dynamodb:GetItem
+              - dynamodb:PutItem
+              - dynamodb:Query
+              - dynamodb:BatchWriteItem
+            Resource:
+              - !GetAtt BooksFilesUploadsTable.Arn
+              - !GetAtt BooksTable.Arn
+              - !Sub '${BooksTable.Arn}/index/*'
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${BookHandlersPath}/processCsvBookFile.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
 
   CreateBookFunction:
     Type: AWS::Serverless::Function
@@ -406,3 +466,6 @@ Outputs:
   BooksUploadBucket:
     Description: 'Books Upload S3 Bucket Name'
     Value: !Ref BooksUploadBucket
+  ProcessCsvBookFileFunction:
+    Description: 'Process CSV Book File Lambda Function ARN'
+    Value: !GetAtt ProcessCsvBookFileFunction.Arn
