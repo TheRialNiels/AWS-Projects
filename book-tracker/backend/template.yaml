@@ -208,6 +208,42 @@ Resources:
         Banner:
           - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
 
+  GetImportStatusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-get-import-status
+      Description: Get import status from database
+      Handler: !Sub ${BookHandlersPath}/getImportStatus.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BookTrackerAppApiGW
+            Path: /v1/books/status/{updateId}
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        Statement:
+          - Sid: DynamoDBRead
+            Effect: Allow
+            Action:
+              - dynamodb:GetItem
+            Resource: !GetAtt BooksFilesUploadsTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${BookHandlersPath}/getImportStatus.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
   CreateBookFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -460,6 +496,9 @@ Outputs:
   GeneratePresignedUrlFunction:
     Description: 'Generate Presigned URL Lambda Function ARN'
     Value: !GetAtt GeneratePresignedUrlFunction.Arn
+  GetImportStatusFunction:
+    Description: 'Get Import Status Lambda Function ARN'
+    Value: !GetAtt GetImportStatusFunction.Arn
   BooksFilesUploadsTable:
     Description: 'Books Files Uploads DynamoDB Table Name'
     Value: !Ref BooksFilesUploadsTable
