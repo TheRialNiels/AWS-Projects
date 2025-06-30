@@ -1,2 +1,4 @@
-id,title,author,status,rating,notes,createdAt,updatedAt
-1a2b3c4d-1234-5678-9101-abcdef123,Sh,No,INVALID_STATUS,10,"Note",bad-date,bad-date
+title,author,status,rating,notes
+Sh,No,INVALID_STATUS,10,"Note"
+h,No,INVALID_STATUS,10,"Note"
+wh,No,INVALID_STATUS,10,"Note"
