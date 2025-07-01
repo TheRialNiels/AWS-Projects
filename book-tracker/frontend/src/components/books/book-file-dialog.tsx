@@ -5,7 +5,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { useCompleteImportWorkflow, useHandleImportCompletion } from '@/services/mutations/books.mutations'
+import {
+  useCompleteImportWorkflow,
+  useHandleImportCompletion,
+} from '@/services/mutations/books.mutations'
 import { useEffect, useState } from 'react'
 
 import { BookFileForm } from '@/components/books/book-file-form'
@@ -28,13 +31,13 @@ export function BookFileDialog({
   const [updateId, setUpdateId] = useState<string | null>(null)
   const [showErrorsDialog, setShowErrorsDialog] = useState(false)
   const [importErrors, setImportErrors] = useState<ImportError[]>([])
-  const [importStats, setImportStats] = useState({ successCount: 0, totalRows: 0 })
+  const [importStats, setImportStats] = useState({
+    successCount: 0,
+    totalRows: 0,
+  })
   const { user } = useAuth()
 
-  const completeImportWorkflow = useCompleteImportWorkflow(
-    setOpen,
-    onResetPagination,
-  )
+  const completeImportWorkflow = useCompleteImportWorkflow()
 
   const handleImportCompletion = useHandleImportCompletion(
     setOpen,
@@ -50,14 +53,17 @@ export function BookFileDialog({
   const { data: importStatus } = useBooksStatus(
     updateId,
     user?.username || null,
-    !!updateId
+    !!updateId,
   )
 
   const isPending = completeImportWorkflow.isPending
   const isImporting = !!updateId && importStatus?.stage === 'processing'
 
   useEffect(() => {
-    if (importStatus && (importStatus.stage === 'completed' || importStatus.stage === 'failed')) {
+    if (
+      importStatus &&
+      (importStatus.stage === 'completed' || importStatus.stage === 'failed')
+    ) {
       handleImportCompletion.mutate(importStatus)
       setUpdateId(null)
     }

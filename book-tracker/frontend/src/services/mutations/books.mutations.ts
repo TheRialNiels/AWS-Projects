@@ -163,18 +163,13 @@ export const useUploadFile = () => {
       presignedUrl: string
       file: File
     }) => uploadFileToS3(presignedUrl, file),
-    onError: (error: any) => {
+    onError: () => {
       useErrorToast('Error uploading file')
     },
   })
 }
 
-export const useCompleteImportWorkflow = (
-  setOpen: (open: boolean) => void,
-  onResetPagination?: () => void,
-) => {
-  const queryClient = useQueryClient()
-
+export const useCompleteImportWorkflow = () => {
   return useMutation({
     mutationKey: ['complete-import-workflow'],
     mutationFn: async ({ userId, file }: { userId: string; file: File }) => {
@@ -185,12 +180,8 @@ export const useCompleteImportWorkflow = (
       await uploadFileToS3(presignedUrl, file)
       return { updateId }
     },
-    onSuccess: ({ updateId }) => {
+    onSuccess: () => {
       useSuccessToast('File uploaded successfully. Import process started.')
-      // Don't close dialog immediately, let polling handle completion
-      // setOpen(false)
-      // onResetPagination?.()
-      // queryClient.invalidateQueries({ queryKey: ['getBooks'] })
     },
     onError: (error: any) => {
       const message =
@@ -214,7 +205,7 @@ export const useHandleImportCompletion = (
   return useMutation({
     mutationKey: ['handle-import-completion'],
     mutationFn: async (importStatus: any) => {
-        return importStatus
+      return importStatus
     },
     onSuccess: (importStatus) => {
       if (importStatus.stage === 'completed') {
