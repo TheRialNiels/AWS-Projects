@@ -1,0 +1,17 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd book-tracker/frontend
+        - npm ci
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: book-tracker/frontend/dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - book-tracker/frontend/node_modules/**/*
