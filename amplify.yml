@@ -16,3 +16,8 @@ applications:
       cache:
         paths:
           - node_modules/**/*
+    environmentVariables:
+      - VITE_BASE_URL
+      - VITE_AWS_REGION
+      - VITE_COGNITO_USER_POOL_ID
+      - VITE_COGNITO_APP_CLIENT_ID
