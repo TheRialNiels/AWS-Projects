@@ -85,14 +85,16 @@ export const createCORSHeaders = (
   }
 
   // * If origin is allowed, return exact origin
+  console.log('origin allowed: ', isOriginAllowed(origin));
+  
   if (origin && isOriginAllowed(origin)) {
     corsHeaders['Access-Control-Allow-Origin'] = origin
-    
+
     // * Add credentials header only if enabled
     if (ALLOW_CREDENTIALS) {
       corsHeaders['Access-Control-Allow-Credentials'] = 'true'
     }
-    
+
     return corsHeaders
   }
 
