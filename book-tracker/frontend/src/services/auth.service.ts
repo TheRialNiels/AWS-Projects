@@ -69,7 +69,9 @@ export class AuthService {
   static async getAccessToken(): Promise<string | null> {
     try {
       const session = await fetchAuthSession()
-      return session.tokens?.accessToken?.toString() || null
+      console.log(session.tokens);
+      
+      return session.tokens?.idToken?.toString() || null
     } catch {
       return null
     }

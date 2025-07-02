@@ -80,6 +80,9 @@ Resources:
         Authorizers:
           CognitoAuthorizer:
             UserPoolArn: !GetAtt BookTrackerUserPool.Arn
+            Identity:
+              Header: Authorization
+              ValidationExpression: '^Bearer [-0-9A-Za-z\.]*$'
 
   BooksTable:
     Type: AWS::DynamoDB::Table
