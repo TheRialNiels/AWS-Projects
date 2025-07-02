@@ -1,25 +1,38 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAppForm } from '@/components/ui/tanstack-form'
-import { LoginSchema, type Login } from '@/interfaces/auth.types'
+import { RegisterSchema, type Register } from '@/interfaces/auth.types'
 import { Loader2 } from 'lucide-react'
 import { useCallback } from 'react'
 
-interface LoginFormProps {
-  onSubmit: (data: Login) => void
+interface RegisterFormProps {
+  onSubmit: (data: Register) => void
   isPending?: boolean
 }
-export function LoginForm({ onSubmit, isPending, ...props }: LoginFormProps) {
+
+export function RegisterForm({
+  onSubmit,
+  isPending,
+  ...props
+}: RegisterFormProps) {
   const form = useAppForm({
     validators: {
-      onChange: LoginSchema,
+      onChange: RegisterSchema,
+      onSubmit: RegisterSchema.refine(
+        (data) => data.password === data.confirmPassword,
+        {
+          message: "Passwords don't match",
+          path: ['confirmPassword'],
+        },
+      ),
     },
     defaultValues: {
       email: '',
       password: '',
+      confirmPassword: '',
     },
     onSubmit: ({ value }) => {
-      onSubmit(value as Login)
+      onSubmit(value as Register)
     },
   })
 
@@ -36,9 +49,9 @@ export function LoginForm({ onSubmit, isPending, ...props }: LoginFormProps) {
     <form.AppForm>
       <form className="space-y-6" onSubmit={handleSubmit} {...props}>
         <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
+          <h1 className="text-2xl font-bold">Create an account</h1>
           <p className="text-muted-foreground text-sm text-balance">
-            Enter your email below to login to your account
+            Enter your information below to create your account
           </p>
         </div>
         <div className="grid gap-6">
@@ -68,6 +81,26 @@ export function LoginForm({ onSubmit, isPending, ...props }: LoginFormProps) {
                 <field.FormControl>
                   <Input
                     type="password"
+                    placeholder="Minimum 8 characters"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    disabled={isPending}
+                  />
+                </field.FormControl>
+                <field.FormMessage />
+              </field.FormItem>
+            )}
+          />
+          <form.AppField
+            name="confirmPassword"
+            children={(field) => (
+              <field.FormItem>
+                <field.FormLabel>Confirm Password</field.FormLabel>
+                <field.FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Confirm your password"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
@@ -82,19 +115,19 @@ export function LoginForm({ onSubmit, isPending, ...props }: LoginFormProps) {
           {isPending ? (
             <Button size="sm" disabled className="w-full sm:w-auto">
               <Loader2 className="animate-spin" />
-              Loading...
+              Creating account...
             </Button>
           ) : (
             <Button type="submit" className="w-full sm:w-auto">
-              Login
+              Create account
             </Button>
           )}
         </div>
 
         <div className="text-center text-sm">
-          Don&apos;t have an account?{' '}
-          <a href="/register" className="underline underline-offset-4">
-            Register
+          Already have an account?{' '}
+          <a href="/login" className="underline underline-offset-4">
+            Login
           </a>
         </div>
       </form>
