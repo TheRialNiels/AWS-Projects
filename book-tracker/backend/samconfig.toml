@@ -16,10 +16,11 @@ lint = true
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
 resolve_s3 = true
-s3_prefix = "book-tracker-app"
+s3_prefix = "book-tracker-app-staging"
 region = "us-east-1"
-parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"http://localhost:3000\" AllowCredentials=\"'true'\" Environment=\"staging\" BookHandlersPath=\"src/handlers/v1/books\""
+parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"https://therialniels-dev.com\" AllowCredentials=\"'true'\" Environment=\"staging\" BookHandlersPath=\"src/handlers/v1/books\""
 image_repositories = []
+stack_name = "book-tracker-app-staging"
 
 [default.package.parameters]
 resolve_s3 = true
