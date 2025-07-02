@@ -1,4 +1,11 @@
-import { fetchAuthSession, getCurrentUser, signIn, signOut } from '@aws-amplify/auth'
+import {
+  confirmSignUp,
+  fetchAuthSession,
+  getCurrentUser,
+  signIn,
+  signOut,
+  signUp,
+} from '@aws-amplify/auth'
 
 export interface AuthUser {
   username: string
@@ -10,6 +17,32 @@ export class AuthService {
     await signIn({ username, password })
   }
 
+  static async register(
+    email: string,
+    password: string,
+  ): Promise<{ isSignUpComplete: boolean; nextStep: any }> {
+    const result = await signUp({
+      username: email,
+      password,
+      options: {
+        userAttributes: {
+          email,
+        },
+      },
+    })
+    return result
+  }
+
+  static async confirmSignUp(
+    email: string,
+    confirmationCode: string,
+  ): Promise<void> {
+    await confirmSignUp({
+      username: email,
+      confirmationCode,
+    })
+  }
+
   static async logout(): Promise<void> {
     await signOut()
   }
@@ -19,7 +52,7 @@ export class AuthService {
       const user = await getCurrentUser()
       return {
         username: user.username,
-        email: user.signInDetails?.loginId
+        email: user.signInDetails?.loginId,
       }
     } catch {
       return null
