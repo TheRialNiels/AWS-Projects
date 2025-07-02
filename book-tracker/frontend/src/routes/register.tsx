@@ -26,13 +26,14 @@ function RegisterPage() {
       const result = await AuthService.register(data.email, data.password)
 
       if (result.isSignUpComplete) {
-        useSuccessToast('Account created successfully! You can now login.')
+        useSuccessToast('Account created successfully! You can now sign in.')
         router.navigate({ to: '/login' })
       } else {
         useSuccessToast('Please check your email for verification code.')
-        // TODO: Navigate to confirmation page when implemented
-        // router.navigate({ to: '/confirm-signup', search: { email: data.email } })
-        router.navigate({ to: '/login' })
+        router.navigate({
+          to: '/confirm-register',
+          search: { email: data.email }
+        })
       }
     } catch (error: any) {
       useErrorToast(error.message || 'There was an error creating your account')

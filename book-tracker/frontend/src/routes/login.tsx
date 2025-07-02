@@ -28,7 +28,15 @@ function LoginPage() {
       await login(data.email, data.password)
       router.navigate({ to: '/' })
     } catch (error: any) {
-      useErrorToast(error.message || 'There was an error logging in')
+      if (error.name === 'UserNotConfirmedException') {
+        useErrorToast('Please confirm your account first')
+        router.navigate({
+          to: '/confirm-register',
+          search: { email: data.email },
+        })
+      } else {
+        useErrorToast(error.message || 'There was an error logging in')
+      }
     } finally {
       setIsPending(false)
     }

@@ -14,7 +14,14 @@ export interface AuthUser {
 
 export class AuthService {
   static async login(username: string, password: string): Promise<void> {
-    await signIn({ username, password })
+    const result = await signIn({ username, password })
+
+    if (result.nextStep.signInStep === 'CONFIRM_SIGN_UP') {
+      const confirmationError = new Error('User account not confirmed')
+      confirmationError.name = 'UserNotConfirmedException'
+      ;(confirmationError as any).username = username
+      throw confirmationError
+    }
   }
 
   static async register(
@@ -33,7 +40,7 @@ export class AuthService {
     return result
   }
 
-  static async confirmSignUp(
+  static async confirmRegister(
     email: string,
     confirmationCode: string,
   ): Promise<void> {
