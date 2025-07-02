@@ -230,6 +230,13 @@ Resources:
             Action:
               - dynamodb:GetItem
             Resource: !GetAtt BooksFilesUploadsTable.Arn
+          - Sid: CloudWatchLogs
+            Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: '*'
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -267,6 +274,13 @@ Resources:
               - dynamodb:PutItem
               - dynamodb:UpdateItem
             Resource: !GetAtt BooksTable.Arn
+          - Sid: CloudWatchLogs
+            Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: '*'
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -305,6 +319,13 @@ Resources:
               - dynamodb:Query
               - dynamodb:Scan
             Resource: !GetAtt BooksTable.Arn
+          - Sid: CloudWatchLogs
+            Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: '*'
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -341,6 +362,13 @@ Resources:
             Action:
               - dynamodb:GetItem
             Resource: !GetAtt BooksTable.Arn
+          - Sid: CloudWatchLogs
+            Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: '*'
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -377,6 +405,13 @@ Resources:
             Action:
               - dynamodb:UpdateItem
             Resource: !GetAtt BooksTable.Arn
+          - Sid: CloudWatchLogs
+            Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: '*'
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -413,6 +448,13 @@ Resources:
             Action:
               - dynamodb:DeleteItem
             Resource: !GetAtt BooksTable.Arn
+          - Sid: CloudWatchLogs
+            Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: '*'
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -454,6 +496,13 @@ Resources:
             Action:
               - s3:PutObject
             Resource: !Sub '${BooksUploadBucket.Arn}/*'
+          - Sid: CloudWatchLogs
+            Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: '*'
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
