@@ -1,25 +1,35 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAppForm } from '@/components/ui/tanstack-form'
-import { LoginSchema, type Login } from '@/interfaces/auth.types'
+import {
+  ConfirmRegisterSchema,
+  type ConfirmRegister,
+} from '@/interfaces/auth.types'
 import { Loader2 } from 'lucide-react'
 import { useCallback } from 'react'
 
-interface LoginFormProps {
-  onSubmit: (data: Login) => void
+interface ConfirmRegisterFormProps {
+  onSubmit: (data: ConfirmRegister) => void
   isPending?: boolean
+  email?: string
 }
-export function LoginForm({ onSubmit, isPending, ...props }: LoginFormProps) {
+
+export function ConfirmRegisterForm({
+  onSubmit,
+  isPending,
+  email,
+  ...props
+}: ConfirmRegisterFormProps) {
   const form = useAppForm({
     validators: {
-      onChange: LoginSchema,
+      onChange: ConfirmRegisterSchema,
     },
     defaultValues: {
-      email: '',
-      password: '',
+      email: email || '',
+      confirmationCode: '',
     },
     onSubmit: ({ value }) => {
-      onSubmit(value as Login)
+      onSubmit(value as ConfirmRegister)
     },
   })
 
@@ -36,44 +46,30 @@ export function LoginForm({ onSubmit, isPending, ...props }: LoginFormProps) {
     <form.AppForm>
       <form className="space-y-6" onSubmit={handleSubmit} {...props}>
         <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
+          <h1 className="text-2xl font-bold">Confirm your account</h1>
           <p className="text-muted-foreground text-sm text-balance">
-            Enter your email below to login to your account
+            Enter the verification code sent to your email
           </p>
         </div>
         <div className="grid gap-6">
           <form.AppField
-            name="email"
+            name="confirmationCode"
             children={(field) => (
               <field.FormItem>
-                <field.FormLabel>Email</field.FormLabel>
+                <field.FormLabel>Confirmation Code</field.FormLabel>
                 <field.FormControl>
                   <Input
-                    placeholder="email@example.com"
+                    placeholder="123456"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
                     disabled={isPending}
+                    maxLength={6}
                   />
                 </field.FormControl>
-                <field.FormMessage />
-              </field.FormItem>
-            )}
-          />
-          <form.AppField
-            name="password"
-            children={(field) => (
-              <field.FormItem>
-                <field.FormLabel>Password</field.FormLabel>
-                <field.FormControl>
-                  <Input
-                    type="password"
-                    value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    onBlur={field.handleBlur}
-                    disabled={isPending}
-                  />
-                </field.FormControl>
+                <field.FormDescription>
+                  Enter the 6-digit code sent to your email
+                </field.FormDescription>
                 <field.FormMessage />
               </field.FormItem>
             )}
@@ -82,19 +78,19 @@ export function LoginForm({ onSubmit, isPending, ...props }: LoginFormProps) {
           {isPending ? (
             <Button size="sm" disabled className="w-full sm:w-auto">
               <Loader2 className="animate-spin" />
-              Loading...
+              Verifying...
             </Button>
           ) : (
             <Button type="submit" className="w-full sm:w-auto">
-              Login
+              Verify account
             </Button>
           )}
         </div>
 
         <div className="text-center text-sm">
-          Don&apos;t have an account?{' '}
-          <a href="/register" className="underline underline-offset-4">
-            Register
+          Already confirmed?{' '}
+          <a href="/login" className="underline underline-offset-4">
+            Log in
           </a>
         </div>
       </form>
