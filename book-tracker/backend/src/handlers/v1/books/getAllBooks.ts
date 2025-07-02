@@ -29,7 +29,10 @@ const dynamoDBClient = new BooksDynamoDBClient(dynamoDbConfig)
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
+  console.log('Event received:', JSON.stringify(event, null, 2))
   const origin = getOriginFromEvent(event)
+  console.log('Origin detected:', origin)
+  console.log('ALLOW_ORIGIN env:', env.ALLOW_ORIGIN)
   const methods = ['GET', 'OPTIONS']
   const { OK, BAD_REQUEST, INTERNAL_SERVER_ERROR } = httpStatusCodes
 
