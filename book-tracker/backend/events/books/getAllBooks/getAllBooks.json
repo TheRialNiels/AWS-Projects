@@ -1,0 +1,18 @@
+{
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "httpMethod": "GET",
+  "isBase64Encoded": false,
+  "path": "/v1/books",
+  "queryStringParameters": {
+    "limit": "10"
+  },
+  "requestContext": {
+    "httpMethod": "GET",
+    "path": "/v1/books",
+    "requestId": "test-get-all-books-request",
+    "stage": "staging"
+  },
+  "resource": "/{proxy+}"
+}

@@ -1,0 +1,510 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS SAM Template for Book Tracker App
+
+Parameters:
+  AppName:
+    Type: String
+    Default: book-tracker-app
+    Description: Application name
+  AllowOrigin:
+    Type: String
+    Default: http://localhost:3000
+    Description: Define the allow origin for CORS
+  AllowCredentials:
+    Type: String
+    Default: "'true'"
+    Description: Boolean variable to specify credentials for CORS headers
+  Environment:
+    Type: String
+    Default: prod
+    Description: Define the runtime environment for the application
+    MinLength: 3
+  BookHandlersPath:
+    Type: String
+    Default: src/handlers/v1/books
+
+Globals:
+  Function:
+    Architectures:
+      - x86_64
+    Runtime: nodejs22.x
+    CodeUri: .
+    Timeout: 60
+    Environment:
+      Variables:
+        ALLOW_ORIGIN: !Ref AllowOrigin
+        ALLOW_CREDENTIALS: !Ref AllowCredentials
+        REGION: !Sub ${AWS::Region}
+        ENVIRONMENT: !Ref Environment
+        BOOKS_TABLE: !Ref BooksTable
+        BOOKS_USER_BOOK_KEY_GSI: UserBookKeyIndex
+        BOOKS_FILES_UPLOADS_TABLE: !Ref BooksFilesUploadsTable
+        BOOKS_UPLOAD_BUCKET: !Ref BooksUploadBucket
+
+Resources:
+  BookTrackerUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${Environment}-${AppName}-user-pool
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+
+  BookTrackerUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub ${Environment}-${AppName}-user-pool-client
+      UserPoolId: !Ref BookTrackerUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+
+  BookTrackerAppApiGW:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub ${Environment}-${AppName}-api
+      Description: API Gateway for Book Tracker App Endpoints
+      StageName: !Ref Environment
+      Cors:
+        AllowMethods: "'GET,POST,PATCH,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: !Sub "'${AllowOrigin}'"
+        AllowCredentials: !Ref AllowCredentials
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt BookTrackerUserPool.Arn
+
+  BooksTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${Environment}-${AppName}-books-table
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: bookId
+          AttributeType: S
+        - AttributeName: bookKey
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: bookId
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: UserBookKeyIndex
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+            - AttributeName: bookKey
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  BooksFilesUploadsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${Environment}-${AppName}-books-files-uploads-table
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: updateId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: updateId
+          KeyType: HASH
+        - AttributeName: userId
+          KeyType: RANGE
+
+  BooksUploadBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${Environment}-${AppName}-books-uploads
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - PUT
+              - POST
+            AllowedOrigins:
+              - !Ref AllowOrigin
+            MaxAge: 3000
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
+
+  ProcessCsvBookFileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-process-csv-book-file
+      Description: Process CSV file uploaded to S3 and import books
+      Handler: !Sub ${BookHandlersPath}/processCsvBookFile.handler
+      Timeout: 300
+      Events:
+        S3EventBridge:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.s3
+              detail-type:
+                - Object Created
+              detail:
+                bucket:
+                  name:
+                    - !Ref BooksUploadBucket
+                object:
+                  key:
+                    - prefix: uploads/
+                    - suffix: .csv
+      Policies:
+        Statement:
+          - Sid: S3Read
+            Effect: Allow
+            Action:
+              - s3:GetObject
+            Resource: !Sub '${BooksUploadBucket.Arn}/*'
+          - Sid: DynamoDBReadWrite
+            Effect: Allow
+            Action:
+              - dynamodb:UpdateItem
+              - dynamodb:GetItem
+              - dynamodb:PutItem
+              - dynamodb:Query
+              - dynamodb:BatchWriteItem
+            Resource:
+              - !GetAtt BooksFilesUploadsTable.Arn
+              - !GetAtt BooksTable.Arn
+              - !Sub '${BooksTable.Arn}/index/*'
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${BookHandlersPath}/processCsvBookFile.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
+  GetImportStatusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-get-import-status
+      Description: Get import status from database
+      Handler: !Sub ${BookHandlersPath}/getImportStatus.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BookTrackerAppApiGW
+            Path: /v1/books/status/{updateId}
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        Statement:
+          - Sid: DynamoDBRead
+            Effect: Allow
+            Action:
+              - dynamodb:GetItem
+            Resource: !GetAtt BooksFilesUploadsTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${BookHandlersPath}/getImportStatus.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
+  CreateBookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-create-book
+      Description: Create book record in database
+      Handler: !Sub ${BookHandlersPath}/createBook.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BookTrackerAppApiGW
+            Path: /v1/books
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        Statement:
+          - Sid: DynamoDBWrite
+            Effect: Allow
+            Action:
+              - dynamodb:PutItem
+              - dynamodb:UpdateItem
+            Resource: !GetAtt BooksTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${BookHandlersPath}/createBook.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
+  GetAllBooksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-get-all-books
+      Description: Get all books records in database
+      Handler: !Sub ${BookHandlersPath}/getAllBooks.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BookTrackerAppApiGW
+            Path: /v1/books
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        Statement:
+          - Sid: DynamoDBRead
+            Effect: Allow
+            Action:
+              - dynamodb:GetItem
+              - dynamodb:Query
+              - dynamodb:Scan
+            Resource: !GetAtt BooksTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${BookHandlersPath}/getAllBooks.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
+  GetBookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-get-book
+      Description: Get book record in database
+      Handler: !Sub ${BookHandlersPath}/getBook.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BookTrackerAppApiGW
+            Path: /v1/books/{bookId}
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        Statement:
+          - Sid: DynamoDBRead
+            Effect: Allow
+            Action:
+              - dynamodb:GetItem
+            Resource: !GetAtt BooksTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${BookHandlersPath}/getBook.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
+  UpdateBookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-update-book
+      Description: Update book record in database
+      Handler: !Sub ${BookHandlersPath}/updateBook.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BookTrackerAppApiGW
+            Path: /v1/books/{bookId}
+            Method: PATCH
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        Statement:
+          - Sid: DynamoDBUpdate
+            Effect: Allow
+            Action:
+              - dynamodb:UpdateItem
+            Resource: !GetAtt BooksTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${BookHandlersPath}/updateBook.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
+  DeleteBookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-delete-book
+      Description: Delete book record in database
+      Handler: !Sub ${BookHandlersPath}/deleteBook.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BookTrackerAppApiGW
+            Path: /v1/books/{bookId}
+            Method: DELETE
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        Statement:
+          - Sid: DynamoDBDelete
+            Effect: Allow
+            Action:
+              - dynamodb:DeleteItem
+            Resource: !GetAtt BooksTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${BookHandlersPath}/deleteBook.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
+  GeneratePresignedUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-generate-presigned-url
+      Description: Generate presigned URL for file upload
+      Handler: !Sub ${BookHandlersPath}/generatePresignedUrl.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BookTrackerAppApiGW
+            Path: /v1/books/generate-presigned-url
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        Statement:
+          - Sid: DynamoDBWrite
+            Effect: Allow
+            Action:
+              - dynamodb:PutItem
+            Resource: !GetAtt BooksFilesUploadsTable.Arn
+          - Sid: S3PresignedUrl
+            Effect: Allow
+            Action:
+              - s3:PutObject
+            Resource: !Sub '${BooksUploadBucket.Arn}/*'
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${BookHandlersPath}/generatePresignedUrl.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
+Outputs:
+  BookTrackerAppApiGW:
+    Description: 'API Gateway endpoint URL'
+    Value: !Sub 'https://${BookTrackerAppApiGW}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/'
+  UserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref BookTrackerUserPool
+  UserPoolClientId:
+    Description: Cognito User Pool Client ID
+    Value: !Ref BookTrackerUserPoolClient
+  CreateBookFunction:
+    Description: 'Create Book Lambda Function ARN'
+    Value: !GetAtt CreateBookFunction.Arn
+  GetAllBooksFunction:
+    Description: 'Get All Books Lambda Function ARN'
+    Value: !GetAtt GetAllBooksFunction.Arn
+  GetBookFunction:
+    Description: 'Get Book Lambda Function ARN'
+    Value: !GetAtt GetBookFunction.Arn
+  UpdateBookFunction:
+    Description: 'Update Book Lambda Function ARN'
+    Value: !GetAtt UpdateBookFunction.Arn
+  DeleteBookFunction:
+    Description: 'Delete Book Lambda Function ARN'
+    Value: !GetAtt DeleteBookFunction.Arn
+  GeneratePresignedUrlFunction:
+    Description: 'Generate Presigned URL Lambda Function ARN'
+    Value: !GetAtt GeneratePresignedUrlFunction.Arn
+  GetImportStatusFunction:
+    Description: 'Get Import Status Lambda Function ARN'
+    Value: !GetAtt GetImportStatusFunction.Arn
+  BooksFilesUploadsTable:
+    Description: 'Books Files Uploads DynamoDB Table Name'
+    Value: !Ref BooksFilesUploadsTable
+  BooksUploadBucket:
+    Description: 'Books Upload S3 Bucket Name'
+    Value: !Ref BooksUploadBucket
+  ProcessCsvBookFileFunction:
+    Description: 'Process CSV Book File Lambda Function ARN'
+    Value: !GetAtt ProcessCsvBookFileFunction.Arn

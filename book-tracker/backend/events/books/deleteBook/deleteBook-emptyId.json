@@ -1,0 +1,15 @@
+{
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "httpMethod": "DELETE",
+  "isBase64Encoded": false,
+  "path": "/v1/books",
+  "requestContext": {
+    "httpMethod": "DELETE",
+    "path": "/v1/books",
+    "requestId": "test-delete-book-request",
+    "stage": "staging"
+  },
+  "resource": "/{proxy+}"
+}

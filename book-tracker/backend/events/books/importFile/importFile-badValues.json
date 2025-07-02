@@ -1,0 +1,16 @@
+{
+  "body": "aWQsdGl0bGUsYXV0aG9yLHN0YXR1cyxyYXRpbmcsbm90ZXMsY3JlYXRlZEF0LHVwZGF0ZWRBdAoxYTJiM2M0ZC0xMjM0LTU2NzgtOTEwMS1hYmNkZWYxMjMsU2gsTm8sSU5WQUxJRF9TVEFUVVMsMTAsIk5vdGUiLGJhZC1kYXRlLGJhZC1kYXRlCg==",
+  "headers": {
+    "Content-Type": "text/csv"
+  },
+  "httpMethod": "POST",
+  "isBase64Encoded": true,
+  "path": "/v1/books/import",
+  "requestContext": {
+    "httpMethod": "POST",
+    "path": "/v1/books/import",
+    "requestId": "test-import-file-request",
+    "stage": "staging"
+  },
+  "resource": "/{proxy+}"
+}

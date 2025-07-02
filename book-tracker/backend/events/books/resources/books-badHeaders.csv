@@ -1,0 +1,5 @@
+id,titless,authoruu,status,ratinggg,notes,createdAt,updatedAt
+1a2b3c4d-1234-5678-9101-abcdef123456,Atomic Habits,James Clear,COMPLETED,5,"Great book on habit formation",2024-06-01T10:00:00Z,2024-06-01T10:00:00Z
+2b3c4d5e-1234-5678-9101-abcdef123457,Deep Work,Cal Newport,READING,4,"Helpful for focus",2024-06-02T11:00:00Z,2024-06-02T11:00:00Z
+3c4d5e6f-1234-5678-9101-abcdef123458,The Pragmatic Programmer,Andy Hunt,WISHLIST,,,"2024-06-03T12:00:00Z","2024-06-03T12:00:00Z"
+4d5e6f7g-1234-5678-9101-abcdef123459,Clean Code,Robert C. Martin,ABANDONED,2,"Too rigid for some use cases",2024-06-04T13:00:00Z,2024-06-04T13:00:00Z
