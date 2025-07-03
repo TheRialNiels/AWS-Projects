@@ -275,7 +275,10 @@ Resources:
               Action:
                 - dynamodb:PutItem
                 - dynamodb:UpdateItem
-              Resource: !GetAtt BooksTable.Arn
+                - dynamodb:Query
+              Resource:
+                - !GetAtt BooksTable.Arn
+                - !Sub '${BooksTable.Arn}/index/*'
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -393,7 +396,11 @@ Resources:
               Effect: Allow
               Action:
                 - dynamodb:UpdateItem
-              Resource: !GetAtt BooksTable.Arn
+                - dynamodb:GetItem
+                - dynamodb:Query
+              Resource:
+                - !GetAtt BooksTable.Arn
+                - !Sub '${BooksTable.Arn}/index/*'
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
