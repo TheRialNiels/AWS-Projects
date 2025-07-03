@@ -3,7 +3,7 @@
 version = 0.1
 
 [default.global.parameters]
-stack_name = "book-tracker-app"
+stack_name = "book-tracker-app-dev"
 
 [default.build.parameters]
 cached = true
@@ -16,11 +16,11 @@ lint = true
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
 resolve_s3 = true
-s3_prefix = "book-tracker-app-staging"
+s3_prefix = "book-tracker-app-dev"
 region = "us-east-1"
-parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"https://therialniels-dev.com\" AllowCredentials=\"'true'\" Environment=\"staging\" BookHandlersPath=\"src/handlers/v1/books\""
+parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"http://localhost:3000\" AllowCredentials=\"'true'\" Environment=\"dev\" BookHandlersPath=\"src/handlers/v1/books\""
 image_repositories = []
-stack_name = "book-tracker-app-staging"
+stack_name = "book-tracker-app-dev"
 
 [default.package.parameters]
 resolve_s3 = true
@@ -33,3 +33,30 @@ warm_containers = "EAGER"
 
 [default.local_start_lambda.parameters]
 warm_containers = "EAGER"
+
+[dev.deploy.parameters]
+stack_name = "book-tracker-app-dev"
+resolve_s3 = true
+s3_prefix = "book-tracker-app-dev"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"http://localhost:3000\" AllowCredentials=\"'true'\" Environment=\"dev\" BookHandlersPath=\"src/handlers/v1/books\""
+image_repositories = []
+
+[staging.deploy.parameters]
+stack_name = "book-tracker-app-staging"
+resolve_s3 = true
+s3_prefix = "book-tracker-app-staging"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"https://staging.therialniels-dev.com\" AllowCredentials=\"'true'\" Environment=\"staging\" BookHandlersPath=\"src/handlers/v1/books\""
+image_repositories = []
+
+[prod.deploy.parameters]
+stack_name = "book-tracker-app-prod"
+resolve_s3 = true
+s3_prefix = "book-tracker-app-prod"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"https://therialniels-dev.com\" AllowCredentials=\"'true'\" Environment=\"prod\" BookHandlersPath=\"src/handlers/v1/books\""
+image_repositories = []
