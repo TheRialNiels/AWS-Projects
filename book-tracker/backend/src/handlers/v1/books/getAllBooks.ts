@@ -29,10 +29,7 @@ const dynamoDBClient = new BooksDynamoDBClient(dynamoDbConfig)
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-  console.log('Event received:', JSON.stringify(event, null, 2))
   const origin = getOriginFromEvent(event)
-  console.log('Origin detected:', origin)
-  console.log('ALLOW_ORIGIN env:', env.ALLOW_ORIGIN)
   const methods = ['GET', 'OPTIONS']
   const { OK, BAD_REQUEST, INTERNAL_SERVER_ERROR } = httpStatusCodes
 
@@ -46,6 +43,7 @@ export const handler = async (
     if (methods.indexOf(event.httpMethod) === -1) {
       return errorResponse({
         statusCode: BAD_REQUEST,
+        additionalHeaders: createCORSHeaders(origin, [], methods),
         message: 'Invalid request method',
         responseData: {
           message: `Only ${methods.join(', ')} methods are allowed`,
@@ -74,6 +72,7 @@ export const handler = async (
       const error = returnFlattenError(queriesSchemaValidation.error)
       return errorResponse({
         statusCode: BAD_REQUEST,
+        additionalHeaders: createCORSHeaders(origin, [], methods),
         message: 'Invalid query parameters',
         responseData: { message: error },
       })
@@ -91,6 +90,7 @@ export const handler = async (
     if (!items) {
       return errorResponse({
         statusCode: BAD_REQUEST,
+        additionalHeaders: createCORSHeaders(origin, [], methods),
         message: 'Books not found',
       })
     }
@@ -109,6 +109,7 @@ export const handler = async (
     }))
     return successResponse({
       statusCode: OK,
+      additionalHeaders: createCORSHeaders(origin, [], methods),
       message: 'Success',
       responseData: { books, lastEvaluatedKey },
     })
@@ -118,6 +119,7 @@ export const handler = async (
       statusCode: err.$metadata
         ? err.$metadata.httpStatusCode
         : INTERNAL_SERVER_ERROR,
+      additionalHeaders: createCORSHeaders(origin, [], methods),
       message: 'Error retrieving books',
       responseData: { message: 'Unexpected error' },
     })
