@@ -85,8 +85,6 @@ export const createCORSHeaders = (
   }
 
   // * If origin is allowed, return exact origin
-  console.log('origin allowed: ', isOriginAllowed(origin));
-  
   if (origin && isOriginAllowed(origin)) {
     corsHeaders['Access-Control-Allow-Origin'] = origin
 

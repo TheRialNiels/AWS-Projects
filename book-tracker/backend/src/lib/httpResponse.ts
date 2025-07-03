@@ -1,5 +1,6 @@
 import type { APIGatewayProxyResult } from 'aws-lambda'
 import type { BodyOptions } from '@interfaces/shared.types'
+import { env } from './packages/env'
 import { getValue } from './utils'
 
 /**
@@ -54,26 +55,26 @@ export const normalizeHeaders = (
   )
 }
 
-// const corsHeaders: Record<string, string> = {
-//   'Access-Control-Allow-Origin': `'${env.ALLOW_ORIGIN}'`,
-//   'Access-Control-Allow-Credentials': `${env.ALLOW_CREDENTIALS}`,
-//   'Access-Control-Allow-Methods': [
-//     'OPTIONS',
-//     'HEAD',
-//     'POST',
-//     'GET',
-//     'PUT',
-//     'PATCH',
-//     'DELETE',
-//   ].join(', '),
-//   'Access-Control-Allow-Headers': [
-//     'Content-Type',
-//     'X-Amz-Date',
-//     'Authorization',
-//     'X-Api-Key',
-//     'X-Amz-Security-Token',
-//   ].join(', '),
-// }
+const corsHeaders: Record<string, string> = {
+  'Access-Control-Allow-Origin': `'${env.ALLOW_ORIGIN}'`,
+  'Access-Control-Allow-Credentials': `${env.ALLOW_CREDENTIALS}`,
+  'Access-Control-Allow-Methods': [
+    'OPTIONS',
+    'HEAD',
+    'POST',
+    'GET',
+    'PUT',
+    'PATCH',
+    'DELETE',
+  ].join(', '),
+  'Access-Control-Allow-Headers': [
+    'Content-Type',
+    'X-Amz-Date',
+    'Authorization',
+    'X-Api-Key',
+    'X-Amz-Security-Token',
+  ].join(', '),
+}
 
 /**
  * Generates a set of JSON headers for HTTP responses, including a default
@@ -87,7 +88,7 @@ const getJsonHeaders = (
   additionalHeaders?: BodyOptions['additionalHeaders'],
 ): Record<string, string> => {
   return {
-    // ...corsHeaders,
+    ...corsHeaders,
     'Content-Type': 'application/json',
     ...getValue(() => additionalHeaders, {}),
   }
