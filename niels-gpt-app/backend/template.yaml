@@ -1,0 +1,332 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS SAM Template for Niels GPT App
+
+Parameters:
+  AppName:
+    Type: String
+    Default: niels-gpt-app
+    Description: Application name
+  AllowedOrigin:
+    Type: String
+    Default: http://localhost:3000
+    Description: Define the allow origin for CORS
+  Environment:
+    Type: String
+    Default: dev
+    Description: Define the runtime environment for the application
+    MinLength: 3
+  PromptHandlerPath:
+    Type: String
+    Default: src/handlers/v1/prompt
+  ThreadsHandlerPath:
+    Type: String
+    Default: src/handlers/v1/threads
+
+Globals:
+  Function:
+    Architectures:
+      - x86_64
+    Runtime: nodejs22.x
+    CodeUri: .
+    Timeout: 60
+    Environment:
+      Variables:
+        REGION: !Sub ${AWS::Region}
+        # ENVIRONMENT: !Ref Environment
+
+Resources:
+  NielsGptAppApiGW:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub ${Environment}-${AppName}-api
+      Description: API Gateway for Niels GPT App Endpoints
+      StageName: !Ref Environment
+      TracingEnabled: true
+      Cors:
+        AllowMethods: "'GET,POST,PATCH,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: !Sub "'${AllowedOrigin}'"
+        # AllowCredentials: "'true'"
+      # Auth:
+      #   DefaultAuthorizer: CognitoAuthorizer
+      #   AddDefaultAuthorizerToCorsPreflight: false
+      #   Authorizers:
+      #     CognitoAuthorizer:
+      #       UserPoolArn: !GetAtt NielsGptUserPool.Arn
+      #       Identity:
+      #         Header: Authorization
+
+  ThreadsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${Environment}-${AppName}-threads-table
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: threadId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: threadId
+          KeyType: HASH
+        - AttributeName: userId
+          KeyType: RANGE
+
+  PromptsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${Environment}-${AppName}-prompts-table
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: threadId
+          AttributeType: S
+        - AttributeName: createdAt
+          AttributeType: S
+      KeySchema:
+        - AttributeName: threadId
+          KeyType: HASH
+        - AttributeName: createdAt
+          KeyType: RANGE
+
+  GetAllThreadsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-get-all-threads
+      Description: Get all threads records in database
+      Handler: !Sub ${ThreadsHandlerPath}/getAllThreads.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref NielsGptAppApiGW
+            Path: /v1/threads
+            Method: GET
+            # Auth:
+            #   Authorizer: CognitoAuthorizer
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Sid: DynamoDBRead
+              Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:Query
+              Resource:
+                - !GetAtt ThreadsTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${ThreadsHandlerPath}/getAllThreads.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
+  DeleteAllThreadsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-delete-all-threads
+      Description: Delete all threads and prompts records in the databases
+      Handler: !Sub ${ThreadsHandlerPath}/deleteAllThreads.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref NielsGptAppApiGW
+            Path: /v1/threads
+            Method: DELETE
+            # Auth:
+            #   Authorizer: CognitoAuthorizer
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Sid: DynamoDBDelete
+              Effect: Allow
+              Action:
+                - dynamodb:Scan
+                - dynamodb:Query
+                - dynamodb:DeleteItem
+                - dynamodb:BatchWriteItem
+              Resource:
+                - !GetAtt ThreadsTable.Arn
+                - !GetAtt PromptsTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${ThreadsHandlerPath}/deleteAllThreads.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
+  GetThreadFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-get-thread
+      Description: Get thread record in database
+      Handler: !Sub ${ThreadsHandlerPath}/getThread.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref NielsGptAppApiGW
+            Path: /v1/threads/{id}
+            Method: GET
+            # Auth:
+            #   Authorizer: CognitoAuthorizer
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Sid: DynamoDBRead
+              Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:Query
+              Resource:
+                - !GetAtt ThreadsTable.Arn
+                - !GetAtt PromptsTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${ThreadsHandlerPath}/getThread.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
+  DeleteThreadFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-delete-thread
+      Description: Delete thread record in database
+      Handler: !Sub ${ThreadsHandlerPath}/deleteThread.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref NielsGptAppApiGW
+            Path: /v1/threads/{id}
+            Method: DELETE
+            # Auth:
+            #   Authorizer: CognitoAuthorizer
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Sid: DynamoDBDelete
+              Effect: Allow
+              Action:
+                - dynamodb:DeleteItem
+              Resource:
+                - !GetAtt ThreadsTable.Arn
+                - !GetAtt PromptsTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${ThreadsHandlerPath}/deleteThread.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
+  UpdateThreadFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-update-thread
+      Description: Update thread
+      Handler: !Sub ${ThreadsHandlerPath}/updateThread.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref NielsGptAppApiGW
+            Path: /v1/threads/{id}
+            Method: PUT
+            # Auth:
+            #   Authorizer: CognitoAuthorizer
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Sid: DynamoDBUpdate
+              Effect: Allow
+              Action:
+                - dynamodb:UpdateItem
+              Resource:
+                - !GetAtt ThreadsTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${ThreadsHandlerPath}/updateThread.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
+  CreatePromptFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-create-prompt
+      Description: Create a new prompt and save it in the database
+      Handler: !Sub ${PromptHandlerPath}/createPrompt.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref NielsGptAppApiGW
+            Path: /v1/prompt
+            Method: POST
+            # Auth:
+            #   Authorizer: CognitoAuthorizer
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Sid: DynamoDBWrite
+              Effect: Allow
+              Action:
+                - dynamodb:PutItem
+              Resource:
+                - !GetAtt PromptsTable.Arn
+                - !GetAtt ThreadsTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Minify: true
+        Target: es2022
+        Sourcemap: false
+        EntryPoints:
+          - !Sub ${PromptHandlerPath}/createPrompt.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+
+Outputs:
+  NielsGptAppApiGW:
+    Description: 'API Gateway endpoint URL'
+    Value: !Sub 'https://${NielsGptAppApiGW}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'

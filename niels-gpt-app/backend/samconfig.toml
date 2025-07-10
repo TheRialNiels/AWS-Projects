@@ -1,0 +1,39 @@
+# More information about the configuration file can be found here:
+# https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-config.html
+version = 0.1
+
+[default.global.parameters]
+stack_name = "niels-gpt-app"
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.validate.parameters]
+lint = true
+
+[default.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+resolve_s3 = true
+
+[default.package.parameters]
+resolve_s3 = true
+
+[default.sync.parameters]
+watch = true
+
+[default.local_start_api.parameters]
+warm_containers = "EAGER"
+
+[default.local_start_lambda.parameters]
+warm_containers = "EAGER"
+
+[dev.deploy.parameters]
+stack_name = "niels-gpt-app-dev"
+resolve_s3 = true
+s3_prefix = "niels-gpt-app-dev"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "AppName=\"niels-gpt-app\" AllowedOrigin=\"http://localhost:3000\" Environment=\"dev\" PromptHandlerPath=\"src/handlers/v1/prompt\" ThreadsHandlerPath=\"src/handlers/v1/threads\""
+image_repositories = []
