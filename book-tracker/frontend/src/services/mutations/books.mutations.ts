@@ -226,8 +226,11 @@ export const useHandleImportCompletion = (
         queryClient.invalidateQueries({ queryKey: ['getBooks'] })
         setOpen(false)
       } else if (importStatus.stage === 'failed') {
-        useErrorToast(
-          `Import failed. ${importStatus.errorCount} errors occurred.`,
+        // * Show errors dialog instead of toast
+        onShowErrors?.(
+          importStatus.errors,
+          importStatus.successCount,
+          importStatus.totalRows,
         )
       }
     },
