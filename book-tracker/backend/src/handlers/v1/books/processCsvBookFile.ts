@@ -72,14 +72,7 @@ export const handler = async (
 
     // * Validate CSV content is not empty
     if (!csvContent || !csvContent.trim()) {
-      throw new Error('Empty CSV file')
-    }
-
-    // * Parse CSV into lines
-    const lines = csvContent.trim().split('\n')
-
-    // * Validate CSV has at least header + one data row
-    if (lines.length < 2) {
+      const errorMsg = 'Empty CSV file'
       await uploadsDBClient.updateItem({
         updateId,
         userId,
@@ -91,15 +84,18 @@ export const handler = async (
           errorCount: 1,
           errors: [
             {
-              row: 1,
-              field: 'csv',
-              message: 'CSV file must have at least one data row.',
+              row: 0,
+              field: 'csv_content',
+              message: errorMsg,
             },
           ],
         },
       })
-      throw new Error('CSV must contain at least one data row')
+      throw new Error(errorMsg)
     }
+
+    // * Parse CSV into lines
+    const lines = csvContent.trim().split('\n')
 
     // * Extract and validate CSV headers
     const headers = lines[0].split(',').map((h) => h.trim().toLowerCase())
@@ -110,6 +106,9 @@ export const handler = async (
 
     // * Stop processing if headers are invalid
     if (!hasValidHeaders) {
+      const errorMsg = `Invalid headers. Expected: ${expectedHeaders.join(
+        ', ',
+      )}`
       await uploadsDBClient.updateItem({
         updateId,
         userId,
@@ -123,14 +122,36 @@ export const handler = async (
             {
               row: 0,
               field: 'headers',
-              message: `Invalid headers. Expected: ${expectedHeaders.join(
-                ', ',
-              )}`,
+              message: errorMsg,
             },
           ],
         },
       })
-      throw new Error('Invalid CSV headers')
+      throw new Error(errorMsg)
+    }
+
+    // * Validate CSV has at least header + two data rows
+    if (lines.length < 3) {
+      const errorMsg = 'CSV file must have at least two data rows'
+      await uploadsDBClient.updateItem({
+        updateId,
+        userId,
+        updateData: {
+          stage: 'failed',
+          totalRows: 0,
+          processedRows: 0,
+          successCount: 0,
+          errorCount: 1,
+          errors: [
+            {
+              row: 1,
+              field: 'csv',
+              message: errorMsg,
+            },
+          ],
+        },
+      })
+      throw new Error(errorMsg)
     }
 
     // * Initialize processing variables
