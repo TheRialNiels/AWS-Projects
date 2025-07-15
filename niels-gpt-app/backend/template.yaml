@@ -32,6 +32,7 @@ Globals:
     Timeout: 60
     Environment:
       Variables:
+        ALLOWED_ORIGIN: !Ref AllowedOrigin
         REGION: !Sub ${AWS::Region}
         # ENVIRONMENT: !Ref Environment
 
