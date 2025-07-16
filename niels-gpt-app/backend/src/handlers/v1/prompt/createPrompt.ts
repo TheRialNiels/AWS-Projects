@@ -60,7 +60,7 @@ export const handler = awslambda.streamifyResponse(
 
         // * Send chunk to client
         const chunkData = JSON.stringify({
-          type: 'chunk',
+          type: 'response',
           content: chunk,
         })
         responseStream.write(`data: ${chunkData}\n\n`)

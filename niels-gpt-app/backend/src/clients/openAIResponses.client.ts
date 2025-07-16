@@ -33,14 +33,11 @@ export class OpenAIResponsesClient {
       input,
       stream: true,
       max_output_tokens: 16,
-      //   max_output_tokens: 50,
     })
 
     for await (const chunk of events) {
-      console.log('🚀 ~ OpenAIResponsesClient ~ forawait ~ chunk:', chunk)
-      const outputChunk = chunk as { output_text?: string }
-      if (outputChunk.output_text) {
-        yield outputChunk.output_text
+      if (chunk.type === 'response.output_text.delta' && chunk.delta) {
+        yield chunk.delta
       }
     }
   }
