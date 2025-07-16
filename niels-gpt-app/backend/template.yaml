@@ -292,19 +292,37 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ${Environment}-${AppName}-create-prompt
-      Description: Create a new prompt and save it in the database
+      Description: Create a new prompt with streaming response
       Handler: !Sub ${PromptHandlerPath}/createPrompt.handler
-      Events:
-        ApiEvent:
-          Type: Api
-          Properties:
-            RestApiId: !Ref NielsGptAppApiGW
-            Path: /v1/prompt
-            Method: POST
-            # Auth:
-            #   Authorizer: CognitoAuthorizer
+      Timeout: 300
+      Environment:
+        Variables:
+          PROMPTS_TABLE: !Ref PromptsTable
+          THREADS_TABLE: !Ref ThreadsTable
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors:
+          AllowHeaders:
+            - content-type
+            - authorization
+            - x-amz-date
+            - x-amz-security-token
+            - x-amz-content-sha256
+          AllowMethods:
+            - POST
+          AllowOrigins:
+            - !Ref AllowedOrigin
+          # AllowCredentials: true
+          # MaxAge: 86400
+        InvokeMode: RESPONSE_STREAM
       Policies:
         - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Sid: ReadSecret
+              Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:NielsGptAppOpenAIApiKey-*
         - Statement:
             - Sid: DynamoDBWrite
               Effect: Allow

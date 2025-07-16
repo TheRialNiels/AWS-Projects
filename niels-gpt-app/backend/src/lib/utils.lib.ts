@@ -1,4 +1,4 @@
-import z from 'zod/v4'
+import * as z from 'zod'
 
 /**
  * Safely retrieves a value by executing a provided function. If the function throws an error
@@ -104,7 +104,7 @@ export const chunkArray = <T>(arr: T[], size: number): T[][] => {
 export const validateSchema = <T extends z.ZodType>(
   schema: T,
   data: unknown,
-): z.ZodSafeParseResult<z.infer<T>> => {
+) => {
   return schema.safeParse(data)
 }
 
@@ -115,5 +115,5 @@ export const validateSchema = <T extends z.ZodType>(
  * @returns A flattened representation of the ZodError.
  */
 export const returnFlattenError = (error: z.ZodError) => {
-  return z.flattenError(error)
+  return error.format()
 }

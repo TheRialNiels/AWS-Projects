@@ -1,5 +1,4 @@
 import OpenAI from 'openai'
-import { env } from '@/lib/env.lib'
 
 // TODO - Move the types to an external file once there be a lot
 type Message = {
@@ -9,11 +8,10 @@ type Message = {
 
 export class OpenAIResponsesClient {
   private openAI: OpenAI
-  private apiKey = env.OPENAI_API_KEY
   private apiModel = 'gpt-4.1-nano'
 
-  constructor() {
-    this.openAI = new OpenAI({ apiKey: this.apiKey })
+  constructor(apiKey: string) {
+    this.openAI = new OpenAI({ apiKey })
   }
 
   async *generateText(input: string | Message[]): AsyncGenerator<string> {

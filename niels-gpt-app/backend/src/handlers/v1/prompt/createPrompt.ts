@@ -1,64 +1,107 @@
-import { APIGatewayProxyEventV2, APIGatewayProxyResult } from 'aws-lambda'
-
 import { PromptSchema, type Prompt } from '@/interfaces/prompts.types'
-import { errorResponse, httpStatusCodes } from '@/lib/httpResponse.lib'
 import { generateUuid } from '@/lib/uuid.lib'
 import { returnFlattenError, validateSchema } from '@/lib/utils.lib'
 import { OpenAIResponsesClient } from '@/clients/openAIResponses.client'
+import {
+  GetSecretValueCommand,
+  SecretsManagerClient,
+} from '@aws-sdk/client-secrets-manager'
 
-const openAIClient = new OpenAIResponsesClient()
+let openAIClient: OpenAIResponsesClient | null = null
 
-export const handler = async (
-  event: APIGatewayProxyEventV2,
-): Promise<APIGatewayProxyResult> => {
-  const { OK, BAD_REQUEST, INTERNAL_SERVER_ERROR } = httpStatusCodes
+async function initializeClient(): Promise<OpenAIResponsesClient> {
+  if (openAIClient) return openAIClient
 
-  try {
-    // * Get the body payload from request
-    const body: Prompt = JSON.parse(event.body || '{}')
-    // * Get threadId from request if not generate a new id
-    body.threadId = body.threadId || generateUuid()
-    // * Generate a new createdAt date
-    const now = new Date().toISOString()
-    body.createdAt = now
+  const secretsClient = new SecretsManagerClient({})
+  const command = new GetSecretValueCommand({ SecretId: 'OpenAIApiKey' })
+  const { SecretString } = await secretsClient.send(command)
 
-    // * Validate payload with schema
-    const schemaValidation = validateSchema(PromptSchema, body)
-    if (schemaValidation.error) {
-      const errors = returnFlattenError(schemaValidation.error)
-      return errorResponse({
-        statusCode: BAD_REQUEST,
-        message: 'Invalid request payload',
-        responseData: { message: errors },
-      })
-    }
+  if (!SecretString) throw new Error('Missing OpenAI secret')
 
-    const response = openAIClient.generateText(
-      'Explain black holes in simple terms.',
-    )
+  const apiKey = JSON.parse(SecretString).apiKey
 
-    for await (const chunk of response) {
-      process.stdout.write(chunk) // or append to UI, etc.
-    }
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        message: 'hello world',
-      }),
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
-      },
-    }
-  } catch (err) {
-    console.log(err)
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        message: 'some error happened',
-      }),
-    }
-  }
+  openAIClient = new OpenAIResponsesClient(apiKey)
+  return openAIClient
 }
+
+export const handler = awslambda.streamifyResponse(
+  async (event, responseStream) => {
+    try {
+      const openAIClient = await initializeClient()
+
+      // * Parse request body
+      const body: Prompt = JSON.parse(event.body || '{}')
+      body.threadId = body.threadId || generateUuid()
+      body.createdAt = new Date().toISOString()
+
+      console.log('🚀 ~ body:', body)
+      // * Validate payload
+      const schemaValidation = validateSchema(PromptSchema, body)
+      if (schemaValidation.error) {
+        const errors = returnFlattenError(schemaValidation.error)
+        const errorData = JSON.stringify({
+          type: 'error',
+          message: 'Invalid request payload',
+          errors,
+        })
+        responseStream.write(`error_data: ${errorData}\n\n`)
+        responseStream.end()
+        return
+      }
+
+      // * Send start event
+      const startData = JSON.stringify({
+        type: 'start',
+        threadId: body.threadId,
+      })
+      responseStream.write(`data: ${startData}\n\n`)
+
+      // * Save user prompt to database
+      //   await dynamoClient.createPrompt({
+      //     threadId: body.threadId,
+      //     createdAt: body.createdAt,
+      //     role: 'user',
+      //     content: body.content,
+      //   })
+
+      // * Generate streaming response from OpenAI
+      let fullResponse = ''
+      const responseGenerator = openAIClient.generateText(body.content)
+
+      for await (const chunk of responseGenerator) {
+        fullResponse += chunk
+
+        // * Send chunk to client
+        const chunkData = JSON.stringify({
+          type: 'chunk',
+          content: chunk,
+        })
+        responseStream.write(`data: ${chunkData}\n\n`)
+      }
+
+      // * Save assistant response to database
+      //   await dynamoClient.createPrompt({
+      //     threadId: body.threadId,
+      //     createdAt: new Date().toISOString(),
+      //     role: 'assistant',
+      //     content: fullResponse,
+      //   })
+
+      // * Send completion event
+      const endData = JSON.stringify({
+        type: 'end',
+        threadId: body.threadId,
+      })
+      responseStream.write(`data: ${endData}\n\n`)
+      responseStream.end()
+    } catch (error) {
+      console.error('Streaming error:', error)
+      const errorData = JSON.stringify({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      })
+      responseStream.write(`error_data: ${errorData}\n\n`)
+      responseStream.end()
+    }
+  },
+)
