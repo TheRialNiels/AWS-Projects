@@ -37,6 +37,13 @@ Globals:
         # ENVIRONMENT: !Ref Environment
 
 Resources:
+  OpenAIApiKeySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub ${Environment}-${AppName}-openai-api-key
+      Description: OpenAI API Key for Niels GPT App
+      SecretString: '{"apiKey":"REPLACE_WITH_ACTUAL_KEY"}'
+
   NielsGptAppApiGW:
     Type: AWS::Serverless::Api
     Properties:
@@ -299,6 +306,7 @@ Resources:
         Variables:
           PROMPTS_TABLE: !Ref PromptsTable
           THREADS_TABLE: !Ref ThreadsTable
+          OPENAI_API_KEY_SECRET_NAME: !Ref OpenAIApiKeySecret
       FunctionUrlConfig:
         AuthType: NONE
         Cors:
@@ -322,8 +330,7 @@ Resources:
               Effect: Allow
               Action:
                 - secretsmanager:GetSecretValue
-              Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:NielsGptAppOpenAIApiKey-*
-        - Statement:
+              Resource: !Ref OpenAIApiKeySecret
             - Sid: DynamoDBWrite
               Effect: Allow
               Action:
