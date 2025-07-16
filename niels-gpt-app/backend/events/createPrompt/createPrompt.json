@@ -1,0 +1,8 @@
+{
+  "body": "{\"prompt\": \"hello how are you?\"}",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "httpMethod": "POST",
+  "isBase64Encoded": false
+}

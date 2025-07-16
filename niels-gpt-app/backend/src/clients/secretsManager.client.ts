@@ -1,4 +1,7 @@
-import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager'
+import {
+  GetSecretValueCommand,
+  SecretsManagerClient,
+} from '@aws-sdk/client-secrets-manager'
 
 export class SecretsManagerService {
   private client: SecretsManagerClient
@@ -7,9 +10,9 @@ export class SecretsManagerService {
     this.client = new SecretsManagerClient({ region })
   }
 
-  async getSecret(secretName: string): Promise<string> {
-    const command = new GetSecretValueCommand({ SecretId: secretName })
+  async getSecret(secretArn: string): Promise<Record<string, string>> {
+    const command = new GetSecretValueCommand({ SecretId: secretArn })
     const response = await this.client.send(command)
-    return response.SecretString || ''
+    return response.SecretString ? JSON.parse(response.SecretString) : {}
   }
 }

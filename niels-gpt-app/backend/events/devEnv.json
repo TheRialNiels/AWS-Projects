@@ -1,0 +1,14 @@
+{
+  "CreatePromptFunction": {
+    "ALLOWED_ORIGIN": "http://localhost:3000",
+    "OPENAI_API_KEY_SECRET_ARN": "arn:aws:secretsmanager:us-east-1:664418980455:secret:dev-niels-gpt-app-openai-api-key-uwHfsr",
+    "PROMPTS_TABLE": "dev-niels-gpt-app-prompts-table",
+    "REGION": "us-east-1",
+    "THREADS_TABLE": "dev-niels-gpt-app-threads-table"
+  },
+  "Parameters": {
+    "AllowedOrigin": "'http://localhost:3000'",
+    "AppName": "niels-gpt-app",
+    "Environment": "dev"
+  }
+}

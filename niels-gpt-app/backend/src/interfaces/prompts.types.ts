@@ -2,7 +2,7 @@ import * as z from 'zod'
 
 export const PromptSchema = z.object({
   threadId: z.string().uuid('Must be a valid UUID').optional(),
-  createdAt: z.string().time('Must be a valid ISO datetime'),
+  createdAt: z.string().datetime('Must be a valid ISO datetime'),
   role: z
     .string({ message: 'Must be a string' })
     .refine((role) => role === 'user' || role === 'assistant', {
@@ -10,7 +10,7 @@ export const PromptSchema = z.object({
     })
     .default('user'),
   responseId: z.string({ message: 'Must be a string' }).optional(),
-  content: z
+  prompt: z
     .string({ message: 'Must be a string' })
     .min(1, 'Must contain at least 1 character'),
 })

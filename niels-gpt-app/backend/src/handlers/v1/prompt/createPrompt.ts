@@ -15,12 +15,13 @@ const openAIClient = new OpenAIResponsesClient()
 export const handler = awslambda.streamifyResponse(
   async (event, responseStream) => {
     try {
+      responseStream.setContentType('text/event-stream')
+
       // * Parse request body
       const body: Prompt = JSON.parse(event.body || '{}')
       body.threadId = body.threadId || generateUuid()
       body.createdAt = new Date().toISOString()
 
-      console.log('🚀 ~ body:', body)
       // * Validate payload
       const schemaValidation = validateSchema(PromptSchema, body)
       if (schemaValidation.error) {
@@ -47,12 +48,12 @@ export const handler = awslambda.streamifyResponse(
       //     threadId: body.threadId,
       //     createdAt: body.createdAt,
       //     role: 'user',
-      //     content: body.content,
+      //     content: body.prompt,
       //   })
 
       // * Generate streaming response from OpenAI
       let fullResponse = ''
-      const responseGenerator = openAIClient.generateText(body.content)
+      const responseGenerator = openAIClient.generateText(body.prompt)
 
       for await (const chunk of responseGenerator) {
         fullResponse += chunk

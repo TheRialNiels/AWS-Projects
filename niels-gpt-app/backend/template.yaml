@@ -306,7 +306,7 @@ Resources:
         Variables:
           PROMPTS_TABLE: !Ref PromptsTable
           THREADS_TABLE: !Ref ThreadsTable
-          OPENAI_API_KEY_SECRET_NAME: !Ref OpenAIApiKeySecret
+          OPENAI_API_KEY_SECRET_ARN: !Ref OpenAIApiKeySecret
       FunctionUrlConfig:
         AuthType: NONE
         Cors:
