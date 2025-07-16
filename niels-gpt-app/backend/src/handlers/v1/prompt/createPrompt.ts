@@ -2,33 +2,19 @@ import { PromptSchema, type Prompt } from '@/interfaces/prompts.types'
 import { generateUuid } from '@/lib/uuid.lib'
 import { returnFlattenError, validateSchema } from '@/lib/utils.lib'
 import { OpenAIResponsesClient } from '@/clients/openAIResponses.client'
-import {
-  GetSecretValueCommand,
-  SecretsManagerClient,
-} from '@aws-sdk/client-secrets-manager'
+// import { DynamoDbClient } from '@/clients/dynamoDb.client'
+// import { promptsEnvs } from '@/lib/env.lib'
 
-let openAIClient: OpenAIResponsesClient | null = null
-
-async function initializeClient(): Promise<OpenAIResponsesClient> {
-  if (openAIClient) return openAIClient
-
-  const secretsClient = new SecretsManagerClient({})
-  const command = new GetSecretValueCommand({ SecretId: 'OpenAIApiKey' })
-  const { SecretString } = await secretsClient.send(command)
-
-  if (!SecretString) throw new Error('Missing OpenAI secret')
-
-  const apiKey = JSON.parse(SecretString).apiKey
-
-  openAIClient = new OpenAIResponsesClient(apiKey)
-  return openAIClient
-}
+const openAIClient = new OpenAIResponsesClient()
+// const dynamoClient = new DynamoDbClient({
+//   region: promptsEnvs.REGION,
+//   promptsTable: promptsEnvs.PROMPTS_TABLE,
+//   threadsTable: promptsEnvs.THREADS_TABLE,
+// })
 
 export const handler = awslambda.streamifyResponse(
   async (event, responseStream) => {
     try {
-      const openAIClient = await initializeClient()
-
       // * Parse request body
       const body: Prompt = JSON.parse(event.body || '{}')
       body.threadId = body.threadId || generateUuid()

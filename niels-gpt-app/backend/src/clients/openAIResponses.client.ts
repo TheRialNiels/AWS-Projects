@@ -1,21 +1,32 @@
 import OpenAI from 'openai'
+import { SecretsManagerService } from '@/clients/secretsManager.client'
+import { promptsEnvs } from '@/lib/env.lib'
 
-// TODO - Move the types to an external file once there be a lot
 type Message = {
   role: 'system' | 'user' | 'assistant'
   content: string
 }
 
 export class OpenAIResponsesClient {
-  private openAI: OpenAI
-  private apiModel = 'gpt-4.1-nano'
+  private openAI: OpenAI | null = null
+  private apiModel = 'gpt-4o-mini'
+  private secretsManager: SecretsManagerService
 
-  constructor(apiKey: string) {
-    this.openAI = new OpenAI({ apiKey })
+  constructor() {
+    this.secretsManager = new SecretsManagerService(promptsEnvs.REGION)
+  }
+
+  private async initializeOpenAI(): Promise<void> {
+    if (!this.openAI) {
+      const apiKey = await this.secretsManager.getSecret(promptsEnvs.OPENAI_API_KEY_SECRET_NAME)
+      this.openAI = new OpenAI({ apiKey })
+    }
   }
 
   async *generateText(input: string | Message[]): AsyncGenerator<string> {
-    const events = await this.openAI.responses.create({
+    await this.initializeOpenAI()
+    
+    const events = await this.openAI!.responses.create({
       model: this.apiModel,
       input,
       stream: true,
