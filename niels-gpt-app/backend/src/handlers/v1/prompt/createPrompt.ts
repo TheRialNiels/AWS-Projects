@@ -1,29 +1,32 @@
-import { PromptSchema, type Prompt } from '@/interfaces/prompts.types'
-import { generateUuid } from '@/lib/uuid.lib'
-import { returnFlattenError, validateSchema } from '@/lib/utils.lib'
 import { OpenAIResponsesClient } from '@/clients/openAIResponses.client'
-// import { DynamoDbClient } from '@/clients/dynamoDb.client'
-// import { promptsEnvs } from '@/lib/env.lib'
+import { PromptsDbClient } from '@/clients/promptsDb.client'
+import {
+  PromptPayloadSchema,
+  type Prompt,
+  type PromptPayload,
+} from '@/interfaces/prompts.types'
+import { promptsEnvs } from '@/lib/env.lib'
+import { returnFlattenError, validateSchema } from '@/lib/utils.lib'
+import { generateUuid } from '@/lib/uuid.lib'
 
 const openAIClient = new OpenAIResponsesClient()
-// const dynamoClient = new DynamoDbClient({
-//   region: promptsEnvs.REGION,
-//   promptsTable: promptsEnvs.PROMPTS_TABLE,
-//   threadsTable: promptsEnvs.THREADS_TABLE,
-// })
+const promptsDbClient = new PromptsDbClient({
+  region: promptsEnvs.REGION,
+  table: promptsEnvs.PROMPTS_TABLE,
+})
 
 export const handler = awslambda.streamifyResponse(
   async (event, responseStream) => {
     try {
       responseStream.setContentType('text/event-stream')
+      const userCreatedAt = new Date().toISOString()
 
       // * Parse request body
-      const body: Prompt = JSON.parse(event.body || '{}')
+      const body: PromptPayload = JSON.parse(event.body || '{}')
       body.threadId = body.threadId || generateUuid()
-      body.createdAt = new Date().toISOString()
 
       // * Validate payload
-      const schemaValidation = validateSchema(PromptSchema, body)
+      const schemaValidation = validateSchema(PromptPayloadSchema, body)
       if (schemaValidation.error) {
         const errors = returnFlattenError(schemaValidation.error)
         const errorData = JSON.stringify({
@@ -43,41 +46,52 @@ export const handler = awslambda.streamifyResponse(
       })
       responseStream.write(`data: ${startData}\n\n`)
 
-      // * Save user prompt to database
-      //   await dynamoClient.createPrompt({
-      //     threadId: body.threadId,
-      //     createdAt: body.createdAt,
-      //     role: 'user',
-      //     content: body.prompt,
-      //   })
-
       // * Generate streaming response from OpenAI
+      let responseId
       let fullResponse = ''
+      const assistantCreatedAt = new Date().toISOString()
       const responseGenerator = openAIClient.generateText(body.prompt)
 
       for await (const chunk of responseGenerator) {
-        fullResponse += chunk
+        if (chunk.type === 'response.output_text.delta' && chunk.delta) {
+          responseId = chunk.item_id
+          fullResponse += chunk.delta
 
-        // * Send chunk to client
-        const chunkData = JSON.stringify({
-          type: 'response',
-          content: chunk,
-        })
-        responseStream.write(`data: ${chunkData}\n\n`)
+          // * Send chunk to client
+          const chunkData = JSON.stringify({
+            type: 'response',
+            content: chunk.delta,
+          })
+          responseStream.write(`data: ${chunkData}\n\n`)
+        }
       }
 
+      // * Save user prompt to database
+      const userItem: Prompt = {
+        id: generateUuid(),
+        threadId: body.threadId,
+        createdAt: userCreatedAt,
+        role: 'user',
+        content: body.prompt,
+        responseId: responseId,
+      }
+      await promptsDbClient.createPrompt(userItem)
+
       // * Save assistant response to database
-      //   await dynamoClient.createPrompt({
-      //     threadId: body.threadId,
-      //     createdAt: new Date().toISOString(),
-      //     role: 'assistant',
-      //     content: fullResponse,
-      //   })
+      const assistantItem: Prompt = {
+        threadId: body.threadId,
+        createdAt: assistantCreatedAt,
+        role: 'assistant',
+        content: fullResponse,
+        responseId: responseId,
+      }
+      await promptsDbClient.createPrompt(assistantItem)
 
       // * Send completion event
       const endData = JSON.stringify({
         type: 'end',
         threadId: body.threadId,
+        messageId: userItem.id,
       })
       responseStream.write(`data: ${endData}\n\n`)
       responseStream.end()
