@@ -49,7 +49,6 @@ export const handler = awslambda.streamifyResponse(
       // * Generate streaming response from OpenAI
       let responseId
       let fullResponse = ''
-      const assistantCreatedAt = new Date().toISOString()
       const responseGenerator = openAIClient.generateText(body.prompt)
 
       for await (const chunk of responseGenerator) {
@@ -78,6 +77,7 @@ export const handler = awslambda.streamifyResponse(
       await promptsDbClient.createPrompt(userItem)
 
       // * Save assistant response to database
+      const assistantCreatedAt = new Date().toISOString()
       const assistantItem: Prompt = {
         threadId: body.threadId,
         createdAt: assistantCreatedAt,

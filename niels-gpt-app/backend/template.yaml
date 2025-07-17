@@ -71,14 +71,14 @@ Resources:
       TableName: !Sub ${Environment}-${AppName}-threads-table
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
-        - AttributeName: threadId
-          AttributeType: S
         - AttributeName: userId
+          AttributeType: S
+        - AttributeName: threadId
           AttributeType: S
       KeySchema:
-        - AttributeName: threadId
-          KeyType: HASH
         - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: threadId
           KeyType: RANGE
 
   PromptsTable:
