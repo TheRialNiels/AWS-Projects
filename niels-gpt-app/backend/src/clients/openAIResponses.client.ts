@@ -1,4 +1,5 @@
 import OpenAI from 'openai'
+import type { ResponseStreamEvent } from 'openai/resources/responses/responses'
 import { SecretsManagerService } from '@/clients/secretsManager.client'
 import { promptsEnvs } from '@/lib/env.lib'
 
@@ -25,7 +26,9 @@ export class OpenAIResponsesClient {
     }
   }
 
-  async *generateText(input: string | Message[]): AsyncGenerator<string> {
+  async *generateText(
+    input: string | Message[],
+  ): AsyncGenerator<ResponseStreamEvent> {
     await this.initializeOpenAI()
 
     const events = await this.openAI!.responses.create({
@@ -35,10 +38,8 @@ export class OpenAIResponsesClient {
       max_output_tokens: 16,
     })
 
-    for await (const chunk of events) {
-      if (chunk.type === 'response.output_text.delta' && chunk.delta) {
-        yield chunk.delta
-      }
+    for await (const event of events) {
+      yield event
     }
   }
 }

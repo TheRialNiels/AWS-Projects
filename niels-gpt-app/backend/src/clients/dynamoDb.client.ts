@@ -9,6 +9,8 @@ import {
   DynamoDBClient,
   GetItemCommand,
   PutItemCommand,
+  QueryCommand,
+  QueryCommandOutput,
   ScanCommand,
   UpdateItemCommand,
   type BatchWriteItemCommandInput,
@@ -90,6 +92,25 @@ export class DynamoDbClient {
     }
   }
 
+  async queryCommand(
+    keyConditionExpression: string,
+    expressionAttributeValues: Item,
+    indexName?: string,
+  ): Promise<QueryCommandOutput> {
+    const input = {
+      TableName: this.table,
+      KeyConditionExpression: keyConditionExpression,
+      ExpressionAttributeValues: expressionAttributeValues,
+      IndexName: indexName,
+    }
+
+    try {
+      return await this.client.send(new QueryCommand(input))
+    } catch (err) {
+      throw err
+    }
+  }
+
   async createCommand(
     item: Record<string, any>,
     conditionExpression: string,
@@ -133,6 +154,24 @@ export class DynamoDbClient {
     const input: BatchWriteItemCommandInput = {
       RequestItems: {
         [this.table]: requestItems,
+      },
+    }
+
+    try {
+      return await this.client.send(new BatchWriteItemCommand(input))
+    } catch (err) {
+      throw err
+    }
+  }
+
+  async batchDeleteCommand(keys: Item[]): Promise<BatchWriteItemCommandOutput> {
+    const deleteRequests = keys.map((key) => ({
+      DeleteRequest: { Key: key },
+    }))
+
+    const input: BatchWriteItemCommandInput = {
+      RequestItems: {
+        [this.table]: deleteRequests,
       },
     }
 
