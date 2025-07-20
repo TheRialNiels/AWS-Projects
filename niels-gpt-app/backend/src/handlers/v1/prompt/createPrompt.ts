@@ -2,8 +2,8 @@ import { OpenAIResponsesClient } from '@/clients/openAIResponses.client'
 import { PromptsDbClient } from '@/clients/promptsDb.client'
 import { ThreadsDbClient } from '@/clients/threadsDb.client'
 import {
+  Prompt,
   PromptPayloadSchema,
-  type Prompt,
   type PromptPayload,
 } from '@/interfaces/prompts.types'
 import { Thread } from '@/interfaces/threads.types'
@@ -27,7 +27,9 @@ export const handler = awslambda.streamifyResponse(
   async (event, responseStream) => {
     try {
       responseStream.setContentType('text/event-stream')
+      let newResponseId, oldResponseId
       const userCreatedAt = new Date().toISOString()
+      const userId = '47cd26e2-abb7-40f5-855a-ea5014169ca7'
 
       // * Parse request body
       const body: PromptPayload = JSON.parse(event.body || '{}')
@@ -54,26 +56,55 @@ export const handler = awslambda.streamifyResponse(
       })
       responseStream.write(`data: ${startData}\n\n`)
 
-      // * Generate thread title
-      const threadTitle = await openAIClient.generateThreadTitle(body.prompt)
+      // * Verify if the threadId already exists
+      const threadExists = await threadsDbClient.verifyThreadExists(
+        userId,
+        body.threadId,
+      )
+      if (!threadExists) {
+        // * Generate thread title
+        const threadTitle = await openAIClient.generateThreadTitle(body.prompt)
 
-      // * Save thread title to database
-      const threadItem: Thread = {
-        userId: '47cd26e2-abb7-40f5-855a-ea5014169ca7', // TODO - Remove this hardcoded userId
-        threadId: body.threadId,
-        createdAt: userCreatedAt,
-        title: threadTitle,
+        // * Save thread title to database
+        const threadItem: Thread = {
+          userId,
+          threadId: body.threadId,
+          createdAt: userCreatedAt,
+          title: threadTitle,
+        }
+        await threadsDbClient.createThread(threadItem)
       }
-      await threadsDbClient.createThread(threadItem)
+
+      // * Get latest two prompts if threadId already exists
+      if (threadExists) {
+        const latestPrompts = await promptsDbClient.getLatestPrompts(
+          body.threadId,
+        )
+
+        // * Set the previous responseId
+        latestPrompts.forEach((prompt) => {
+          if (prompt.role.S === 'user') {
+            oldResponseId = prompt.responseId.S
+          }
+        })
+      }
 
       // * Generate streaming response from OpenAI
-      let responseId
       let fullResponse = ''
-      const responseGenerator = openAIClient.generateText(body.prompt)
+      const promptResponse = openAIClient.generateText(
+        body.prompt,
+        oldResponseId,
+      )
 
-      for await (const chunk of responseGenerator) {
+      // * Stream the response
+      for await (const chunk of promptResponse) {
+        // * Set responseId if it's created
+        if (chunk.type === 'response.created') {
+          newResponseId = chunk.response.id
+        }
+
+        // * Return prompt messages and save them to fullResponse
         if (chunk.type === 'response.output_text.delta' && chunk.delta) {
-          responseId = chunk.item_id
           fullResponse += chunk.delta
 
           // * Send chunk to client
@@ -92,7 +123,7 @@ export const handler = awslambda.streamifyResponse(
         createdAt: userCreatedAt,
         role: 'user',
         content: body.prompt,
-        responseId: responseId,
+        responseId: newResponseId,
       }
       await promptsDbClient.createPrompt(userItem)
 
@@ -103,7 +134,7 @@ export const handler = awslambda.streamifyResponse(
         createdAt: assistantCreatedAt,
         role: 'assistant',
         content: fullResponse,
-        responseId: responseId,
+        responseId: newResponseId,
       }
       await promptsDbClient.createPrompt(assistantItem)
 

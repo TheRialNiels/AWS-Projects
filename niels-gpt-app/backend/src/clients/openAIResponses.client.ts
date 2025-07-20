@@ -39,12 +39,14 @@ export class OpenAIResponsesClient {
 
   async *generateText(
     input: string | Message[],
+    responseId?: string,
   ): AsyncGenerator<ResponseStreamEvent> {
     const events = await this.openAI!.responses.create({
       model: this.apiModel,
       input,
       stream: true,
-      max_output_tokens: 16,
+      max_output_tokens: 200,
+      previous_response_id: responseId,
     })
 
     for await (const event of events) {

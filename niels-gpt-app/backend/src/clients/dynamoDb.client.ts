@@ -1,6 +1,7 @@
 import type {
   DynamoDbConfig,
   Item,
+  QueryCommandParams,
   UpdateCommandParams,
 } from '@/interfaces/dynamoDb.types'
 import {
@@ -10,6 +11,7 @@ import {
   GetItemCommand,
   PutItemCommand,
   QueryCommand,
+  QueryCommandInput,
   QueryCommandOutput,
   ScanCommand,
   UpdateItemCommand,
@@ -79,10 +81,10 @@ export class DynamoDbClient {
     }
   }
 
-  async getCommand(item: Item): Promise<GetItemCommandOutput> {
+  async getCommand(item: Record<string, any>): Promise<GetItemCommandOutput> {
     const input: GetItemCommandInput = {
       TableName: this.table,
-      Key: item,
+      Key: marshall(item),
     }
 
     try {
@@ -92,16 +94,15 @@ export class DynamoDbClient {
     }
   }
 
-  async queryCommand(
-    keyConditionExpression: string,
-    expressionAttributeValues: Item,
-    indexName?: string,
-  ): Promise<QueryCommandOutput> {
-    const input = {
+  async queryCommand(params: QueryCommandParams): Promise<QueryCommandOutput> {
+    const input: QueryCommandInput = {
       TableName: this.table,
-      KeyConditionExpression: keyConditionExpression,
-      ExpressionAttributeValues: expressionAttributeValues,
-      IndexName: indexName,
+      KeyConditionExpression: params.keyConditionExpression,
+      ExpressionAttributeNames: params.expressionAttributeNames,
+      ExpressionAttributeValues: params.expressionAttributeValues,
+      IndexName: params.indexName,
+      Limit: params.limit,
+      ScanIndexForward: params.scanIndexForward,
     }
 
     try {
