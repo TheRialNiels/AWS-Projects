@@ -1,0 +1,8 @@
+{
+  "body": "{\"prompt\": \"What was my name and what did I asked you before?\", \"threadId\": \"b49311dd-7af1-4c8a-bce3-3f8822c8eb25\"}",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "httpMethod": "POST",
+  "isBase64Encoded": false
+}

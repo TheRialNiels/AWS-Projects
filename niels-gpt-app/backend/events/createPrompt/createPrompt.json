@@ -1,5 +1,5 @@
 {
-  "body": "{\"prompt\": \"hello how are you?\"}",
+  "body": "{\"prompt\": \"Hello my name is Jonhy. How are you?\"}",
   "headers": {
     "Content-Type": "application/json"
   },
