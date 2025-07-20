@@ -1,10 +1,12 @@
 import { OpenAIResponsesClient } from '@/clients/openAIResponses.client'
 import { PromptsDbClient } from '@/clients/promptsDb.client'
+import { ThreadsDbClient } from '@/clients/threadsDb.client'
 import {
   PromptPayloadSchema,
   type Prompt,
   type PromptPayload,
 } from '@/interfaces/prompts.types'
+import { Thread } from '@/interfaces/threads.types'
 import { promptsEnvs } from '@/lib/env.lib'
 import { returnFlattenError, validateSchema } from '@/lib/utils.lib'
 import { generateUuid } from '@/lib/uuid.lib'
@@ -14,6 +16,12 @@ const promptsDbClient = new PromptsDbClient({
   region: promptsEnvs.REGION,
   table: promptsEnvs.PROMPTS_TABLE,
 })
+const threadsDbClient = new ThreadsDbClient({
+  region: promptsEnvs.REGION,
+  table: promptsEnvs.THREADS_TABLE,
+})
+
+await openAIClient.initializeOpenAI()
 
 export const handler = awslambda.streamifyResponse(
   async (event, responseStream) => {
@@ -45,6 +53,18 @@ export const handler = awslambda.streamifyResponse(
         threadId: body.threadId,
       })
       responseStream.write(`data: ${startData}\n\n`)
+
+      // * Generate thread title
+      const threadTitle = await openAIClient.generateThreadTitle(body.prompt)
+
+      // * Save thread title to database
+      const threadItem: Thread = {
+        userId: '47cd26e2-abb7-40f5-855a-ea5014169ca7', // TODO - Remove this hardcoded userId
+        threadId: body.threadId,
+        createdAt: userCreatedAt,
+        title: threadTitle,
+      }
+      await threadsDbClient.createThread(threadItem)
 
       // * Generate streaming response from OpenAI
       let responseId

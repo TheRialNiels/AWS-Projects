@@ -1,6 +1,7 @@
 import OpenAI from 'openai'
 import type { ResponseStreamEvent } from 'openai/resources/responses/responses'
 import { SecretsManagerService } from '@/clients/secretsManager.client'
+import { generateThreadTitleInstructions } from '@/resources/instructions/generateThreadTitle'
 import { promptsEnvs } from '@/lib/env.lib'
 
 type Message = {
@@ -17,7 +18,7 @@ export class OpenAIResponsesClient {
     this.secretsManager = new SecretsManagerService(promptsEnvs.REGION)
   }
 
-  private async initializeOpenAI(): Promise<void> {
+  async initializeOpenAI(): Promise<void> {
     if (!this.openAI) {
       const { apiKey } = await this.secretsManager.getSecret(
         promptsEnvs.OPENAI_API_KEY_SECRET_ARN,
@@ -26,11 +27,19 @@ export class OpenAIResponsesClient {
     }
   }
 
+  async generateThreadTitle(input: string | Message[]): Promise<string> {
+    const instructions = generateThreadTitleInstructions
+    const response = await this.openAI!.responses.create({
+      model: this.apiModel,
+      instructions,
+      input,
+    })
+    return response.output_text || ''
+  }
+
   async *generateText(
     input: string | Message[],
   ): AsyncGenerator<ResponseStreamEvent> {
-    await this.initializeOpenAI()
-
     const events = await this.openAI!.responses.create({
       model: this.apiModel,
       input,
