@@ -1,0 +1,17 @@
+{
+  "projectName": "niels-gpt-app-frontend",
+  "mode": "file-router",
+  "typescript": true,
+  "tailwind": true,
+  "packageManager": "npm",
+  "git": true,
+  "version": 1,
+  "framework": "react-cra",
+  "chosenAddOns": [
+    "biome",
+    "form",
+    "shadcn",
+    "t3env",
+    "tanstack-query"
+  ]
+}
