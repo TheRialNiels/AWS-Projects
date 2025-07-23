@@ -58,5 +58,5 @@ resolve_s3 = true
 s3_prefix = "book-tracker-app-prod"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"https://therialniels-dev.com\" AllowCredentials=\"'true'\" Environment=\"prod\" BookHandlersPath=\"src/handlers/v1/books\""
+parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"https://prod.therialniels-dev.com\" AllowCredentials=\"'true'\" Environment=\"prod\" BookHandlersPath=\"src/handlers/v1/books\""
 image_repositories = []
