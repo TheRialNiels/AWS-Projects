@@ -4,7 +4,7 @@ import { Paperclip, Send } from 'lucide-react'
 import { useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import clsx from 'clsx'
+import { cn } from '@/lib/utils'
 
 export function ChatInput() {
     const editorRef = useRef<HTMLDivElement>(null)
@@ -32,7 +32,7 @@ export function ChatInput() {
     return (
         <form
             onSubmit={handleSubmit}
-            className={clsx(
+            className={cn(
                 'flex items-end gap-2 border border-border rounded-lg p-4 bg-background w-full',
                 'transition-all',
                 isDragging && 'ring-2 ring-blue-500',
@@ -66,7 +66,7 @@ export function ChatInput() {
                 contentEditable
                 role="textbox"
                 data-placeholder="Ask anything..."
-                className={clsx(
+                className={cn(
                     'flex-1 w-full overflow-y-auto min-h-9 max-h-52',
                     'focus:outline-none p-1 rounded-md',
                     'bg-transparent text-sm',
