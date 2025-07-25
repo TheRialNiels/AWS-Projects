@@ -6,6 +6,7 @@ import {
 import {
     Sidebar,
     SidebarContent,
+    SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
     SidebarGroupLabel,
@@ -15,8 +16,14 @@ import {
     SidebarMenuItem,
     SidebarRail,
 } from '@/components/ui/sidebar'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 import { ChevronRight } from 'lucide-react'
+import { NewThreadButton } from '@/components/new-thread-button'
 
 // This is sample data.
 const data = {
@@ -31,6 +38,10 @@ const data = {
                 },
                 {
                     title: 'What is git?',
+                    url: '#',
+                },
+                {
+                    title: 'This is a long thread title',
                     url: '#',
                 },
             ],
@@ -63,6 +74,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarHeader className="px-4 font-sans font-bold text-xl py-[20px]">
                 <h2>Threads</h2>
             </SidebarHeader>
+
             <SidebarContent className="gap-0">
                 {data.navMain.map((dateItem) => (
                     <Collapsible
@@ -85,17 +97,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     <SidebarMenu>
                                         {dateItem.items.map((item) => (
                                             <SidebarMenuItem key={item.title}>
-                                                <SidebarMenuButton
-                                                    asChild
-                                                    isActive={item.isActive}
-                                                    title={item.title}
-                                                >
-                                                    <a href={item.url}>
-                                                        <span className="truncate">
-                                                            {item.title}
-                                                        </span>
-                                                    </a>
-                                                </SidebarMenuButton>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <SidebarMenuButton
+                                                            asChild
+                                                            isActive={
+                                                                item.isActive
+                                                            }
+                                                        >
+                                                            <a href={item.url}>
+                                                                <span className="truncate">
+                                                                    {item.title}
+                                                                </span>
+                                                            </a>
+                                                        </SidebarMenuButton>
+                                                    </TooltipTrigger>
+
+                                                    <TooltipContent side='right'>
+                                                        <p>{item.title}</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
                                             </SidebarMenuItem>
                                         ))}
                                     </SidebarMenu>
@@ -105,7 +126,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </Collapsible>
                 ))}
             </SidebarContent>
+
             <SidebarRail />
+
+            <SidebarFooter className="px-4">
+                <NewThreadButton />
+            </SidebarFooter>
         </Sidebar>
     )
 }
