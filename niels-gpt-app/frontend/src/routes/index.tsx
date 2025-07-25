@@ -36,11 +36,7 @@ function App() {
                             </h2>
                         </div>
 
-                        <div className="flex items-end gap-4">
-                            <NewThreadButton />
-
-                            <ChatInput />
-                        </div>
+                        <ChatInput />
                     </div>
                 </div>
             </SidebarInset>

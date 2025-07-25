@@ -1,6 +1,11 @@
 'use client'
 
 import { Paperclip, Send } from 'lucide-react'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -35,7 +40,7 @@ export function ChatInput() {
             className={cn(
                 'flex items-end gap-2 border border-border rounded-lg p-4 bg-background w-full',
                 'transition-all',
-                isDragging && 'ring-2 ring-blue-500',
+                isDragging && 'ring-2 ring-primary bg-primary/20',
             )}
             onDragOver={(e) => {
                 e.preventDefault()
@@ -44,12 +49,22 @@ export function ChatInput() {
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
         >
-            <label
-                htmlFor="file-upload"
-                className="cursor-pointer text-muted-foreground hover:text-foreground h-9 flex items-center"
-            >
-                <Paperclip className="w-5 h-5" />
-            </label>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <label
+                        htmlFor="file-upload"
+                        className="cursor-pointer text-muted-foreground hover:text-foreground h-9 flex items-center"
+                    >
+                        <Paperclip className="w-5 h-5" />
+                    </label>
+                </TooltipTrigger>
+
+                <TooltipContent>
+                    <p>Attach files (images, documents, etc.)</p>
+                    <p>by clicking or dragging them here.</p>
+                </TooltipContent>
+            </Tooltip>
+
             <input
                 id="file-upload"
                 type="file"
@@ -77,9 +92,17 @@ export function ChatInput() {
                 )}
             />
 
-            <Button type="submit" variant="default" size="icon">
-                <Send className="w-5 h-5" />
-            </Button>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button type="submit" variant="default" size="icon">
+                        <Send className="w-5 h-5" />
+                    </Button>
+                </TooltipTrigger>
+
+                <TooltipContent>
+                    <p>Send message</p>
+                </TooltipContent>
+            </Tooltip>
         </form>
     )
 }
