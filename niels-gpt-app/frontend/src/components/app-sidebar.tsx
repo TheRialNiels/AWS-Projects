@@ -22,7 +22,7 @@ import { ChevronRight } from 'lucide-react'
 const data = {
     navMain: [
         {
-            title: 'Tue 22 Jul, 2025',
+            date: 'Tue 22 Jul, 2025',
             url: '#',
             items: [
                 {
@@ -36,7 +36,7 @@ const data = {
             ],
         },
         {
-            title: 'Wed 23 Jul, 2025',
+            date: 'Wed 23 Jul, 2025',
             url: '#',
             items: [
                 {
@@ -60,38 +60,40 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return (
         <Sidebar {...props}>
-            <SidebarHeader>
-                <h2 className="px-2 font-sans font-bold text-xl">Threads</h2>
+            <SidebarHeader className="px-4 font-sans font-bold text-xl py-[20px]">
+                <h2>Threads</h2>
             </SidebarHeader>
             <SidebarContent className="gap-0">
-                {data.navMain.map((item) => (
+                {data.navMain.map((dateItem) => (
                     <Collapsible
-                        key={item.title}
-                        title={item.title}
+                        key={dateItem.date}
                         defaultOpen
                         className="group/collapsible"
                     >
-                        <SidebarGroup>
+                        <SidebarGroup className="px-4">
                             <SidebarGroupLabel
                                 asChild
                                 className="group/label text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm font-bold"
                             >
-                                <CollapsibleTrigger>
-                                    {item.title}{' '}
+                                <CollapsibleTrigger title={dateItem.date}>
+                                    {dateItem.date}{' '}
                                     <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
                                 </CollapsibleTrigger>
                             </SidebarGroupLabel>
                             <CollapsibleContent>
                                 <SidebarGroupContent className="p-2">
                                     <SidebarMenu>
-                                        {item.items.map((item) => (
+                                        {dateItem.items.map((item) => (
                                             <SidebarMenuItem key={item.title}>
                                                 <SidebarMenuButton
                                                     asChild
                                                     isActive={item.isActive}
+                                                    title={item.title}
                                                 >
                                                     <a href={item.url}>
-                                                        {item.title}
+                                                        <span className="truncate">
+                                                            {item.title}
+                                                        </span>
                                                     </a>
                                                 </SidebarMenuButton>
                                             </SidebarMenuItem>
