@@ -21,7 +21,21 @@ export const RegisterEmailSchema = emailField('Email')
 export const RegisterPasswordSchema = stringField('Password', {
   minLength: 8,
 })
+  .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/[0-9]/, 'Password must contain at least one number')
+  .regex(
+    /(?=.*[^\w\s])|(?<=\S)\s(?=\S)/,
+    'Must contain at least one special character',
+  )
 export const RegisterConfirmPasswordSchema = stringField('Confirm Password')
+  .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/[0-9]/, 'Password must contain at least one number')
+  .regex(
+    /(?=.*[^\w\s])|(?<=\S)\s(?=\S)/,
+    'Must contain at least one special character',
+  )
 
 export const RegisterSchema = createSchema({
   email: () => RegisterEmailSchema,
