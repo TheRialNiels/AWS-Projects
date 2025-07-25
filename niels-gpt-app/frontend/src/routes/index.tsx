@@ -6,6 +6,7 @@ import {
 
 import { AppSidebar } from '@/components/app-sidebar'
 import { ChatInput } from '@/components/chat-input'
+import { NewThreadButton } from '@/components/new-thread-button'
 import { Separator } from '@/components/ui/separator'
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -23,17 +24,24 @@ function App() {
                     <Separator orientation="vertical" className="mr-2 h-4" />
                     <h1 className="font-sans font-bold text-2xl">Niels GPT</h1>
                 </header>
-                <div className="flex flex-1 flex-col gap-4 p-4 w-full max-w-6xl mx-auto px-10 justify-between">
-                    <div className="flex items-center w-full h-full justify-center">
-                        <h2 className="text-2xl text-center flex flex-col gap-2">
-                            <span className="font-extrabold text-4xl">
-                                Hi Jonhy!
-                            </span>
-                            How can I help you today?
-                        </h2>
-                    </div>
 
-                    <ChatInput />
+                <div className="h-full p-4 flex flex-col w-full items-center">
+                    <div className="w-full max-w-6xl flex flex-col justify-between h-full">
+                        <div>
+                            <h2 className="text-2xl text-center">
+                                <span className="font-extrabold text-4xl block font-sans mb-2">
+                                    Hi Jonhy!
+                                </span>
+                                How can I help you today?
+                            </h2>
+                        </div>
+
+                        <div className="flex items-end gap-4">
+                            <NewThreadButton />
+
+                            <ChatInput />
+                        </div>
+                    </div>
                 </div>
             </SidebarInset>
         </SidebarProvider>
