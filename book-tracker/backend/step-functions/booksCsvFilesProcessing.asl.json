@@ -1,0 +1,64 @@
+{
+  "Comment": "State Machine to process a CSV file that contains some book records that will be validated and saved in a DB.",
+  "StartAt": "Process Csv Chunks",
+  "States": {
+    "Process Csv Chunks": {
+      "Type": "Map",
+      "ItemProcessor": {
+        "ProcessorConfig": {
+          "Mode": "DISTRIBUTED",
+          "ExecutionType": "STANDARD"
+        },
+        "StartAt": "Validate Records",
+        "States": {
+          "Validate Records": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "arn:aws:lambda:us-east-1:664418980455:function:test-book-validation:$LATEST",
+              "Payload.$": "$"
+            },
+            "Retry": [
+              {
+                "ErrorEquals": [
+                  "Lambda.ServiceException",
+                  "Lambda.AWSLambdaException",
+                  "Lambda.SdkClientException",
+                  "Lambda.TooManyRequestsException"
+                ],
+                "IntervalSeconds": 1,
+                "MaxAttempts": 3,
+                "BackoffRate": 2,
+                "JitterStrategy": "FULL"
+              }
+            ],
+            "End": true,
+            "OutputPath": "$.Payload"
+          }
+        }
+      },
+      "ItemReader": {
+        "Resource": "arn:aws:states:::s3:getObject",
+        "ReaderConfig": {
+          "InputType": "CSV",
+          "CSVHeaderLocation": "FIRST_ROW"
+        },
+        "Parameters": {
+          "Bucket.$": "$.bucket",
+          "Key.$": "$.key"
+        }
+      },
+      "MaxConcurrency": 1000,
+      "Label": "ProcessCsvChunks",
+      "End": true,
+      "ItemBatcher": {
+        "MaxItemsPerBatch": 100
+      },
+      "ItemSelector": {
+        "Key.$": "$.key",
+        "Index.$": "$$.Map.Item.Index",
+        "Value.$": "$$.Map.Item.Value"
+      }
+    }
+  }
+}

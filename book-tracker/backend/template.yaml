@@ -154,6 +154,25 @@ Resources:
         EventBridgeConfiguration:
           EventBridgeEnabled: true
 
+  BooksProcessingStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: !Sub ${Environment}-${AppName}-books-csv-files-processing
+      DefinitionUri: stepFunctions/booksCsvFilesProcessing.asl.json
+      DefinitionSubstitutions:
+        ValidateBooksRecordsFunctionArn: !Ref ValidateBooksRecordsFunction.Arn
+      Policies:
+        - LambdaInvokeFunction:
+            FunctionName: !Ref ValidateBooksRecordsFunction
+        - Statement:
+            - Sid: DistributedMapExecution
+              Effect: Allow
+              Action:
+                - states:StartExecution
+                - states:DescribeExecution
+                - states:StopExecution
+              Resource: !Sub 'arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:*'
+
   ProcessCsvBookFileFunction:
     Type: AWS::Serverless::Function
     Properties:
