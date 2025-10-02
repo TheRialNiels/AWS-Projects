@@ -22,7 +22,7 @@ Parameters:
     MinLength: 3
   BookHandlersPath:
     Type: String
-    Default: src/handlers/v1/books
+    Default: src/handlers/v2/books
 
 Globals:
   Function:
@@ -154,70 +154,66 @@ Resources:
         EventBridgeConfiguration:
           EventBridgeEnabled: true
 
+  BooksProcessingStateMachineLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub
+        - /aws/vendedlogs/states/${Environment}-${AppName}-books-csv-files-processing
+        - ResourceId: BooksProcessingStateMachine
+
   BooksProcessingStateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
       Name: !Sub ${Environment}-${AppName}-books-csv-files-processing
+      Logging:
+        Level: ALL
+        IncludeExecutionData: true
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt BooksProcessingStateMachineLogGroup.Arn
+      Tracing:
+        Enabled: true
+      Type: STANDARD
       DefinitionUri: stepFunctions/booksCsvFilesProcessing.asl.json
       DefinitionSubstitutions:
-        ValidateBooksRecordsFunctionArn: !Ref ValidateBooksRecordsFunction.Arn
+        ValidateBooksRecordsFunctionArn: !GetAtt ValidateBooksRecordsFunction.Arn
       Policies:
-        - LambdaInvokeFunction:
+        - CloudWatchLogsFullAccess
+        - CloudWatchPutMetricPolicy: {}
+        - LambdaInvokePolicy:
             FunctionName: !Ref ValidateBooksRecordsFunction
         - Statement:
-            - Sid: DistributedMapExecution
+            - Sid: 'RulesAccess'
               Effect: Allow
               Action:
-                - states:StartExecution
-                - states:DescribeExecution
-                - states:StopExecution
-              Resource: !Sub 'arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:*'
-
-  ProcessCsvBookFileFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub ${Environment}-${AppName}-process-csv-book-file
-      Description: Process CSV file uploaded to S3 and import books
-      Handler: !Sub ${BookHandlersPath}/processCsvBookFile.handler
-      Timeout: 300
-      Tracing: Active
-      Events:
-        S3EventBridge:
-          Type: EventBridgeRule
-          Properties:
-            Pattern:
-              source:
-                - aws.s3
-              detail-type:
-                - Object Created
-              detail:
-                bucket:
-                  name:
-                    - !Ref BooksUploadBucket
-                object:
-                  key:
-                    - prefix: uploads/
-                    - suffix: .csv
-      Policies:
-        - AWSLambdaBasicExecutionRole
-        - Statement:
-            - Sid: S3Read
+                - events:PutTargets
+                - events:PutRule
+                - events:DescribeRule
+              Resource: !Sub 'arn:aws:events:${AWS::Region}:${AWS::AccountId}:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule'
+            - Sid: 'XrayAccess'
+              Effect: Allow
+              Action:
+                - xray:PutTraceSegments
+                - xray:PutTelemetryRecords
+                - xray:GetSamplingRules
+                - xray:GetSamplingTargets
+              Resource: '*'
+            - Sid: 'GetObject'
               Effect: Allow
               Action:
                 - s3:GetObject
-              Resource: !Sub '${BooksUploadBucket.Arn}/*'
-            - Sid: DynamoDBReadWrite
-              Effect: Allow
-              Action:
-                - dynamodb:UpdateItem
-                - dynamodb:GetItem
-                - dynamodb:PutItem
-                - dynamodb:Query
-                - dynamodb:BatchWriteItem
               Resource:
-                - !GetAtt BooksFilesUploadsTable.Arn
-                - !GetAtt BooksTable.Arn
-                - !Sub '${BooksTable.Arn}/index/*'
+                - !GetAtt BooksUploadBucket.Arn
+                - !Sub '${BooksUploadBucket.Arn}/*'
+
+  ValidateBooksRecordsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-${AppName}-validate-books-records
+      Description: Validate each book record from the csv file
+      Handler: !Sub ${BookHandlersPath}/validateBooksRecords.handler
+      Timeout: 300
+      Tracing: Active
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -228,7 +224,7 @@ Resources:
         Target: es2022
         Sourcemap: false
         EntryPoints:
-          - !Sub ${BookHandlersPath}/processCsvBookFile.ts
+          - !Sub ${BookHandlersPath}/validateBooksRecords.ts
         Banner:
           - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
 
@@ -552,6 +548,6 @@ Outputs:
   BooksUploadBucket:
     Description: 'Books Upload S3 Bucket Name'
     Value: !Ref BooksUploadBucket
-  ProcessCsvBookFileFunction:
-    Description: 'Process CSV Book File Lambda Function ARN'
-    Value: !GetAtt ProcessCsvBookFileFunction.Arn
+  ValidateBooksRecordsFunction:
+    Description: 'Validate Books Records Lambda Function ARN'
+    Value: !GetAtt ValidateBooksRecordsFunction.Arn
