@@ -205,6 +205,11 @@ Resources:
               Resource:
                 - !GetAtt BooksUploadBucket.Arn
                 - !Sub '${BooksUploadBucket.Arn}/*'
+            - Sid: 'StartExecution'
+              Effect: Allow
+              Action:
+                - states:StartExecution
+              Resource: !Sub 'arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${Environment}-${AppName}-books-csv-files-processing'
 
   ValidateBooksRecordsFunction:
     Type: AWS::Serverless::Function
