@@ -1,9 +1,49 @@
 {
   "Comment": "State Machine to process a CSV file that contains some book records that will be validated and saved in a DB.",
-  "StartAt": "Process Csv Chunks",
+  "StartAt": "Get File Content",
   "States": {
+    "Get File Content": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
+      "Parameters": {
+        "Bucket.$": "$.bucket",
+        "Key.$": "$.key"
+      },
+      "ResultPath": "$.file",
+      "Next": "Has Content?"
+    },
+    "Has Content?": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Next": "Process Csv Chunks",
+          "Variable": "$.file.ContentLength",
+          "NumericGreaterThan": 0
+        }
+      ],
+      "Default": "Empty File"
+    },
+    "Empty File": {
+      "Type": "Fail",
+      "Error": "EmptyFile",
+      "Cause": "The CSV file has no content"
+    },
     "Process Csv Chunks": {
       "Type": "Map",
+      "ItemReader": {
+        "Resource": "arn:aws:states:::s3:getObject",
+        "ReaderConfig": {
+          "InputType": "CSV",
+          "CSVHeaderLocation": "FIRST_ROW"
+        },
+        "Parameters": {
+          "Bucket.$": "$.bucket",
+          "Key.$": "$.key"
+        }
+      },
+      "ItemBatcher": {
+        "MaxItemsPerBatch": 100
+      },
       "ItemProcessor": {
         "ProcessorConfig": {
           "Mode": "DISTRIBUTED",
@@ -18,46 +58,17 @@
               "FunctionName": "${ValidateBooksRecordsFunctionArn}",
               "Payload.$": "$"
             },
-            "Retry": [
-              {
-                "ErrorEquals": [
-                  "Lambda.ServiceException",
-                  "Lambda.AWSLambdaException",
-                  "Lambda.SdkClientException",
-                  "Lambda.TooManyRequestsException"
-                ],
-                "IntervalSeconds": 1,
-                "MaxAttempts": 3,
-                "BackoffRate": 2,
-                "JitterStrategy": "FULL"
-              }
-            ],
             "End": true,
             "OutputPath": "$.Payload"
           }
         }
       },
-      "ItemReader": {
-        "Resource": "arn:aws:states:::s3:getObject",
-        "ReaderConfig": {
-          "InputType": "CSV",
-          "CSVHeaderLocation": "FIRST_ROW"
-        },
-        "Parameters": {
-          "Bucket.$": "$.bucket",
-          "Key.$": "$.key"
-        }
-      },
       "MaxConcurrency": 1000,
-      "Label": "ProcessCsvChunks",
       "End": true,
-      "ItemBatcher": {
-        "MaxItemsPerBatch": 100
-      },
       "ItemSelector": {
-        "Key.$": "$.key",
-        "Index.$": "$$.Map.Item.Index",
-        "Value.$": "$$.Map.Item.Value"
+        "key.$": "$.key",
+        "index.$": "$$.Map.Item.Index",
+        "value.$": "$$.Map.Item.Value"
       }
     }
   }
