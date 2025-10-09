@@ -1,4 +1,9 @@
 import { BookSchema, type Book } from '@interfaces/books.types'
+import { ResponseBody } from '@interfaces/shared.types'
+import {
+  stepFunctionErrorResponse,
+  stepFunctionSuccessResponse,
+} from '@lib/httpResponse'
 import { env } from '@lib/packages/env'
 import { generateUuid } from '@lib/packages/uuid'
 import { returnFlattenError, validateSchema } from '@lib/packages/zod'
@@ -45,7 +50,7 @@ interface ValidationResult {
 //   ]
 // }
 
-export const handler = async (event: EventData): Promise<void> => {
+export const handler = async (event: EventData): Promise<ResponseBody> => {
   console.log(event)
 
   // * Extract key from first item in Items array
@@ -71,6 +76,18 @@ export const handler = async (event: EventData): Promise<void> => {
   // * Stop processing if headers are invalid
   if (!hasValidHeaders) {
     const errorMsg = `Invalid headers. Expected: ${expectedHeaders.join(', ')}`
-    throw new Error(errorMsg)
+
+    return stepFunctionErrorResponse({
+      success: false,
+      responseData: {},
+      error: 'Invalid Headers',
+      cause: errorMsg,
+    })
   }
+
+  return stepFunctionSuccessResponse({
+    success: true,
+    responseData: {},
+    message: 'Books validated successfully',
+  })
 }

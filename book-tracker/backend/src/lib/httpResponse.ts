@@ -1,5 +1,5 @@
 import type { APIGatewayProxyResult } from 'aws-lambda'
-import type { BodyOptions } from '@interfaces/shared.types'
+import type { BodyOptions, ResponseBody } from '@interfaces/shared.types'
 import { getValue } from './utils'
 
 /**
@@ -140,5 +140,36 @@ export const successResponse = (
       responseData: getValue(() => options.responseData, {}),
       success: getValue(() => options.success, true),
     }),
+  }
+}
+
+/**
+ * Generates a standardized error response object for Step Functions.
+ *
+ * @param options - An object containing optional properties to customize the error response.
+ * @param options.message - An optional error message. Defaults to 'Unexpected error' if not provided.
+ * @param options.responseData - Optional additional data to include in the response. Defaults to an empty object.
+ * @param options.success - Indicates the success status. Defaults to false.
+ * @returns A `ResponseBody` object containing the error message, response data, and success status.
+ */
+export const stepFunctionErrorResponse = (
+  options: ResponseBody,
+): ResponseBody => {
+  return {
+    success: getValue(() => options.success, false),
+    message: getValue(() => options.message, 'Error'),
+    responseData: getValue(() => options.responseData, {}),
+    error: getValue(() => options.error, 'Unexpected error'),
+    cause: getValue(() => options.cause, 'Unexpected error'),
+  }
+}
+
+export const stepFunctionSuccessResponse = (
+  options: ResponseBody,
+): ResponseBody => {
+  return {
+    success: getValue(() => options.success, true),
+    message: getValue(() => options.message, 'Success'),
+    responseData: getValue(() => options.responseData, {}),
   }
 }
