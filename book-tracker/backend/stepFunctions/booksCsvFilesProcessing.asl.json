@@ -16,12 +16,74 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Next": "Process Csv Chunks",
+          "Next": "Pass",
           "Variable": "$.file.ContentLength",
           "NumericGreaterThan": 0
         }
       ],
-      "Default": "Empty File"
+      "Default": "Update File Uploads Failure Status"
+    },
+    "Pass": {
+      "Type": "Pass",
+      "Next": "Process Csv Chunks",
+      "QueryLanguage": "JSONata",
+      "Output": {
+        "Bucket": "{% $states.input.bucket %}",
+        "Key": "{% $states.input.key %}"
+      },
+      "Assign": {
+        "TotalRows": "{% $count($split($states.input.file.Body, /\\r?\\n/)) - 1 %}"
+      }
+    },
+    "Update File Uploads Failure Status": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Next": "Empty File",
+      "QueryLanguage": "JSONata",
+      "Arguments": {
+        "TableName": "${FileUploadsTableNameArn}",
+        "Key": {
+          "updateId": {
+            "S": "{% $replace($split($states.input.key, '/')[2], /.csv$/, '') %}"
+          },
+          "userId": {
+            "S": "{% $split($states.input.key, '/')[1] %}"
+          }
+        },
+        "UpdateExpression": "SET #stage = :stage, #totalRows = :totalRows, #processedRows = :processedRows, #successCount = :successCount, #errorCount = :errorCount, #errors = :errors",
+        "ExpressionAttributeNames": {
+          "#stage": "stage",
+          "#totalRows": "totalRows",
+          "#processedRows": "processedRows",
+          "#successCount": "successCount",
+          "#errorCount": "errorCount",
+          "#errors": "errors"
+        },
+        "ExpressionAttributeValues": {
+          ":stage": {
+            "S": "failed"
+          },
+          ":totalRows": {
+            "N": "0"
+          },
+          ":processedRows": {
+            "N": "0"
+          },
+          ":successCount": {
+            "N": "0"
+          },
+          ":errorCount": {
+            "N": "1"
+          },
+          ":errors": {
+            "L": [
+              {
+                "S": "{\"row\":0,\"field\":\"system\",\"message\":\"Empty CSV file\"}"
+              }
+            ]
+          }
+        }
+      }
     },
     "Empty File": {
       "Type": "Fail",
@@ -37,8 +99,8 @@
           "CSVHeaderLocation": "FIRST_ROW"
         },
         "Parameters": {
-          "Bucket.$": "$.bucket",
-          "Key.$": "$.key"
+          "Bucket.$": "$.Bucket",
+          "Key.$": "$.Key"
         }
       },
       "ItemBatcher": {
@@ -65,7 +127,7 @@
       },
       "MaxConcurrency": 1000,
       "ItemSelector": {
-        "key.$": "$.key",
+        "key.$": "$.Key",
         "index.$": "$$.Map.Item.Index",
         "value.$": "$$.Map.Item.Value"
       },

@@ -177,6 +177,7 @@ Resources:
       DefinitionUri: stepFunctions/booksCsvFilesProcessing.asl.json
       DefinitionSubstitutions:
         ValidateBooksRecordsFunctionArn: !GetAtt ValidateBooksRecordsFunction.Arn
+        FileUploadsTableNameArn: !GetAtt BooksFilesUploadsTable.Arn
       Policies:
         - CloudWatchLogsFullAccess
         - CloudWatchPutMetricPolicy: {}
@@ -198,13 +199,20 @@ Resources:
                 - xray:GetSamplingRules
                 - xray:GetSamplingTargets
               Resource: '*'
-            - Sid: 'GetObject'
+            - Sid: 'S3Access'
               Effect: Allow
               Action:
                 - s3:GetObject
               Resource:
                 - !GetAtt BooksUploadBucket.Arn
                 - !Sub '${BooksUploadBucket.Arn}/*'
+            - Sid: 'DynamoDBAccess'
+              Effect: Allow
+              Action:
+                - dynamodb:UpdateItem
+              Resource:
+                - !GetAtt BooksTable.Arn
+                - !GetAtt BooksFilesUploadsTable.Arn
             - Sid: 'StartExecution'
               Effect: Allow
               Action:
