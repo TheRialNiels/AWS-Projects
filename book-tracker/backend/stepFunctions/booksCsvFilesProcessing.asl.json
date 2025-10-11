@@ -14,28 +14,25 @@
     },
     "Has Content?": {
       "Type": "Choice",
+      "Default": "File Uploads - Empty Files",
       "Choices": [
         {
-          "Next": "Pass",
-          "Variable": "$.file.ContentLength",
-          "NumericGreaterThan": 0
+          "Condition": "{% ($states.input.file.ContentLength) > (0) %}",
+          "Next": "Process Csv Chunks",
+          "Assign": {
+            "Bucket": "{% $states.input.bucket %}",
+            "Key": "{% $states.input.key %}",
+            "TotalRows": "{% $string($count($split($states.input.file.Body, /\\r?\\n/)) - 1) %}"
+          }
         }
       ],
-      "Default": "Update File Uploads Failure Status"
-    },
-    "Pass": {
-      "Type": "Pass",
-      "Next": "Process Csv Chunks",
       "QueryLanguage": "JSONata",
-      "Output": {
+      "Assign": {
         "Bucket": "{% $states.input.bucket %}",
         "Key": "{% $states.input.key %}"
-      },
-      "Assign": {
-        "TotalRows": "{% $count($split($states.input.file.Body, /\\r?\\n/)) - 1 %}"
       }
     },
-    "Update File Uploads Failure Status": {
+    "File Uploads - Empty Files": {
       "Type": "Task",
       "Resource": "arn:aws:states:::dynamodb:updateItem",
       "Next": "Empty File",
@@ -44,10 +41,10 @@
         "TableName": "${FileUploadsTableNameArn}",
         "Key": {
           "updateId": {
-            "S": "{% $replace($split($states.input.key, '/')[2], /.csv$/, '') %}"
+            "S": "{% $replace($split($Key, '/')[2], /.csv$/, '') %}"
           },
           "userId": {
-            "S": "{% $split($states.input.key, '/')[1] %}"
+            "S": "{% $split($Key, '/')[1] %}"
           }
         },
         "UpdateExpression": "SET #stage = :stage, #totalRows = :totalRows, #processedRows = :processedRows, #successCount = :successCount, #errorCount = :errorCount, #errors = :errors",
@@ -99,8 +96,8 @@
           "CSVHeaderLocation": "FIRST_ROW"
         },
         "Parameters": {
-          "Bucket.$": "$.Bucket",
-          "Key.$": "$.Key"
+          "Bucket.$": "$Bucket",
+          "Key.$": "$Key"
         }
       },
       "ItemBatcher": {
@@ -127,7 +124,7 @@
       },
       "MaxConcurrency": 1000,
       "ItemSelector": {
-        "key.$": "$.Key",
+        "key.$": "$Key",
         "index.$": "$$.Map.Item.Index",
         "value.$": "$$.Map.Item.Value"
       },
@@ -138,11 +135,61 @@
       "Default": "Success",
       "Choices": [
         {
-          "Next": "Fail",
+          "Next": "File Uploads - Bad Headers",
           "Condition": "{% ($states.input.success) = (false) %}"
         }
       ],
       "QueryLanguage": "JSONata"
+    },
+    "File Uploads - Bad Headers": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Next": "Fail",
+      "QueryLanguage": "JSONata",
+      "Arguments": {
+        "TableName": "${FileUploadsTableNameArn}",
+        "Key": {
+          "updateId": {
+            "S": "{% $replace($split($Key, '/')[2], /.csv$/, '') %}"
+          },
+          "userId": {
+            "S": "{% $split($Key, '/')[1] %}"
+          }
+        },
+        "UpdateExpression": "SET #stage = :stage, #totalRows = :totalRows, #processedRows = :processedRows, #successCount = :successCount, #errorCount = :errorCount, #errors = :errors",
+        "ExpressionAttributeNames": {
+          "#stage": "stage",
+          "#totalRows": "totalRows",
+          "#processedRows": "processedRows",
+          "#successCount": "successCount",
+          "#errorCount": "errorCount",
+          "#errors": "errors"
+        },
+        "ExpressionAttributeValues": {
+          ":stage": {
+            "S": "failed"
+          },
+          ":totalRows": {
+            "N": "{% $TotalRows %}"
+          },
+          ":processedRows": {
+            "N": "0"
+          },
+          ":successCount": {
+            "N": "0"
+          },
+          ":errorCount": {
+            "N": "1"
+          },
+          ":errors": {
+            "L": [
+              {
+                "S": "{\"row\":0,\"field\":\"headers\",\"message\":\"Invalid headers. Expected: title, author, status, rating, notes\"}"
+              }
+            ]
+          }
+        }
+      }
     },
     "Fail": {
       "Type": "Fail",

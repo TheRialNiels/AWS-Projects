@@ -4,7 +4,6 @@ import {
   stepFunctionErrorResponse,
   stepFunctionSuccessResponse,
 } from '@lib/httpResponse'
-import { env } from '@lib/packages/env'
 import { generateUuid } from '@lib/packages/uuid'
 import { returnFlattenError, validateSchema } from '@lib/packages/zod'
 
@@ -17,42 +16,12 @@ interface EventData {
 }
 
 interface ValidationError {
+  row: number
   field: string
   message: string
 }
 
-interface ValidatedBook extends Book {
-  bookKey: string
-}
-
-interface ValidationResult {
-  validBooks: ValidatedBook[]
-  errors: ValidationError[]
-}
-
-// {
-//   "Items": [
-//     {
-//       "index": 0,
-//       "value": {
-//         "authoruu": "James Clear",
-//         "createdAt": "2024-06-01T10:00:00Z",
-//         "ratinggg": "5",
-//         "notes": "Great book on habit formation",
-//         "id": "1a2b3c4d-1234-5678-9101-abcdef123456",
-//         "titless": "Atomic Habits",
-//         "status": "COMPLETED",
-//         "updatedAt": "2024-06-01T10:00:00Z"
-//       },
-//       "key": "uploads/34282498-20a1-7076-2b80-abab79ac0c52/11282498-20a1-7076-2b80-abab79ac0c11.csv"
-//     },
-//     // ...
-//   ]
-// }
-
 export const handler = async (event: EventData): Promise<ResponseBody> => {
-  console.log(event)
-
   // * Extract key from first item in Items array
   const key: string = event.Items[0]?.key
   console.log(`Validating books from file: ${key}`)
@@ -85,9 +54,76 @@ export const handler = async (event: EventData): Promise<ResponseBody> => {
     })
   }
 
+  // * Initialize processing variables
+  const dataRows = event.Items
+  const errors: ValidationError[] = []
+  let successCount = 0
+  let processedRows = 0
+  const validBooks: { data: Book; rowNumber: number }[] = []
+
+  // * Process each data row
+  dataRows.forEach((item) => {
+    const rowNumber = item.index + 1 // * +1 because we skip header and arrays are 0-indexed
+    const row = item.value
+    processedRows++
+
+    // * Parse rating value safely
+    const now = new Date().toISOString()
+    const rating = +row.rating
+
+    // * Create book object from CSV row
+    const book: Book = {
+      userId,
+      bookId: generateUuid(),
+      title: row.title || '',
+      author: row.author || '',
+      status: row.status || '',
+      rating,
+      notes: row.notes || '',
+      createdAt: now,
+      updatedAt: now,
+    }
+
+    // * Validate book data against schema
+    const validation = validateSchema(BookSchema, book)
+    if (validation.error) {
+      const error = returnFlattenError(validation.error)
+      for (const [field, messages] of Object.entries(error.fieldErrors)) {
+        errors.push({
+          row: rowNumber,
+          field,
+          message: (messages as string[])[0] || 'Validation error',
+        })
+      }
+      return
+    }
+
+    // * Add valid book to validBooks array
+    validBooks.push({
+      data: book,
+      rowNumber,
+    })
+    successCount++
+  })
+
+  // * Return validation results
+  console.log(
+    `Successfully validated ${successCount} books from ${processedRows} rows`,
+  )
   return stepFunctionSuccessResponse({
     success: true,
-    responseData: {},
+    responseData: {
+      updateId,
+      userId,
+      updateData: {
+        stage: 'completed',
+        processedRows,
+        successCount,
+        errorCount: errors.length,
+        errors,
+      },
+      validBooks,
+    },
     message: 'Books validated successfully',
   })
 }
