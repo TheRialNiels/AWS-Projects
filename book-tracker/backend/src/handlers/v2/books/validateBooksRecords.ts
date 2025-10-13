@@ -1,4 +1,9 @@
-import { BookSchema, type Book } from '@interfaces/books.types'
+import {
+  BookSchema,
+  BooksQueryUserBookKeyGsiParams,
+  Item,
+  type Book,
+} from '@interfaces/books.types'
 import { ResponseBody } from '@interfaces/shared.types'
 import {
   stepFunctionErrorResponse,
@@ -6,6 +11,9 @@ import {
 } from '@lib/httpResponse'
 import { generateUuid } from '@lib/packages/uuid'
 import { returnFlattenError, validateSchema } from '@lib/packages/zod'
+import { env } from '@lib/packages/env'
+import { BooksDynamoDBClient } from '@lib/booksDynamoDBClient'
+import { chunkArray } from '@lib/utils'
 
 interface EventData {
   Items: {
@@ -16,10 +24,16 @@ interface EventData {
 }
 
 interface ValidationError {
-  row: number
-  field: string
-  message: string
+  S: string
 }
+
+const booksDbConfig = {
+  region: env.REGION,
+  tableName: env.BOOKS_TABLE,
+  userBookKeyGsi: env.BOOKS_USER_BOOK_KEY_GSI,
+}
+
+const booksDBClient = new BooksDynamoDBClient(booksDbConfig)
 
 export const handler = async (event: EventData): Promise<ResponseBody> => {
   // * Extract key from first item in Items array
@@ -59,10 +73,13 @@ export const handler = async (event: EventData): Promise<ResponseBody> => {
   const errors: ValidationError[] = []
   let successCount = 0
   let processedRows = 0
-  const validBooks: { data: Book; rowNumber: number }[] = []
+  const booksToInsert: {
+    request: { PutRequest: { Item: Item } }
+    rowNumber: number
+  }[] = []
 
   // * Process each data row
-  dataRows.forEach((item) => {
+  dataRows.forEach(async (item) => {
     const rowNumber = item.index + 1 // * +1 because we skip header and arrays are 0-indexed
     const row = item.value
     processedRows++
@@ -86,25 +103,64 @@ export const handler = async (event: EventData): Promise<ResponseBody> => {
 
     // * Validate book data against schema
     const validation = validateSchema(BookSchema, book)
+
     if (validation.error) {
       const error = returnFlattenError(validation.error)
       for (const [field, messages] of Object.entries(error.fieldErrors)) {
         errors.push({
-          row: rowNumber,
-          field,
-          message: (messages as string[])[0] || 'Validation error',
+          S: JSON.stringify({
+            row: rowNumber,
+            field,
+            message: (messages as string[])[0] || 'Validation error',
+          }),
         })
       }
       return
     }
 
     // * Add valid book to validBooks array
-    validBooks.push({
-      data: book,
+    const bookKey = `${book.title.toLowerCase()}#${book.author.toLowerCase()}`
+    booksToInsert.push({
+      request: {
+        PutRequest: {
+          Item: {
+            userId: { S: book.userId },
+            bookId: { S: book.bookId! },
+            bookKey: { S: bookKey },
+            title: { S: book.title },
+            author: { S: book.author },
+            status: { S: String(book.status) },
+            rating: { N: String(book.rating || 0) },
+            notes: { S: book.notes || '' },
+            createdAt: { S: now },
+            updatedAt: { S: now },
+          },
+        },
+      },
       rowNumber,
     })
-    successCount++
   })
+
+  // * Process all valid books in chunks of 25 (DynamoDB batchWrite limit)
+  const chunks = chunkArray(booksToInsert, 25)
+  for (const chunk of chunks) {
+    try {
+      await booksDBClient.batchWrite(chunk.map((b) => b.request))
+      successCount += chunk.length
+    } catch (error) {
+      console.error('Error in batch write:', error)
+      // * Add failed batch items to errors
+      for (const b of chunk) {
+        errors.push({
+          S: JSON.stringify({
+            row: b.rowNumber,
+            field: 'system',
+            message: 'Failed to save to database',
+          }),
+        })
+      }
+    }
+  }
 
   // * Return validation results
   console.log(
@@ -122,7 +178,6 @@ export const handler = async (event: EventData): Promise<ResponseBody> => {
         errorCount: errors.length,
         errors,
       },
-      validBooks,
     },
     message: 'Books validated successfully',
   })

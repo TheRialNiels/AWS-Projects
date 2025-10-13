@@ -227,6 +227,20 @@ Resources:
       Handler: !Sub ${BookHandlersPath}/validateBooksRecords.handler
       Timeout: 300
       Tracing: Active
+    Policies:
+      - AWSLambdaBasicExecutionRole
+      - Statement:
+          - Sid: DynamoDBReadWrite
+            Effect: Allow
+            Action:
+              - dynamodb:UpdateItem
+              - dynamodb:GetItem
+              - dynamodb:PutItem
+              - dynamodb:Query
+              - dynamodb:BatchWriteItem
+            Resource:
+              - !GetAtt BooksTable.Arn
+              - !Sub '${BooksTable.Arn}/index/*'
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

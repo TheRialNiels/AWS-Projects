@@ -101,7 +101,7 @@
         }
       },
       "ItemBatcher": {
-        "MaxItemsPerBatch": 100
+        "MaxItemsPerBatch": 3
       },
       "ItemProcessor": {
         "ProcessorConfig": {
@@ -132,7 +132,7 @@
     },
     "Choice": {
       "Type": "Choice",
-      "Default": "Success",
+      "Default": "File Uploads - Success",
       "Choices": [
         {
           "Next": "File Uploads - Bad Headers",
@@ -140,6 +140,52 @@
         }
       ],
       "QueryLanguage": "JSONata"
+    },
+    "File Uploads - Success": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Next": "Success",
+      "QueryLanguage": "JSONata",
+      "Arguments": {
+        "TableName": "${FileUploadsTableNameArn}",
+        "Key": {
+          "updateId": {
+            "S": "{% $replace($split($Key, '/')[2], /.csv$/, '') %}"
+          },
+          "userId": {
+            "S": "{% $split($Key, '/')[1] %}"
+          }
+        },
+        "UpdateExpression": "SET #stage = :stage, #totalRows = :totalRows, #processedRows = :processedRows, #successCount = :successCount, #errorCount = :errorCount, #errors = :errors",
+        "ExpressionAttributeNames": {
+          "#stage": "stage",
+          "#totalRows": "totalRows",
+          "#processedRows": "processedRows",
+          "#successCount": "successCount",
+          "#errorCount": "errorCount",
+          "#errors": "errors"
+        },
+        "ExpressionAttributeValues": {
+          ":stage": {
+            "S": "completed"
+          },
+          ":totalRows": {
+            "N": "{% $TotalRows %}"
+          },
+          ":processedRows": {
+            "N": "{% $string($sum($states.input[*].responseData.updateData.processedRows)) %}"
+          },
+          ":successCount": {
+            "N": "{% $string($sum($states.input[*].responseData.updateData.successCount)) %}"
+          },
+          ":errorCount": {
+            "N": "{% $string($sum($states.input[*].responseData.updateData.errorCount)) %}"
+          },
+          ":errors": {
+            "L": "{% $states.input[*].responseData.updateData.errors %}"
+          }
+        }
+      }
     },
     "File Uploads - Bad Headers": {
       "Type": "Task",
