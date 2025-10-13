@@ -103,7 +103,6 @@ export const handler = async (event: EventData): Promise<ResponseBody> => {
 
     // * Validate book data against schema
     const validation = validateSchema(BookSchema, book)
-
     if (validation.error) {
       const error = returnFlattenError(validation.error)
       for (const [field, messages] of Object.entries(error.fieldErrors)) {
