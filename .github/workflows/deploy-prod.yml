@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'book-tracker/backend/**'
+      - "book-tracker/backend/**"
   workflow_dispatch:
 
 env:
@@ -25,8 +25,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: "22"
+          cache: "npm"
           cache-dependency-path: book-tracker/backend/package-lock.json
 
       - name: Install dependencies
@@ -54,5 +54,5 @@ jobs:
             --no-fail-on-empty-changeset \
             --stack-name book-tracker-app-prod \
             --parameter-overrides Environment=prod \
-            --capabilities CAPABILITY_IAM \
+            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
             --region ${{ env.AWS_REGION }}
