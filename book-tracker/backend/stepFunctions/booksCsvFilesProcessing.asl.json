@@ -1,0 +1,250 @@
+{
+  "Comment": "State Machine to process a CSV file that contains some book records that will be validated and saved in a DB.",
+  "StartAt": "Get File Content",
+  "States": {
+    "Get File Content": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
+      "Parameters": {
+        "Bucket.$": "$.bucket",
+        "Key.$": "$.key"
+      },
+      "ResultPath": "$.file",
+      "Next": "Has Content?"
+    },
+    "Has Content?": {
+      "Type": "Choice",
+      "Default": "File Uploads - Empty Files",
+      "Choices": [
+        {
+          "Condition": "{% ($states.input.file.ContentLength) > (0) %}",
+          "Next": "Process Csv Chunks",
+          "Assign": {
+            "Bucket": "{% $states.input.bucket %}",
+            "Key": "{% $states.input.key %}",
+            "TotalRows": "{% $string($count($split($states.input.file.Body, /\\r?\\n/)) - 1) %}"
+          }
+        }
+      ],
+      "QueryLanguage": "JSONata",
+      "Assign": {
+        "Bucket": "{% $states.input.bucket %}",
+        "Key": "{% $states.input.key %}"
+      }
+    },
+    "File Uploads - Empty Files": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Next": "Empty File",
+      "QueryLanguage": "JSONata",
+      "Arguments": {
+        "TableName": "${FileUploadsTableNameArn}",
+        "Key": {
+          "updateId": {
+            "S": "{% $replace($split($Key, '/')[2], /.csv$/, '') %}"
+          },
+          "userId": {
+            "S": "{% $split($Key, '/')[1] %}"
+          }
+        },
+        "UpdateExpression": "SET #stage = :stage, #totalRows = :totalRows, #processedRows = :processedRows, #successCount = :successCount, #errorCount = :errorCount, #errors = :errors",
+        "ExpressionAttributeNames": {
+          "#stage": "stage",
+          "#totalRows": "totalRows",
+          "#processedRows": "processedRows",
+          "#successCount": "successCount",
+          "#errorCount": "errorCount",
+          "#errors": "errors"
+        },
+        "ExpressionAttributeValues": {
+          ":stage": {
+            "S": "failed"
+          },
+          ":totalRows": {
+            "N": "0"
+          },
+          ":processedRows": {
+            "N": "0"
+          },
+          ":successCount": {
+            "N": "0"
+          },
+          ":errorCount": {
+            "N": "1"
+          },
+          ":errors": {
+            "L": [
+              {
+                "S": "{\"row\":0,\"field\":\"system\",\"message\":\"Empty CSV file\"}"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "Empty File": {
+      "Type": "Fail",
+      "Error": "EmptyFile",
+      "Cause": "The CSV file has no content"
+    },
+    "Process Csv Chunks": {
+      "Type": "Map",
+      "ItemReader": {
+        "Resource": "arn:aws:states:::s3:getObject",
+        "ReaderConfig": {
+          "InputType": "CSV",
+          "CSVHeaderLocation": "FIRST_ROW"
+        },
+        "Parameters": {
+          "Bucket.$": "$Bucket",
+          "Key.$": "$Key"
+        }
+      },
+      "ItemBatcher": {
+        "MaxItemsPerBatch": 3
+      },
+      "ItemProcessor": {
+        "ProcessorConfig": {
+          "Mode": "DISTRIBUTED",
+          "ExecutionType": "STANDARD"
+        },
+        "StartAt": "Process Records",
+        "States": {
+          "Process Records": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "${ValidateBooksRecordsFunctionArn}",
+              "Payload.$": "$"
+            },
+            "OutputPath": "$.Payload",
+            "End": true
+          }
+        }
+      },
+      "MaxConcurrency": 1000,
+      "ItemSelector": {
+        "key.$": "$Key",
+        "index.$": "$$.Map.Item.Index",
+        "value.$": "$$.Map.Item.Value"
+      },
+      "Next": "Choice"
+    },
+    "Choice": {
+      "Type": "Choice",
+      "Default": "File Uploads - Success",
+      "Choices": [
+        {
+          "Next": "File Uploads - Bad Headers",
+          "Condition": "{% ($states.input.success) = (false) %}"
+        }
+      ],
+      "QueryLanguage": "JSONata"
+    },
+    "File Uploads - Success": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Next": "Success",
+      "QueryLanguage": "JSONata",
+      "Arguments": {
+        "TableName": "${FileUploadsTableNameArn}",
+        "Key": {
+          "updateId": {
+            "S": "{% $replace($split($Key, '/')[2], /.csv$/, '') %}"
+          },
+          "userId": {
+            "S": "{% $split($Key, '/')[1] %}"
+          }
+        },
+        "UpdateExpression": "SET #stage = :stage, #totalRows = :totalRows, #processedRows = :processedRows, #successCount = :successCount, #errorCount = :errorCount, #errors = :errors",
+        "ExpressionAttributeNames": {
+          "#stage": "stage",
+          "#totalRows": "totalRows",
+          "#processedRows": "processedRows",
+          "#successCount": "successCount",
+          "#errorCount": "errorCount",
+          "#errors": "errors"
+        },
+        "ExpressionAttributeValues": {
+          ":stage": {
+            "S": "completed"
+          },
+          ":totalRows": {
+            "N": "{% $TotalRows %}"
+          },
+          ":processedRows": {
+            "N": "{% $string($sum($states.input[*].responseData.updateData.processedRows)) %}"
+          },
+          ":successCount": {
+            "N": "{% $string($sum($states.input[*].responseData.updateData.successCount)) %}"
+          },
+          ":errorCount": {
+            "N": "{% $string($sum($states.input[*].responseData.updateData.errorCount)) %}"
+          },
+          ":errors": {
+            "L": "{% $states.input[*].responseData.updateData.errors %}"
+          }
+        }
+      }
+    },
+    "File Uploads - Bad Headers": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Next": "Fail",
+      "QueryLanguage": "JSONata",
+      "Arguments": {
+        "TableName": "${FileUploadsTableNameArn}",
+        "Key": {
+          "updateId": {
+            "S": "{% $replace($split($Key, '/')[2], /.csv$/, '') %}"
+          },
+          "userId": {
+            "S": "{% $split($Key, '/')[1] %}"
+          }
+        },
+        "UpdateExpression": "SET #stage = :stage, #totalRows = :totalRows, #processedRows = :processedRows, #successCount = :successCount, #errorCount = :errorCount, #errors = :errors",
+        "ExpressionAttributeNames": {
+          "#stage": "stage",
+          "#totalRows": "totalRows",
+          "#processedRows": "processedRows",
+          "#successCount": "successCount",
+          "#errorCount": "errorCount",
+          "#errors": "errors"
+        },
+        "ExpressionAttributeValues": {
+          ":stage": {
+            "S": "failed"
+          },
+          ":totalRows": {
+            "N": "{% $TotalRows %}"
+          },
+          ":processedRows": {
+            "N": "0"
+          },
+          ":successCount": {
+            "N": "0"
+          },
+          ":errorCount": {
+            "N": "1"
+          },
+          ":errors": {
+            "L": [
+              {
+                "S": "{\"row\":0,\"field\":\"headers\",\"message\":\"Invalid headers. Expected: title, author, status, rating, notes\"}"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "Fail": {
+      "Type": "Fail",
+      "QueryLanguage": "JSONata",
+      "Error": "{% $states.input.error %}",
+      "Cause": "{% $states.input.cause %}"
+    },
+    "Success": {
+      "Type": "Succeed"
+    }
+  }
+}

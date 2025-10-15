@@ -18,9 +18,9 @@ confirm_changeset = true
 resolve_s3 = true
 s3_prefix = "book-tracker-app-dev"
 region = "us-east-1"
-parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"http://localhost:3000\" AllowCredentials=\"'true'\" Environment=\"dev\" BookHandlersPath=\"src/handlers/v1/books\""
+parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"http://localhost:3000\" AllowCredentials=\"'true'\" Environment=\"dev\" BookHandlersPath=\"src/handlers/v2/books\""
 image_repositories = []
-stack_name = "book-tracker-app-dev"
+disable_rollback = true
 
 [default.package.parameters]
 resolve_s3 = true
