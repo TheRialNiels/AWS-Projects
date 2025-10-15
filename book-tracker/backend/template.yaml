@@ -267,7 +267,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref BookTrackerAppApiGW
-            Path: /v1/books/status/{updateId}
+            Path: /v2/books/status/{updateId}
             Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
@@ -305,7 +305,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref BookTrackerAppApiGW
-            Path: /v1/books
+            Path: /v2/books
             Method: POST
             Auth:
               Authorizer: CognitoAuthorizer
@@ -347,7 +347,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref BookTrackerAppApiGW
-            Path: /v1/books
+            Path: /v2/books
             Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
@@ -389,7 +389,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref BookTrackerAppApiGW
-            Path: /v1/books/{bookId}
+            Path: /v2/books/{bookId}
             Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
@@ -427,7 +427,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref BookTrackerAppApiGW
-            Path: /v1/books/{bookId}
+            Path: /v2/books/{bookId}
             Method: PATCH
             Auth:
               Authorizer: CognitoAuthorizer
@@ -469,7 +469,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref BookTrackerAppApiGW
-            Path: /v1/books/{bookId}
+            Path: /v2/books/{bookId}
             Method: DELETE
             Auth:
               Authorizer: CognitoAuthorizer
@@ -507,7 +507,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref BookTrackerAppApiGW
-            Path: /v1/books/generate-presigned-url
+            Path: /v2/books/generate-presigned-url
             Method: POST
             Auth:
               Authorizer: CognitoAuthorizer
