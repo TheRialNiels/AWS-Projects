@@ -13,7 +13,7 @@ parallel = true
 lint = true
 
 [default.deploy.parameters]
-capabilities = "CAPABILITY_IAM"
+capabilities = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
 confirm_changeset = true
 resolve_s3 = true
 s3_prefix = "book-tracker-app-dev"
@@ -39,7 +39,7 @@ stack_name = "book-tracker-app-dev"
 resolve_s3 = true
 s3_prefix = "book-tracker-app-dev"
 region = "us-east-1"
-capabilities = "CAPABILITY_IAM"
+capabilities = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
 parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"http://localhost:3000\" AllowCredentials=\"'true'\" Environment=\"dev\" BookHandlersPath=\"src/handlers/v2/books\""
 image_repositories = []
 
@@ -48,7 +48,7 @@ stack_name = "book-tracker-app-staging"
 resolve_s3 = true
 s3_prefix = "book-tracker-app-staging"
 region = "us-east-1"
-capabilities = "CAPABILITY_IAM"
+capabilities = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
 parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"https://staging.therialniels-dev.com\" AllowCredentials=\"'true'\" Environment=\"staging\" BookHandlersPath=\"src/handlers/v2/books\""
 image_repositories = []
 
@@ -57,6 +57,6 @@ stack_name = "book-tracker-app-prod"
 resolve_s3 = true
 s3_prefix = "book-tracker-app-prod"
 region = "us-east-1"
-capabilities = "CAPABILITY_IAM"
+capabilities = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
 parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"https://therialniels-dev.com\" AllowCredentials=\"'true'\" Environment=\"prod\" BookHandlersPath=\"src/handlers/v2/books\""
 image_repositories = []
