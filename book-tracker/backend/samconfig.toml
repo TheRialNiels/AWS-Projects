@@ -20,7 +20,7 @@ s3_prefix = "book-tracker-app-dev"
 region = "us-east-1"
 parameter_overrides = "AppName=\"book-tracker-app\" AllowOrigin=\"http://localhost:3000\" AllowCredentials=\"'true'\" Environment=\"dev\" BookHandlersPath=\"src/handlers/v2/books\""
 image_repositories = []
-disable_rollback = true
+
 
 [default.package.parameters]
 resolve_s3 = true
