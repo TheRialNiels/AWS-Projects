@@ -219,6 +219,51 @@ Resources:
                 - states:StartExecution
               Resource: !Sub 'arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${Environment}-${AppName}-books-csv-files-processing'
 
+  BooksProcessingEventBridgeRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub ${Environment}-${AppName}-books-csv-upload-rule
+      Description: Trigger Step Function when CSV files are uploaded to S3
+      EventPattern:
+        source:
+          - aws.s3
+        detail-type:
+          - Object Created
+        detail:
+          bucket:
+            name:
+              - !Ref BooksUploadBucket
+          object:
+            key:
+              - prefix: uploads/
+              - suffix: .csv
+      State: ENABLED
+      Targets:
+        - Arn: !Ref BooksProcessingStateMachine
+          Id: BooksProcessingStateMachineTarget
+          RoleArn: !GetAtt BooksProcessingEventBridgeRole.Arn
+
+  BooksProcessingEventBridgeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${Environment}-${AppName}-eventbridge-stepfunctions-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: StartStepFunctionExecution
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - states:StartExecution
+                Resource: !Ref BooksProcessingStateMachine
+
   ValidateBooksRecordsFunction:
     Type: AWS::Serverless::Function
     Properties:
