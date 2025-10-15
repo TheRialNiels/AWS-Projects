@@ -5,12 +5,20 @@
     "Get File Content": {
       "Type": "Task",
       "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
-      "Parameters": {
-        "Bucket.$": "$.bucket",
-        "Key.$": "$.key"
+      "Next": "Has Content?",
+      "QueryLanguage": "JSONata",
+      "Arguments": {
+        "Bucket": "{% $states.input.detail.bucket.name %}",
+        "Key": "{% $states.input.detail.object.key %}"
       },
-      "ResultPath": "$.file",
-      "Next": "Has Content?"
+      "Output": {
+        "file": "{% $states.result %}"
+      },
+      "Assign": {
+        "Bucket": "{% $states.input.detail.bucket.name %}",
+        "Key": "{% $states.input.detail.object.key %}",
+        "TotalRows": "{% $string($count($split($states.result.Body, /\\r?\\n/)) - 1) %}"
+      }
     },
     "Has Content?": {
       "Type": "Choice",
@@ -18,19 +26,10 @@
       "Choices": [
         {
           "Condition": "{% ($states.input.file.ContentLength) > (0) %}",
-          "Next": "Process Csv Chunks",
-          "Assign": {
-            "Bucket": "{% $states.input.bucket %}",
-            "Key": "{% $states.input.key %}",
-            "TotalRows": "{% $string($count($split($states.input.file.Body, /\\r?\\n/)) - 1) %}"
-          }
+          "Next": "Process Csv Chunks"
         }
       ],
-      "QueryLanguage": "JSONata",
-      "Assign": {
-        "Bucket": "{% $states.input.bucket %}",
-        "Key": "{% $states.input.key %}"
-      }
+      "QueryLanguage": "JSONata"
     },
     "File Uploads - Empty Files": {
       "Type": "Task",
@@ -235,6 +234,10 @@
             ]
           }
         }
+      },
+      "Output": {
+        "error": "{% $states.input[0].error %}",
+        "cause": "{% $states.input[0].cause %}"
       }
     },
     "Fail": {
