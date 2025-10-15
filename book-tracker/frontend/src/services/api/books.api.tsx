@@ -10,7 +10,7 @@ import type {
 
 import { api } from '@/lib/axios'
 
-const path = '/v1/books'
+const path = '/v2/books'
 
 export const getBooksApi = async (params: {
   userId: string

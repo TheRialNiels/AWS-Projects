@@ -108,9 +108,9 @@
           "Mode": "DISTRIBUTED",
           "ExecutionType": "STANDARD"
         },
-        "StartAt": "Validate Records",
+        "StartAt": "Process Records",
         "States": {
-          "Validate Records": {
+          "Process Records": {
             "Type": "Task",
             "Resource": "arn:aws:states:::lambda:invoke",
             "Parameters": {
