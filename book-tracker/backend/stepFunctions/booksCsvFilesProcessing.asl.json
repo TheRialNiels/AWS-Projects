@@ -101,7 +101,7 @@
         }
       },
       "ItemBatcher": {
-        "MaxItemsPerBatch": 3
+        "MaxItemsPerBatch": 1000
       },
       "ItemProcessor": {
         "ProcessorConfig": {
