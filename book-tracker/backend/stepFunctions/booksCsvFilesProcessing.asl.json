@@ -119,11 +119,24 @@
               "Payload.$": "$"
             },
             "OutputPath": "$.Payload",
+            "Retry": [
+              {
+                "ErrorEquals": [
+                  "Lambda.TooManyRequestsException",
+                  "Lambda.ServiceException",
+                  "Lambda.AWSLambdaException"
+                ],
+                "IntervalSeconds": 2,
+                "MaxAttempts": 6,
+                "BackoffRate": 2.0
+              }
+            ],
             "End": true
           }
         }
       },
-      "MaxConcurrency": 1000,
+      "MaxConcurrency": 10000,
+      "ToleratedFailurePercentage": 10,
       "ItemSelector": {
         "key.$": "$Key",
         "index.$": "$$.Map.Item.Index",
