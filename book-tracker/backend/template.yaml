@@ -87,7 +87,7 @@ Resources:
   BooksTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub ${Environment}-${AppName}-books-table
+      TableName: !Sub ${Environment}-${AppName}-books-table2
       BillingMode: PAY_PER_REQUEST
       SSESpecification:
         SSEEnabled: true
@@ -116,7 +116,7 @@ Resources:
   BooksFilesUploadsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub ${Environment}-${AppName}-books-files-uploads-table
+      TableName: !Sub ${Environment}-${AppName}-books-files-uploads-table2
       BillingMode: PAY_PER_REQUEST
       SSESpecification:
         SSEEnabled: true
@@ -154,6 +154,11 @@ Resources:
         EventBridgeConfiguration:
           EventBridgeEnabled: true
 
+  BooksUploadResultsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${Environment}-${AppName}-books-uploads-results
+
   BooksProcessingStateMachineLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -178,6 +183,7 @@ Resources:
       DefinitionSubstitutions:
         ValidateBooksRecordsFunctionArn: !GetAtt ValidateBooksRecordsFunction.Arn
         FileUploadsTableNameArn: !GetAtt BooksFilesUploadsTable.Arn
+        BooksUploadResultsBucket: !Ref BooksUploadResultsBucket
       Policies:
         - CloudWatchLogsFullAccess
         - CloudWatchPutMetricPolicy: {}
@@ -204,9 +210,12 @@ Resources:
               Action:
                 - s3:GetObject
                 - s3:GetObjectAttributes
+                - s3:PutObject
               Resource:
                 - !GetAtt BooksUploadBucket.Arn
                 - !Sub '${BooksUploadBucket.Arn}/*'
+                - !GetAtt BooksUploadResultsBucket.Arn
+                - !Sub '${BooksUploadResultsBucket.Arn}/*'
             - Sid: 'DynamoDBAccess'
               Effect: Allow
               Action:
