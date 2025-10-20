@@ -146,7 +146,7 @@
             "Choices": [
               {
                 "Next": "File Uploads - Bad Headers",
-                "Condition": "{% ($states.input.success) = (false) %}"
+                "Condition": "{% ($states.input.Payload.success) = (false) %}"
               }
             ],
             "QueryLanguage": "JSONata"
