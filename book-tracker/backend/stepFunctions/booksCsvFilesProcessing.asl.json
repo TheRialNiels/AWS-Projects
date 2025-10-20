@@ -102,7 +102,7 @@
         }
       },
       "ItemBatcher": {
-        "MaxItemsPerBatch": 1000
+        "MaxItemsPerBatch": 500
       },
       "ItemProcessor": {
         "ProcessorConfig": {
@@ -128,14 +128,14 @@
                 ],
                 "IntervalSeconds": 2,
                 "MaxAttempts": 6,
-                "BackoffRate": 2.0
+                "BackoffRate": 2
               }
             ],
             "End": true
           }
         }
       },
-      "MaxConcurrency": 10000,
+      "MaxConcurrency": 100,
       "ToleratedFailurePercentage": 10,
       "ItemSelector": {
         "key.$": "$Key",
