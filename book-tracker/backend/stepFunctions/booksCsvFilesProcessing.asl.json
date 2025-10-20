@@ -103,7 +103,7 @@
       },
       "ItemBatcher": {
         "MaxItemsPerBatch": 500,
-        "MaxInputBytesPerBatch": 260000
+        "MaxInputBytesPerBatch": 150000
       },
       "ItemProcessor": {
         "ProcessorConfig": {
@@ -143,7 +143,14 @@
         "index.$": "$$.Map.Item.Index",
         "value.$": "$$.Map.Item.Value"
       },
-      "Next": "Choice"
+      "Next": "Choice",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ]
+        }
+      ]
     },
     "Choice": {
       "Type": "Choice",
