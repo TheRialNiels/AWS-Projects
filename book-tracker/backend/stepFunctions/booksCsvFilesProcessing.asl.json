@@ -225,7 +225,7 @@
                   "S": "{% $split($MapKey, '/')[1] %}"
                 }
               },
-              "UpdateExpression": "SET #stage = :stage, #processedRows = if_not_exists(#processedRows, :zero) + :processedRows, #totalRows = if_not_exists(#totalRows, :zero) + :processedRows, #successCount = if_not_exists(#totalRows, :zero) + :successCount, #errorCount = if_not_exists(#totalRows, :zero) + :errorCount, #errors = list_append(if_not_exists(#errors, :emptyList), :errors)",
+              "UpdateExpression": "SET #stage = :stage, #processedRows = if_not_exists(#processedRows, :zero) + :processedRows, #totalRows = if_not_exists(#totalRows, :zero) + :processedRows, #successCount = if_not_exists(#successCount, :zero) + :successCount, #errorCount = if_not_exists(#errorCount, :zero) + :errorCount, #errors = list_append(if_not_exists(#errors, :emptyList), :errors)",
               "ExpressionAttributeNames": {
                 "#stage": "stage",
                 "#totalRows": "totalRows",
@@ -238,9 +238,6 @@
                 ":stage": {
                   "S": "processing"
                 },
-                ":totalRows": {
-                  "N": "{% $string($sum($states.input.Payload.responseData.updateData.processedRows)) %}"
-                },
                 ":processedRows": {
                   "N": "{% $string($sum($states.input.Payload.responseData.updateData.processedRows)) %}"
                 },
@@ -252,6 +249,12 @@
                 },
                 ":errors": {
                   "L": "{% $states.input.Payload.responseData.updateData.errors %}"
+                },
+                ":zero": {
+                  "N": "0"
+                },
+                ":emptyList": {
+                  "L": []
                 }
               }
             },
