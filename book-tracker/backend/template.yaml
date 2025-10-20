@@ -87,7 +87,7 @@ Resources:
   BooksTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub ${Environment}-${AppName}-books-table
+      TableName: !Sub ${Environment}-${AppName}-books-table2
       BillingMode: PAY_PER_REQUEST
       SSESpecification:
         SSEEnabled: true
@@ -116,7 +116,7 @@ Resources:
   BooksFilesUploadsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub ${Environment}-${AppName}-books-files-uploads-table
+      TableName: !Sub ${Environment}-${AppName}-books-files-uploads-table2
       BillingMode: PAY_PER_REQUEST
       SSESpecification:
         SSEEnabled: true
