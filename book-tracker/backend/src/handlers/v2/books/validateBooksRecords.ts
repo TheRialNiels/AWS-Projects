@@ -21,6 +21,9 @@ interface EventData {
     value: Book
     key: string
   }[]
+  BatchInput: {
+    Key: string
+  }
 }
 
 interface ValidationError {
@@ -37,7 +40,7 @@ const booksDBClient = new BooksDynamoDBClient(booksDbConfig)
 
 export const handler = async (event: EventData): Promise<ResponseBody> => {
   // * Extract key from first item in Items array
-  const key: string = event.Items[0]?.key
+  const key: string = event.BatchInput.Key
   console.log(`Validating books from file: ${key}`)
 
   // * Extract updateId and userId from first item in Items array
@@ -171,7 +174,7 @@ export const handler = async (event: EventData): Promise<ResponseBody> => {
       updateId,
       userId,
       updateData: {
-        stage: 'completed',
+        stage: 'processing',
         processedRows,
         successCount,
         errorCount: errors.length,
