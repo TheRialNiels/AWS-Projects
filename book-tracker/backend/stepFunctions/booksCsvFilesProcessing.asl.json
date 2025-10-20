@@ -1,23 +1,25 @@
 {
   "Comment": "State Machine to process a CSV file that contains some book records that will be validated and saved in a DB.",
-  "StartAt": "Get File Content",
+  "StartAt": "GetObjectAttributes",
   "States": {
-    "Get File Content": {
+    "GetObjectAttributes": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
+      "Resource": "arn:aws:states:::aws-sdk:s3:getObjectAttributes",
       "Next": "Has Content?",
       "QueryLanguage": "JSONata",
       "Arguments": {
         "Bucket": "{% $states.input.detail.bucket.name %}",
-        "Key": "{% $states.input.detail.object.key %}"
+        "Key": "{% $states.input.detail.object.key %}",
+        "ObjectAttributes": [
+          "ObjectSize"
+        ]
       },
       "Output": {
         "file": "{% $states.result %}"
       },
       "Assign": {
         "Bucket": "{% $states.input.detail.bucket.name %}",
-        "Key": "{% $states.input.detail.object.key %}",
-        "TotalRows": "{% $string($count($split($states.result.Body, /\\r?\\n/)) - 1) %}"
+        "Key": "{% $states.input.detail.object.key %}"
       }
     },
     "Has Content?": {
@@ -25,7 +27,7 @@
       "Default": "File Uploads - Empty Files",
       "Choices": [
         {
-          "Condition": "{% ($states.input.file.ContentLength) > (0) %}",
+          "Condition": "{% ($states.input.file.ObjectSize) > (0) %}",
           "Next": "Process Csv Chunks"
         }
       ],
@@ -169,7 +171,7 @@
             "S": "completed"
           },
           ":totalRows": {
-            "N": "{% $TotalRows %}"
+            "N": "{% $string($sum($states.input[*].responseData.updateData.processedRows)) %}"
           },
           ":processedRows": {
             "N": "{% $string($sum($states.input[*].responseData.updateData.processedRows)) %}"
@@ -215,7 +217,7 @@
             "S": "failed"
           },
           ":totalRows": {
-            "N": "{% $TotalRows %}"
+            "N": "0"
           },
           ":processedRows": {
             "N": "0"

@@ -203,6 +203,7 @@ Resources:
               Effect: Allow
               Action:
                 - s3:GetObject
+                - s3:GetObjectAttributes
               Resource:
                 - !GetAtt BooksUploadBucket.Arn
                 - !Sub '${BooksUploadBucket.Arn}/*'
